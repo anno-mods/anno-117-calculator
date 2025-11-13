@@ -1,0 +1,39 @@
+<div class="ui-tier-unit" data-bind="debug: 'Population Tile', visible: $data.instance().visible()">
+    <div style="margin-left: 100%;direction: rtl;" class="">
+        <div style="position: absolute;">
+            <button class="btn btn-light btn-sm" data-bind="click: () => {$root.presenter.residence.update($data.instance())}" data-toggle="modal" data-target="#population-level-config-dialog">
+                <span class="fa fa-sliders"></span>
+            </button>
+        </div>
+    </div>
+    <div class="ui-tier-unit-icon mb-1">
+        <img class="icon-tile" src="../icons/icon_marketplace_2d_light.png" data-bind="attr: { src: $data.icon ? $data.icon : null, alt: $data.name }">
+
+    </div>
+    <div class="ui-tier-unit-name" data-bind="visible: !$root.settings.hideNames.checked(), attr: {'tier-unit-guid' : guid}">
+        <span data-bind="visible: $data.instance().hotkey, text: $data.instance().hotkey() ? '[' + $data.instance().hotkey().toUpperCase() + '] ' : ''"></span>
+        <span data-bind="text: name"></span>
+    </div>
+
+    <div class="mb-3">
+        <!-- Buildings Input -->
+        <div class="input-group input-group-sm spinner mb-2">
+            <div class="input-group-prepend" data-bind="attr: {title: $root.texts.residences.name()}">
+                <div class="input-group-text">
+                    <img class="icon-sm icon-light" src="../icons/icon_house_white.png" />
+                </div>
+            </div>
+            <input step="10" class="form-control input-lg" type="number" value="0" min="0" data-bind="value: $data.instance().residences[0].buildings.constructed, attr: {title: 'Press '+name()[0]+' to focus', id: $data.guid + '-buildings-constructed-input' };" />
+            <div class="input-group-append">
+                <div data-bind="component: { name: 'number-input-increment', params: { obs: $data.instance().residences[0].buildings.constructed, id: $data.guid + '-buildings-constructed-input' }}"></div>
+            </div>
+        </div>
+        
+        <!-- Total Residents Display -->
+        <div class="d-flex align-items-center justify-content-center p-2" style="background-color: rgba(0,0,0,0.05); border-radius: 4px;">
+            <img class="icon-sm icon-light mr-2" src="../icons/icon_resource_population.png" data-bind="attr: {title: $root.texts.residents.name()}" />
+            <strong data-bind="text: formatNumber($data.instance().residents())"></strong>
+        </div>
+    </div>
+
+</div>

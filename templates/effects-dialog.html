@@ -1,0 +1,56 @@
+<div id="effects-dialog" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true" data-bind="debug: 'Effects Dialog'">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 data-bind="text: $root.texts.effects.name">Effect</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead style="text-align: center">
+                    <tbody data-bind="foreach: $root.island().availableEffects">
+                        <tr>
+                            <td> 
+                                <div data-bind="if:$data.isStackable">
+                                    <div class="ui-fchain-item-boost">
+                                        <div href="#" data-toggle="tooltip">
+                                            <div class="input-group input-group-sm mb-3 spinner">
+                                                <input class="form-control" style="width: 2rem" type="number" value="0" step="1" min="0" data-bind="value:  $data.scaling, attr: {id: $data.guid + '-scaling-input'}" />
+                                                <div class="input-group-append">
+                                                    <div data-bind="component: { name: 'number-input-increment', params: { obs: $data.scaling, id: $data.guid + '-scaling-input' }}"></div>
+                                                    <span class="input-group-text">x</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-bind="if: !$data.isStackable">
+                                    <div data-bind="component:{name:'icon-checkbox', params:{asset: $data, checked: $data.scaling}}"></div>
+                                </div> 
+                            </td>     
+                            <td data-bind="text: $data.name"></td> <!-- item name -->
+                            <td data-bind="if: $data.effectDuration">
+                                <span data-bind="text: formatNumber($data.effectDuration / 3600)"></span><span>h</span>
+                            </td>
+                            <td>
+                                <div data-bind="if: $data.targetsIsAllProduction" style="text-align: center;">
+                                    <span data-bind="text: $root.texts.allBuildings.name"></span>
+                                </div>
+                                <div data-bind="if: !$data.targetsIsAllProduction">
+                                    <div class="inline-list-centered" data-bind="foreach: $data.targets">
+                                        <img class="mr-2 icon-sm" data-bind="attr: { src: $data.icon ? $data.icon : null, alt: $data.name, title: $data.getRegionExtendedName()}">
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div data-bind="component: {name: 'buff-display', params: {buffs: $data.buffs}}"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>

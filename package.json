@@ -1,0 +1,52 @@
+{
+  "name": "anno-117-calculator",
+  "displayName": "Anno 117 Calculator",
+  "version": "1.0",
+  "description": "A calculator to compute the consumption of goods in the computer game Anno 117.",
+  "scripts": {
+    "test": "playwright test",
+    "test:install": "playwright install chromium",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:binding": "playwright test tests/binding",
+    "test:computed": "playwright test tests/computed",
+    "test:e2e": "playwright test tests/e2e",
+    "test:factory-dialogs": "playwright test tests/binding/factory-config-dialogs.spec.ts --reporter=list",
+    "test:init-errors": "playwright test tests/e2e/initialization-errors.spec.ts --reporter=list",
+    "test:dom-inspect": "playwright test tests/e2e/dom-inspection.spec.ts --reporter=list",
+    "test:report": "playwright show-report",
+    "build": "webpack",
+    "build:ts": "tsc",
+    "dev": "webpack serve",
+    "dev:open": "webpack serve --open",
+    "type-check": "tsc --noEmit",
+    "migrate": "node scripts/migrate-to-typescript.js",
+    "type-check:watch": "tsc --noEmit --watch",
+    "fix-types": "node scripts/fix-typescript-errors.js",
+    "migration-helper": "node scripts/migration-helper.js",
+    "generate-types": "node scripts/generate-config-types.js",
+    "check-translations": "node scripts/check-translations.js",
+    "check-translations:batch": "node scripts/check-translations.js --batch"
+  },
+  "author": "Nico Höllerich",
+  "license": "MIT",
+  "dependencies": {
+    "compression-webpack-plugin": "^11.1.0",
+    "html-loader": "^5.0.0",
+    "knockout": "^3.5.1",
+    "knockout-amd-helpers": "^1.0.0",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.1",
+    "@types/jquery": "^3.5.29",
+    "@types/knockout": "^3.4.72",
+    "@types/node": "^20.10.5",
+    "http-server": "^14.1.1",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack-dev-server": "^4.15.1"
+  }
+}

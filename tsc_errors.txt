@@ -1,0 +1,108 @@
+src/consumption.ts(245,30): error TS2345: Argument of type 'this' is not assignable to parameter of type 'Need'.
+  Property 'factory' is missing in type 'NoFactoryNeed' but required in type 'Need'.
+src/factories.ts(146,43): error TS18048: 'item.replacements' is possibly 'undefined'.
+src/factories.ts(212,88): error TS2367: This comparison appears to be unintentional because the types 'import("C:/dev/anno-117-calculator/src/types").Workforce' and 'import("C:/dev/anno-117-calculator/src/population").Workforce' have no overlap.
+src/factories.ts(214,25): error TS2531: Object is possibly 'null'.
+src/factories.ts(216,25): error TS2531: Object is possibly 'null'.
+src/factories.ts(219,48): error TS2531: Object is possibly 'null'.
+src/factories.ts(234,35): error TS2531: Object is possibly 'null'.
+src/factories.ts(291,9): error TS2412: Type '{ Value: number; } | undefined' is not assignable to type '{ Value: number; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type '{ Value: number; }'.
+src/factories.ts(307,12): error TS2416: Property 'product' in type 'PublicConsumerBuilding' is not assignable to the same property in base type 'Consumer'.
+  Type 'Product | null' is not assignable to type 'Product | undefined'.
+    Type 'null' is not assignable to type 'Product | undefined'.
+src/factories.ts(328,38): error TS2339: Property 'fixedFactory' does not exist on type 'Factory'.
+src/factories.ts(440,68): error TS2379: Argument of type 'this' is not assignable to parameter of type 'Factory' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type 'import("C:/dev/anno-117-calculator/src/factories").Factory' is not assignable to type 'import("C:/dev/anno-117-calculator/src/types").Factory' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'region' are incompatible.
+      Type 'Region | null' is not assignable to type 'Region'.
+        Type 'null' is not assignable to type 'Region'.
+src/factories.ts(500,42): error TS2345: Argument of type 'KnockoutObservable<boolean> | undefined' is not assignable to parameter of type 'KnockoutObservable<any> | KnockoutComputed<any>'.
+  Type 'undefined' is not assignable to type 'KnockoutObservable<any> | KnockoutComputed<any>'.
+src/factories.ts(506,86): error TS2532: Object is possibly 'undefined'.
+src/factories.ts(511,92): error TS2532: Object is possibly 'undefined'.
+src/factories.ts(519,129): error TS2532: Object is possibly 'undefined'.
+src/factories.ts(527,52): error TS2345: Argument of type 'KnockoutObservable<boolean> | undefined' is not assignable to parameter of type 'KnockoutObservable<any> | KnockoutComputed<any>'.
+  Type 'undefined' is not assignable to type 'KnockoutObservable<any> | KnockoutComputed<any>'.
+src/factories.ts(532,86): error TS2532: Object is possibly 'undefined'.
+src/factories.ts(535,92): error TS2532: Object is possibly 'undefined'.
+src/factories.ts(540,159): error TS2532: Object is possibly 'undefined'.
+src/factories.ts(548,46): error TS2345: Argument of type 'KnockoutObservable<boolean> | undefined' is not assignable to parameter of type 'KnockoutObservable<any> | KnockoutComputed<any>'.
+  Type 'undefined' is not assignable to type 'KnockoutObservable<any> | KnockoutComputed<any>'.
+src/factories.ts(553,49): error TS2532: Object is possibly 'undefined'.
+src/factories.ts(562,43): error TS2345: Argument of type 'KnockoutObservable<boolean> | undefined' is not assignable to parameter of type 'KnockoutObservable<any> | KnockoutComputed<any>'.
+  Type 'undefined' is not assignable to type 'KnockoutObservable<any> | KnockoutComputed<any>'.
+src/factories.ts(567,49): error TS2532: Object is possibly 'undefined'.
+src/factories.ts(624,44): error TS2531: Object is possibly 'null'.
+src/factories.ts(659,37): error TS2367: This comparison appears to be unintentional because the types 'string' and 'number' have no overlap.
+src/factories.ts(685,9): error TS2322: Type 'Product | null' is not assignable to type 'Product'.
+  Type 'null' is not assignable to type 'Product'.
+src/factories.ts(731,39): error TS2322: Type 'Product | undefined' is not assignable to type 'Product | null'.
+  Type 'undefined' is not assignable to type 'Product | null'.
+src/factories.ts(739,36): error TS2531: Object is possibly 'null'.
+src/production.ts(499,33): error TS2379: Argument of type 'this' is not assignable to parameter of type 'Item' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type 'EquippedItem' is missing the following properties from type 'Item': factories, equipments
+src/production.ts(567,13): error TS18048: 'f.extraGoodProductionList' is possibly 'undefined'.
+src/production.ts(567,52): error TS2345: Argument of type 'this' is not assignable to parameter of type 'ExtraGoodProductionEntry'.
+  Type 'ExtraGoodProduction' is not assignable to type 'ExtraGoodProductionEntry'.
+    Types of property 'item' are incompatible.
+      Type 'EquippedItem' is missing the following properties from type 'Item': factories, equipments
+src/production.ts(570,17): error TS18048: 'f.extraGoodProductionList' is possibly 'undefined'.
+src/production.ts(570,62): error TS2345: Argument of type 'this' is not assignable to parameter of type 'ExtraGoodProductionEntry'.
+  Type 'ExtraGoodProduction' is not assignable to type 'ExtraGoodProductionEntry'.
+    Types of property 'item' are incompatible.
+      Type 'EquippedItem' is missing the following properties from type 'Item': factories, equipments
+src/trade.ts(181,21): error TS2304: Cannot find name 'FactoryExtended'.
+src/trade.ts(198,42): error TS2304: Cannot find name 'FactoryExtended'.
+src/trade.ts(354,32): error TS2693: 'Factory' only refers to a type, but is being used as a value here.
+src/types.ts(398,18): error TS2430: Interface 'NoFactoryProduct' incorrectly extends interface 'Product'.
+  Types of property 'visible' are incompatible.
+    Type '() => boolean' is missing the following properties from type 'KnockoutComputed<boolean>': subscribe, unsubscribe, notifySubscribers
+src/views.ts(4,10): error TS6133: 'Product' is declared but its value is never read.
+src/views.ts(4,19): error TS6133: 'Demand' is declared but its value is never read.
+src/views.ts(219,30): error TS2693: 'Product' only refers to a type, but is being used as a value here.
+src/views.ts(220,30): error TS2693: 'Factory' only refers to a type, but is being used as a value here.
+src/views.ts(221,30): error TS2693: 'Demand' only refers to a type, but is being used as a value here.
+src/views.ts(255,47): error TS2693: 'Factory' only refers to a type, but is being used as a value here.
+src/views.ts(286,48): error TS2722: Cannot invoke an object which is possibly 'undefined'.
+src/views.ts(422,44): error TS2552: Cannot find name 'ResidenceEffectCoverageExtended'. Did you mean 'ResidenceEffectCoverage'?
+src/views.ts(444,69): error TS2304: Cannot find name 'PopulationNeedExtended'.
+src/views.ts(444,111): error TS2304: Cannot find name 'PopulationNeedExtended'.
+src/views.ts(467,58): error TS2552: Cannot find name 'ResidenceEffectCoverageExtended'. Did you mean 'ResidenceEffectCoverage'?
+src/world.ts(186,37): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/world.ts(500,33): error TS2345: Argument of type '(name: string) => void' is not assignable to parameter of type '() => void'.
+  Target signature provides too few arguments. Expected 1 or more, but got 0.
+src/world.ts(618,69): error TS2345: Argument of type 'this' is not assignable to parameter of type 'Island'.
+  Type 'Island' is not assignable to type 'import("C:/dev/anno-117-calculator/src/types").Island'.
+    The types of 'session.deleteIsland' are incompatible between these types.
+      Type '(isl: Island) => void' is not assignable to type '(island: Island) => void'.
+        Types of parameters 'isl' and 'island' are incompatible.
+          Type 'Island' is missing the following properties from type 'Island': sessionExtendedName, publicServices, publicRecipeBuildings, consumers, and 13 more.
+src/world.ts(620,33): error TS2379: Argument of type 'PublicConsumerBuilding' is not assignable to parameter of type 'Consumer' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'product' are incompatible.
+    Type 'Product | null' is not assignable to type 'Product'.
+      Type 'null' is not assignable to type 'Product'.
+src/world.ts(625,69): error TS2345: Argument of type 'this' is not assignable to parameter of type 'Island'.
+  Type 'Island' is not assignable to type 'import("C:/dev/anno-117-calculator/src/types").Island'.
+    The types of 'session.deleteIsland' are incompatible between these types.
+      Type '(isl: Island) => void' is not assignable to type '(island: Island) => void'.
+        Types of parameters 'isl' and 'island' are incompatible.
+          Type 'Island' is missing the following properties from type 'Island': sessionExtendedName, publicServices, publicRecipeBuildings, consumers, and 13 more.
+src/world.ts(627,33): error TS2379: Argument of type 'PublicConsumerBuilding' is not assignable to parameter of type 'Consumer' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'product' are incompatible.
+    Type 'Product | null' is not assignable to type 'Product'.
+      Type 'null' is not assignable to type 'Product'.
+src/world.ts(633,71): error TS2345: Argument of type 'this' is not assignable to parameter of type 'Island'.
+  Type 'Island' is not assignable to type 'import("C:/dev/anno-117-calculator/src/types").Island'.
+    The types of 'session.deleteIsland' are incompatible between these types.
+      Type '(isl: Island) => void' is not assignable to type '(island: Island) => void'.
+        Types of parameters 'isl' and 'island' are incompatible.
+          Type 'Island' is missing the following properties from type 'Island': sessionExtendedName, publicServices, publicRecipeBuildings, consumers, and 13 more.
+src/world.ts(637,53): error TS2345: Argument of type 'this' is not assignable to parameter of type 'Island'.
+  Type 'Island' is not assignable to type 'import("C:/dev/anno-117-calculator/src/types").Island'.
+    The types of 'session.deleteIsland' are incompatible between these types.
+      Type '(isl: Island) => void' is not assignable to type '(island: Island) => void'.
+        Types of parameters 'isl' and 'island' are incompatible.
+          Type 'Island' is missing the following properties from type 'Island': sessionExtendedName, publicServices, publicRecipeBuildings, consumers, and 13 more.
+src/world.ts(984,18): error TS6133: 'island' is declared but its value is never read.

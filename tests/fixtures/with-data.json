@@ -1,0 +1,14 @@
+{
+    "islandNames": "[\"Latium\",\"Albion\"]",
+    "collapsibleStates": "{\"factory-config-equipped-items\":1,\"workforce\":0,\"category-public-buildings\":0,\"category-37670\":0,\"category-37671\":0,\"category-37672\":0,\"category-37673\":0,\"category-37674\":0,\"factory-config-consumption\":1,\"factory-config-production-chain\":0,\"factory-config-trade-routes\":1}",
+    "islandName": "Latium",
+    "Albion": "{\n    \"session\": 6627,\n    \"selectedPatron\": \"\",\n    \"5475.buildings.constructed\": \"1\",\n    \"6475.buildings.constructed\": \"1\"\n}",
+    "versionCalculator": "1.0",
+    "tradeRoutes": "[]",
+    "debug.enabled": "true",
+    "calculatorSettings": "{}",
+    "sessionSettings": "{}",
+    "globalEffects": "{}",
+    "Latium": "{\n    \"session\": 3245,\n    \"selectedPatron\": \"\",\n    \"5475.buildings.constructed\": \"0\",\n    \"6475.buildings.constructed\": \"0\",\n    \"3087.buildings.constructed\": \"10\",\n    \"3171.buildings.constructed\": \"1\"\n}",
+    "All Islands": "{\n    \"session\": 37135,\n    \"selectedPatron\": \"\"\n}"
+}

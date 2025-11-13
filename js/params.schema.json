@@ -1,0 +1,3318 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Anno 117 Calculator Parameters",
+  "description": "Generated schema for Anno 117 calculator parameters",
+  "type": "object",
+  "properties": {
+    "constants": {
+      "type": "object",
+      "title": "Constants",
+      "properties": {
+        "fuelProductionTime": {
+          "type": "integer",
+          "description": "How long does 1t of this product activate a production in seconds"
+        },
+        "fuelProduct": {
+          "type": "integer",
+          "description": "which product can be used as fuel"
+        }
+      },
+      "required": [
+        "fuelProductionTime",
+        "fuelProduct"
+      ]
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Language",
+      "description": "Supported localization languages"
+    },
+    "needConsumptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "consumptionFactor": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "locaText",
+          "consumptionFactor"
+        ]
+      },
+      "title": "NeedConsumption",
+      "description": "Scaling factor for NeedConsumptionRate"
+    },
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "id"
+        ]
+      },
+      "title": "Region",
+      "description": "Game regions data with GUID, name, icon, and localized text"
+    },
+    "sessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english"
+            ]
+          },
+          "region": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "region"
+        ]
+      },
+      "title": "Session",
+      "description": "Game session information including region associations"
+    },
+    "needAttributes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "iconPath",
+          "locaText"
+        ]
+      },
+      "title": "NeedAttribute",
+      "description": "Attributes obtained from needs"
+    },
+    "needCategories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "iconPath",
+          "locaText"
+        ]
+      },
+      "title": "NeedCategory",
+      "description": "Categories for needs"
+    },
+    "needs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "needProduct": {
+            "type": "integer"
+          },
+          "needCategory": {
+            "type": "string"
+          },
+          "supplyWeight": {
+            "type": "number"
+          },
+          "isBuilding": {
+            "type": "boolean"
+          },
+          "needAttributes": {
+            "type": "object",
+            "properties": {
+              "Population": {
+                "type": "integer"
+              },
+              "Money": {
+                "type": "integer"
+              },
+              "Happiness": {
+                "type": "integer"
+              },
+              "Health": {
+                "type": "integer"
+              },
+              "FireSafety": {
+                "type": "integer"
+              },
+              "Belief": {
+                "type": "integer"
+              },
+              "Knowledge": {
+                "type": "integer"
+              },
+              "Prestige": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "Population",
+              "Money",
+              "Happiness",
+              "Health",
+              "FireSafety",
+              "Belief",
+              "Knowledge",
+              "Prestige"
+            ]
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "needProduct",
+          "needCategory",
+          "supplyWeight",
+          "isBuilding",
+          "needAttributes"
+        ]
+      },
+      "title": "Need",
+      "description": "Population group definitions with associated levels"
+    },
+    "populationGroups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "populationLevels": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "region": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "locaText",
+          "populationLevels",
+          "region"
+        ]
+      },
+      "title": "PopulationGroup",
+      "description": "Population group definitions with associated levels"
+    },
+    "residenceBuildings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "associatedRegions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "possibleUpgrades": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "populationLevel": {
+            "type": "integer"
+          },
+          "needsList": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "need": {
+                  "type": "integer"
+                },
+                "needConsumptionRate": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "need"
+              ]
+            }
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "associatedRegions",
+          "populationLevel",
+          "needsList"
+        ]
+      },
+      "title": "ResidenceBuilding",
+      "description": "Residence building for a population level"
+    },
+    "populationLevels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "connectedWorkforce": {
+            "type": "integer"
+          },
+          "populationToWorkforceFactor": {
+            "type": "number"
+          },
+          "associatedRegions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "connectedWorkforce",
+          "populationToWorkforceFactor",
+          "associatedRegions"
+        ]
+      },
+      "title": "PopulationLevel",
+      "description": "Population level definitions with needs and requirements"
+    },
+    "products": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "isAbstract": {
+            "type": "boolean"
+          },
+          "isConstructionMaterial": {
+            "type": "boolean"
+          },
+          "associatedRegions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "isAbstract",
+          "isConstructionMaterial"
+        ]
+      },
+      "title": "Product",
+      "description": "Product definitions with producer information"
+    },
+    "workforce": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "associatedRegions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "associatedRegions"
+        ]
+      },
+      "title": "Workforce",
+      "description": "Product definitions with producer information"
+    },
+    "productFilters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "guid": {
+            "type": "integer"
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        "required": [
+          "iconPath",
+          "locaText",
+          "guid",
+          "products"
+        ]
+      },
+      "title": "ProductFilter",
+      "description": "Product category filters for UI organization"
+    },
+    "factories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "associatedRegions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "needsFuelInput": {
+            "type": "boolean"
+          },
+          "outputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product": {
+                  "type": "integer"
+                },
+                "amount": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "product",
+                "amount"
+              ]
+            }
+          },
+          "maintenances": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product": {
+                  "type": "integer"
+                },
+                "amount": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "product",
+                "amount"
+              ]
+            }
+          },
+          "cycleTime": {
+            "type": "integer"
+          },
+          "modulesLimit": {
+            "type": "integer"
+          },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product": {
+                  "type": "integer"
+                },
+                "amount": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "product",
+                "amount"
+              ]
+            }
+          },
+          "buffs": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "aqueductProductivityBuff": {
+            "type": "integer"
+          },
+          "additionalModule": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "associatedRegions",
+          "needsFuelInput",
+          "outputs",
+          "maintenances",
+          "cycleTime",
+          "modulesLimit"
+        ]
+      },
+      "title": "Factory",
+      "description": "Factory building definitions with inputs, outputs, maintenances, and production rates"
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "associatedRegions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product": {
+                  "type": "integer"
+                },
+                "amount": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "product",
+                "amount"
+              ]
+            }
+          },
+          "needsFuelInput": {
+            "type": "boolean"
+          },
+          "cycleTime": {
+            "type": "integer"
+          },
+          "modulesLimit": {
+            "type": "integer"
+          },
+          "buffs": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "associatedRegions",
+          "inputs",
+          "needsFuelInput",
+          "cycleTime",
+          "modulesLimit",
+          "buffs"
+        ]
+      },
+      "title": "Module",
+      "description": "Modules attachable to factories with inputs, maintenances, and production rates"
+    },
+    "buildingBuffs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "isStackable": {
+            "type": "boolean"
+          },
+          "workforceModifierInPercent": {
+            "type": "number"
+          },
+          "productivityUpgrade": {
+            "type": "number"
+          },
+          "fuelDurationPercent": {
+            "type": "number"
+          },
+          "replaceWorkforce": {
+            "type": "object",
+            "properties": {
+              "newWorkforce": {
+                "type": "integer"
+              },
+              "oldWorkforce": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "newWorkforce",
+              "oldWorkforce"
+            ]
+          },
+          "workforceMaintenanceFactorUpgrade": {
+            "type": "number"
+          },
+          "additionalOutputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product": {
+                  "type": "integer"
+                },
+                "forceProductSameAsFactoryOutput": {
+                  "type": "boolean"
+                },
+                "additionalOutputCycle": {
+                  "type": "integer"
+                },
+                "amount": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "product",
+                "forceProductSameAsFactoryOutput",
+                "additionalOutputCycle",
+                "amount"
+              ]
+            }
+          },
+          "additionalWorkforces": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "replaceInputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "newInput": {
+                  "type": "integer"
+                },
+                "oldInput": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "newInput",
+                "oldInput"
+              ]
+            }
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "isStackable",
+          "workforceModifierInPercent",
+          "productivityUpgrade",
+          "fuelDurationPercent",
+          "replaceWorkforce",
+          "workforceMaintenanceFactorUpgrade"
+        ]
+      },
+      "title": "BuildingBuff",
+      "description": "Building buff assets with upgrade properties for buildings, residences, and factories. Determine what the effect is. See effects for where they apply."
+    },
+    "effects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "buffs": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "targetsIsAllProduction": {
+            "type": "boolean"
+          },
+          "effectScope": {
+            "type": "string"
+          },
+          "excludeEffectSourceGUID": {
+            "type": "boolean"
+          },
+          "effectDuration": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "buffs",
+          "targets",
+          "targetsIsAllProduction",
+          "effectScope",
+          "excludeEffectSourceGUID",
+          "effectDuration"
+        ]
+      },
+      "title": "Effect",
+      "description": "Building buff combined with targets (pool of building GUIDs)."
+    },
+    "techs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "effects": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "isRepeatable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "effects",
+          "isRepeatable"
+        ]
+      },
+      "title": "Tech",
+      "description": "Technologies from the discovery tree with relevant effects"
+    },
+    "patrons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "localEffects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "effect": {
+                  "type": "integer"
+                },
+                "milestones": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "devotion": {
+                        "type": "integer"
+                      },
+                      "buffScaling": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "devotion",
+                      "buffScaling"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "effect",
+                "milestones"
+              ]
+            }
+          },
+          "wonder": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText"
+        ]
+      },
+      "title": "Patrons",
+      "description": "Patrons with effects increased by devotion."
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "buffs": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "effectScope": {
+            "type": "string"
+          },
+          "excludeEffectSourceGUID": {
+            "type": "boolean"
+          },
+          "rarity": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "buffs",
+          "effectScope",
+          "excludeEffectSourceGUID",
+          "rarity"
+        ]
+      },
+      "title": "Item",
+      "description": "Items equipable in Villa with relevant buffs."
+    },
+    "icons": {
+      "type": "object",
+      "properties": {
+        "data/ui/fhd/base/icon_content/generic/icon_2d_region_heartlands.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/generic/icon_2d_region_wetlands.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/hud_minimap/icon_2d_minimap_world_map.png": {
+          "type": "string"
+        },
+        "data/ui/2kimages/fpp/assets/main_menu_flow/symbol_heartlands_280.png": {
+          "type": "string"
+        },
+        "data/ui/2kimages/fpp/assets/main_menu_flow/symbol_wetlands_fp_280.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/attributes/icon_2d_population.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/attributes/icon_2d_income.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/attributes/icon_2d_happiness.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/attributes/icon_2d_health.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/attributes/icon_2d_fire_safety.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/religion/icon_2d_religion.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/attributes/icon_2d_techtree_knowledge.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/attributes/icon_2d_prestige.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_roman_marketplace.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/need_categories/icon_3d_need_category_food.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/need_categories/icon_3d_need_category_fashion.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/need_categories/icon_3d_need_category_household.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/colosseum/icon_3d_colosseum.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/need_categories/icon_3d_need_category_culture.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_roman_tavern.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_roman_sanctuary.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_roman_grammaticus.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_roman_theatre.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_construction_category_aqueduct.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_roman_temple.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_roman_library.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_sardines_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_porridge_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_bread_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_garum_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_wine_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_cheese_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_oysters_and_caviar_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_tongue_in_aspic_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_tunics_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_farmer_hat_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_lavender_soap_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_sandals_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_togas_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_brooch_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_necklaces_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_cloak_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_amphorae_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_olive_oil_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_wax_tablets_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_fine_glass_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_lounger_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_handmirros_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_wonder_celtic_forum.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_wonder_roman_bathhouse.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_lye_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_chariot_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_celtic_fanum.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_eels_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_sausages_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_wig_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_celtic_bardic_hall.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_celtic_sportsfield.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_celtic_town_hall.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_cockles_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_beer_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_roast_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_reed_shoes_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_trouser_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_torcs_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_pelt_hat_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_drinkhorns_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_clan_shields_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_celtic_barrows.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_celtic_sacred_grove.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_roman_gambling_house.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_celtic_gambling_house.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_base_residence.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/portraits/portrait_resident_roman_tier1_libertus.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/portraits/portrait_resident_roman_tier2_plebeian.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/portraits/portrait_resident_roman_tier3_eques.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/portraits/portrait_resident_roman_tier4_patrician.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/portraits/portrait_resident_celtic_roman_tier2_mercator.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/portraits/portrait_resident_celtic_roman_tier3_noble.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/portraits/portrait_resident_celtic_tier1_wader.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/portraits/portrait_resident_celtic_tier2_smith.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/portraits/portrait_resident_celtic_tier3_alderman.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/generic/icon_2d_permit_guesthouse.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/generic/icon_2d_permit_depot.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/generic/icon_2d_permit_shrine.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/military/icon_3d_unit_auxilia.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/military/icon_3d_unit_archer.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/military/icon_3d_unit_pretorian.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_mackerels_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_salt_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_murex_snails_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_silica_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_oysters_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_oats_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_hemp_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_wheat_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_lavender_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_olives_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_grapes_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_flax_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_cypress_wood_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_wood_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_charcoal_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_resin_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_honeycombs_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_iron_ore_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_limestone_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_marble_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_minerals_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_sheep_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_pigs_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_horses_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_clay_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_sturgeons_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_gold_ore_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_leather_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_tyrian_purple_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_pig_lard_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_cloth_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_ornamented_wood_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_cushion_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_strings_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_iron_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_glass_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_pigments_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_gold_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_flour_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_caviar_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_string_instrument_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_timber_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_tiles_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_concrete_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_marble_blocks_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_mosaics_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_ropes_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_sails_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_weapons_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_armory_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_seashells_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_marsh_birds_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_silver_ore_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_herbs_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_wig_base_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_silver_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_bird_tongue_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_samphire_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_barley_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_dye_plants_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_reed_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_mud_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_auroch_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_beaver_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_tin_ore_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_copper_ore_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_granite_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_ponies_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_celtic_green_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_chassis_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_bronze_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_malt_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_wattle_daub_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_granite_block_goods.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_wonder_roman_forum.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_celtic_marketplace.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_celtic_grammaticus.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/building/icon_3d_wonder_celtic_bathhouse.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/workforce/icon_2d_libertus_workforce_roman.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/workforce/icon_2d_plebeians_workforce_roman.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/workforce/icon_2d_equites_workforce_roman.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/workforce/icon_2d_patricians_workforce_roman.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/workforce/icon_2d_mercators_workforce_albion.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/workforce/icon_2d_nobles_workforce_albion.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/workforce/icon_2d_walders_workforce_albion.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/workforce/icon_2d_smiths_workforce_albion.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/workforce/icon_2d_aldermen_workforce_albion.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/generic/icon_2d_filter_goods_consumption.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/generic/icon_2d_filter_goods_construction.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/generic/icon_2d_filter_goods_raw.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/generic/icon_2d_filter_goods_agricultural.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/generic/icon_2d_filter_goods_intermediate.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/infrastructure/icon_3d_silos.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/tech_tree/icon_2d_irrigation_aqueduct.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/tech_tree/civic/icon_3d_tech_warehouse_maintenance.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/tech_tree/economy/icon_3d_tech_wood_honey.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/tech_tree/economy/icon_3d_tech_wood_beaver.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/tech_tree/economy/icon_3d_tech_wood_bird.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/generic/icon_2d_slot_mountain.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/colosseum/icon_3d_buff_colosseum_small_bronze.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/colosseum/icon_3d_buff_colosseum_small_silver.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/religion/icon_2d_deity_mercury.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/religion/icon_2d_deity_cernunnos.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/religion/icon_2d_deity_minerva.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/generic/icon_2d_arrow_up.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/generic/icon_2d_ship_civilian.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/generic/icon_2d_arrow_down.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/religion/icon_2d_deity_mars.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/religion/icon_2d_deity_ceres.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/religion/icon_2d_deity_neptune.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/religion/icon_2d_deity_epona.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/infrastructure/icon_3d_resource_forest.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/rival/icon_3d_rival_01_dorian.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/rival/icon_3d_rival_02_tarragon.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/rival/icon_3d_rival_03_licia.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/rival/icon_3d_rival_04_athr.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/rival/icon_3d_rival_05_zarai.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/rival/icon_3d_rival_06_concordia.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/rival/icon_3d_rival_07_nefernu.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/unique/icon_3d_unique_campaign_002_elephant_handler.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_035.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_87.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_88.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_61.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_69.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/unique/icon_3d_unique_001_barley_shaker.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/unique/icon_3d_unique_specialist_dog_01.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_006.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_female/icon_3d_celtic_female_004.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_028.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_008.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_male/icon_3d_other_male_007.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_001.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_002.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_002.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_male/icon_3d_other_male_001.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_013.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_001.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_033.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_female/icon_3d_celtic_female_009.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_female/icon_3d_celtic_female_007.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_002.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_006.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_025.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_81.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_male/icon_3d_other_male_016.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_30.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/nonbinary/icon_3d_celtic_nb_03.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_male/icon_3d_other_male_019.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_048.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_47.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_008.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_female/icon_3d_celtic_female_025.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_female/icon_3d_celtic_female_024.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_017.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_23.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_014.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_female/icon_3d_celtic_female_012.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_021.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_003.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_018.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_012.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_012.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_male/icon_3d_other_male_039.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_female/icon_3d_celtic_female_045.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_038.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_019.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_030.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_036.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_046.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_022.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_male/icon_3d_other_male_010.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_female/icon_3d_celtic_female_014.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_013.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_007.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_015.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_009.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_male/icon_3d_other_male_014.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/unique/icon_3d_unique_007_lapidarius_aureate.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_70.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_009.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/unique/icon_3d_unique_017_marix.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_009.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_021.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_024.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_023.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_35.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_027.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_28.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_030.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_007.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_female/icon_3d_celtic_female_013.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_006.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/unique/icon_3d_unique_015_aisling_ui_democritus.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_034.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_010.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_male/icon_3d_other_male_028.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_29.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_044.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/nonbinary/icon_3d_celtic_nb_04.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_032.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_46.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_73.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_041.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_79.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_49.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_040.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_45.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/unique/icon_3d_unique_016_dibblorix.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_018.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/items_specialist/unique/icon_3d_specialist_hooded_01.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/icon_3d_removed.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/generic/icon_2d_productivity.png": {
+          "type": "string"
+        },
+        "data/ui/fhd/base/icon_content/tech_tree/icon_2d_research_progress.png": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "data/ui/fhd/base/icon_content/generic/icon_2d_region_heartlands.png",
+        "data/ui/fhd/base/icon_content/generic/icon_2d_region_wetlands.png",
+        "data/ui/fhd/base/icon_content/hud_minimap/icon_2d_minimap_world_map.png",
+        "data/ui/2kimages/fpp/assets/main_menu_flow/symbol_heartlands_280.png",
+        "data/ui/2kimages/fpp/assets/main_menu_flow/symbol_wetlands_fp_280.png",
+        "data/ui/fhd/base/icon_content/attributes/icon_2d_population.png",
+        "data/ui/fhd/base/icon_content/attributes/icon_2d_income.png",
+        "data/ui/fhd/base/icon_content/attributes/icon_2d_happiness.png",
+        "data/ui/fhd/base/icon_content/attributes/icon_2d_health.png",
+        "data/ui/fhd/base/icon_content/attributes/icon_2d_fire_safety.png",
+        "data/ui/fhd/base/icon_content/religion/icon_2d_religion.png",
+        "data/ui/fhd/base/icon_content/attributes/icon_2d_techtree_knowledge.png",
+        "data/ui/fhd/base/icon_content/attributes/icon_2d_prestige.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_roman_marketplace.png",
+        "data/ui/fhd/base/icon_content/need_categories/icon_3d_need_category_food.png",
+        "data/ui/fhd/base/icon_content/need_categories/icon_3d_need_category_fashion.png",
+        "data/ui/fhd/base/icon_content/need_categories/icon_3d_need_category_household.png",
+        "data/ui/fhd/base/icon_content/colosseum/icon_3d_colosseum.png",
+        "data/ui/fhd/base/icon_content/need_categories/icon_3d_need_category_culture.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_roman_tavern.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_roman_sanctuary.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_roman_grammaticus.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_roman_theatre.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_construction_category_aqueduct.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_roman_temple.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_roman_library.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_sardines_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_porridge_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_bread_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_garum_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_wine_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_cheese_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_oysters_and_caviar_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_tongue_in_aspic_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_tunics_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_farmer_hat_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_lavender_soap_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_sandals_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_togas_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_brooch_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_necklaces_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_cloak_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_amphorae_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_olive_oil_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_wax_tablets_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_fine_glass_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_lounger_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_handmirros_goods.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_wonder_celtic_forum.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_wonder_roman_bathhouse.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_lye_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_chariot_goods.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_celtic_fanum.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_eels_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_sausages_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_wig_goods.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_celtic_bardic_hall.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_celtic_sportsfield.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_celtic_town_hall.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_cockles_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_beer_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_roast_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_reed_shoes_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_trouser_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_torcs_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_pelt_hat_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_drinkhorns_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_clan_shields_goods.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_celtic_barrows.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_celtic_sacred_grove.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_roman_gambling_house.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_celtic_gambling_house.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_base_residence.png",
+        "data/ui/fhd/base/icon_content/portraits/portrait_resident_roman_tier1_libertus.png",
+        "data/ui/fhd/base/icon_content/portraits/portrait_resident_roman_tier2_plebeian.png",
+        "data/ui/fhd/base/icon_content/portraits/portrait_resident_roman_tier3_eques.png",
+        "data/ui/fhd/base/icon_content/portraits/portrait_resident_roman_tier4_patrician.png",
+        "data/ui/fhd/base/icon_content/portraits/portrait_resident_celtic_roman_tier2_mercator.png",
+        "data/ui/fhd/base/icon_content/portraits/portrait_resident_celtic_roman_tier3_noble.png",
+        "data/ui/fhd/base/icon_content/portraits/portrait_resident_celtic_tier1_wader.png",
+        "data/ui/fhd/base/icon_content/portraits/portrait_resident_celtic_tier2_smith.png",
+        "data/ui/fhd/base/icon_content/portraits/portrait_resident_celtic_tier3_alderman.png",
+        "data/ui/fhd/base/icon_content/generic/icon_2d_permit_guesthouse.png",
+        "data/ui/fhd/base/icon_content/generic/icon_2d_permit_depot.png",
+        "data/ui/fhd/base/icon_content/generic/icon_2d_permit_shrine.png",
+        "data/ui/fhd/base/icon_content/military/icon_3d_unit_auxilia.png",
+        "data/ui/fhd/base/icon_content/military/icon_3d_unit_archer.png",
+        "data/ui/fhd/base/icon_content/military/icon_3d_unit_pretorian.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_mackerels_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_salt_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_murex_snails_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_silica_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_oysters_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_oats_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_hemp_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_wheat_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_lavender_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_olives_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_grapes_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_flax_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_cypress_wood_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_wood_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_charcoal_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_resin_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_honeycombs_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_iron_ore_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_limestone_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_marble_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_minerals_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_sheep_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_pigs_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_horses_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_clay_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_sturgeons_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_gold_ore_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_leather_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_tyrian_purple_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_pig_lard_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_cloth_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_ornamented_wood_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_cushion_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_strings_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_iron_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_glass_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_pigments_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_gold_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_flour_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_caviar_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_string_instrument_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_timber_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_tiles_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_concrete_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_marble_blocks_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_mosaics_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_ropes_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_sails_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_weapons_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_armory_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_seashells_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_marsh_birds_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_silver_ore_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_herbs_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_wig_base_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_silver_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_bird_tongue_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_samphire_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_barley_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_dye_plants_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_reed_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_mud_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_auroch_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_beaver_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_tin_ore_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_copper_ore_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_granite_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_ponies_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_celtic_green_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_chassis_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_bronze_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_malt_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_wattle_daub_goods.png",
+        "data/ui/fhd/base/icon_content/production_goods/icon_3d_granite_block_goods.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_wonder_roman_forum.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_celtic_marketplace.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_public_celtic_grammaticus.png",
+        "data/ui/fhd/base/icon_content/building/icon_3d_wonder_celtic_bathhouse.png",
+        "data/ui/fhd/base/icon_content/workforce/icon_2d_libertus_workforce_roman.png",
+        "data/ui/fhd/base/icon_content/workforce/icon_2d_plebeians_workforce_roman.png",
+        "data/ui/fhd/base/icon_content/workforce/icon_2d_equites_workforce_roman.png",
+        "data/ui/fhd/base/icon_content/workforce/icon_2d_patricians_workforce_roman.png",
+        "data/ui/fhd/base/icon_content/workforce/icon_2d_mercators_workforce_albion.png",
+        "data/ui/fhd/base/icon_content/workforce/icon_2d_nobles_workforce_albion.png",
+        "data/ui/fhd/base/icon_content/workforce/icon_2d_walders_workforce_albion.png",
+        "data/ui/fhd/base/icon_content/workforce/icon_2d_smiths_workforce_albion.png",
+        "data/ui/fhd/base/icon_content/workforce/icon_2d_aldermen_workforce_albion.png",
+        "data/ui/fhd/base/icon_content/generic/icon_2d_filter_goods_consumption.png",
+        "data/ui/fhd/base/icon_content/generic/icon_2d_filter_goods_construction.png",
+        "data/ui/fhd/base/icon_content/generic/icon_2d_filter_goods_raw.png",
+        "data/ui/fhd/base/icon_content/generic/icon_2d_filter_goods_agricultural.png",
+        "data/ui/fhd/base/icon_content/generic/icon_2d_filter_goods_intermediate.png",
+        "data/ui/fhd/base/icon_content/infrastructure/icon_3d_silos.png",
+        "data/ui/fhd/base/icon_content/tech_tree/icon_2d_irrigation_aqueduct.png",
+        "data/ui/fhd/base/icon_content/tech_tree/civic/icon_3d_tech_warehouse_maintenance.png",
+        "data/ui/fhd/base/icon_content/tech_tree/economy/icon_3d_tech_wood_honey.png",
+        "data/ui/fhd/base/icon_content/tech_tree/economy/icon_3d_tech_wood_beaver.png",
+        "data/ui/fhd/base/icon_content/tech_tree/economy/icon_3d_tech_wood_bird.png",
+        "data/ui/fhd/base/icon_content/generic/icon_2d_slot_mountain.png",
+        "data/ui/fhd/base/icon_content/colosseum/icon_3d_buff_colosseum_small_bronze.png",
+        "data/ui/fhd/base/icon_content/colosseum/icon_3d_buff_colosseum_small_silver.png",
+        "data/ui/fhd/base/icon_content/religion/icon_2d_deity_mercury.png",
+        "data/ui/fhd/base/icon_content/religion/icon_2d_deity_cernunnos.png",
+        "data/ui/fhd/base/icon_content/religion/icon_2d_deity_minerva.png",
+        "data/ui/fhd/base/icon_content/generic/icon_2d_arrow_up.png",
+        "data/ui/fhd/base/icon_content/generic/icon_2d_ship_civilian.png",
+        "data/ui/fhd/base/icon_content/generic/icon_2d_arrow_down.png",
+        "data/ui/fhd/base/icon_content/religion/icon_2d_deity_mars.png",
+        "data/ui/fhd/base/icon_content/religion/icon_2d_deity_ceres.png",
+        "data/ui/fhd/base/icon_content/religion/icon_2d_deity_neptune.png",
+        "data/ui/fhd/base/icon_content/religion/icon_2d_deity_epona.png",
+        "data/ui/fhd/base/icon_content/infrastructure/icon_3d_resource_forest.png",
+        "data/ui/fhd/base/icon_content/items_specialist/rival/icon_3d_rival_01_dorian.png",
+        "data/ui/fhd/base/icon_content/items_specialist/rival/icon_3d_rival_02_tarragon.png",
+        "data/ui/fhd/base/icon_content/items_specialist/rival/icon_3d_rival_03_licia.png",
+        "data/ui/fhd/base/icon_content/items_specialist/rival/icon_3d_rival_04_athr.png",
+        "data/ui/fhd/base/icon_content/items_specialist/rival/icon_3d_rival_05_zarai.png",
+        "data/ui/fhd/base/icon_content/items_specialist/rival/icon_3d_rival_06_concordia.png",
+        "data/ui/fhd/base/icon_content/items_specialist/rival/icon_3d_rival_07_nefernu.png",
+        "data/ui/fhd/base/icon_content/items_specialist/unique/icon_3d_unique_campaign_002_elephant_handler.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_035.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_87.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_88.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_61.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_69.png",
+        "data/ui/fhd/base/icon_content/items_specialist/unique/icon_3d_unique_001_barley_shaker.png",
+        "data/ui/fhd/base/icon_content/items_specialist/unique/icon_3d_unique_specialist_dog_01.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_006.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_female/icon_3d_celtic_female_004.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_028.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_008.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_male/icon_3d_other_male_007.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_001.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_002.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_002.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_male/icon_3d_other_male_001.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_013.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_001.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_033.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_female/icon_3d_celtic_female_009.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_female/icon_3d_celtic_female_007.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_002.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_006.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_025.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_81.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_male/icon_3d_other_male_016.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_30.png",
+        "data/ui/fhd/base/icon_content/items_specialist/nonbinary/icon_3d_celtic_nb_03.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_male/icon_3d_other_male_019.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_048.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_47.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_008.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_female/icon_3d_celtic_female_025.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_female/icon_3d_celtic_female_024.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_017.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_23.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_014.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_female/icon_3d_celtic_female_012.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_021.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_003.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_018.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_012.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_012.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_male/icon_3d_other_male_039.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_female/icon_3d_celtic_female_045.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_038.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_019.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_030.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_036.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_046.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_022.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_male/icon_3d_other_male_010.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_female/icon_3d_celtic_female_014.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_013.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_007.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_015.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_009.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_male/icon_3d_other_male_014.png",
+        "data/ui/fhd/base/icon_content/items_specialist/unique/icon_3d_unique_007_lapidarius_aureate.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_70.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_009.png",
+        "data/ui/fhd/base/icon_content/items_specialist/unique/icon_3d_unique_017_marix.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_009.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_021.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_024.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_023.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_35.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_027.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_28.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_030.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_007.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_female/icon_3d_celtic_female_013.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_006.png",
+        "data/ui/fhd/base/icon_content/items_specialist/unique/icon_3d_unique_015_aisling_ui_democritus.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_034.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_010.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_male/icon_3d_other_male_028.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_29.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_044.png",
+        "data/ui/fhd/base/icon_content/items_specialist/nonbinary/icon_3d_celtic_nb_04.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_032.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_46.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_73.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_041.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_male/icon_3d_roman_male_79.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_49.png",
+        "data/ui/fhd/base/icon_content/items_specialist/roman_female/icon_3d_roman_female_040.png",
+        "data/ui/fhd/base/icon_content/items_specialist/celtic_male/icon_3d_celtic_male_45.png",
+        "data/ui/fhd/base/icon_content/items_specialist/unique/icon_3d_unique_016_dibblorix.png",
+        "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_018.png",
+        "data/ui/fhd/base/icon_content/items_specialist/unique/icon_3d_specialist_hooded_01.png",
+        "data/ui/fhd/base/icon_content/icon_3d_removed.png",
+        "data/ui/fhd/base/icon_content/generic/icon_2d_productivity.png",
+        "data/ui/fhd/base/icon_content/tech_tree/icon_2d_research_progress.png"
+      ],
+      "title": "Icon",
+      "description": "Icon data URLs indexed by icon identifier"
+    },
+    "texts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "lineID": {
+            "type": "integer"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "lineID",
+          "locaText"
+        ]
+      },
+      "title": "Text",
+      "description": "Texts from the game with localization."
+    }
+  },
+  "required": [
+    "languages",
+    "needConsumptions",
+    "regions",
+    "sessions",
+    "needAttributes",
+    "needCategories",
+    "needs",
+    "populationGroups",
+    "residenceBuildings",
+    "populationLevels",
+    "products",
+    "workforce",
+    "productFilters",
+    "factories",
+    "modules",
+    "buildingBuffs",
+    "effects",
+    "techs",
+    "patrons",
+    "items",
+    "icons",
+    "texts"
+  ]
+}

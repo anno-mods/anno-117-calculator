@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "server-structured-memory": {
+      "command": "npx",
+      "args": [
+        "@nmeierpolys/mcp-structured-memory"
+      ]
+    }
+  }
+}

@@ -1,0 +1,82 @@
+﻿<div data-bind="debug: 'Product Tile', visible: $data.visible">
+    <div class="product-tile" data-bind="css: $data.isHighlightedAsMissing() ? 'danger' : ''">
+
+        <!-- Product Header -->
+        <div class="product-tile-tr-button">
+            <div>
+                <button class="btn btn-light btn-sm" data-bind="click: () => {$root.selectedProduct($data.instance())}" data-toggle="modal" data-target="#product-config-dialog">
+                    <span class="fa fa-sliders"></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="product-tile-name" data-bind="text: $data.name, visible: !$root.settings.hideNames.checked()"></div>
+
+        <div class="product-tile-icon mb-2">
+            <img class="icon-tile" data-bind="attr: { src: $data.icon ? $data.icon : null, alt: $data.name }">
+            <img class="superscript-icon icon-light" data-bind="visible: $data.regionIconVisible(), attr: {src: $data.region() ? $data.region().icon : null, title: $data.region() ? $data.region().name : null}">
+        </div>
+
+
+
+        <div class="product-tile-attribute-group">
+            <!-- Factory Count -->
+             <!--
+            <div>
+                <div class="product-tile-count">
+                    <div href="#" data-toggle="tooltip" data-bind="attr: {'title': $root.texts.factories ? $root.texts.factories.name : 'Factories'}">
+                        <span data-bind="text: $data.visibleFactories().length"></span>
+                        <span>x</span>
+                        <span class="fa fa-industry" style="font-size: 0.8rem;"></span>
+                    </div>
+                </div>
+            </div>
+        -->
+
+        <ddiv class="product-tile-count" data-bind="with: $data.factoryPresenterIfDefaultSupplier()">
+            <div class="inline-list-stretched mr-2"  >
+                <div>
+                    <img class="icon-sm icon-light" src="../icons/icon_house_white.png" />
+                </div>
+                <div href="#" data-toggle="tooltip" data-bind="attr: {'title' : $root.texts.existingNumberOfBuildings.name}">
+                    <span data-bind="text: $data.instance().buildings.constructed()"></span>
+                    
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-secondary" data-bind="click: () => $data.incConstructedBuildings()" style="padding: 0em 0.25em 0em 0.25em; font-size: unset;">+</button>
+                        <button type="button" class="btn btn-secondary" data-bind="click: () => $data.decConstructedBuildings(), enable: $data.canDecConstructedBuildings()" style="padding: 0em 0.25em 0em 0.25em; font-size: unset;">-</button>
+                    </div>
+                </div>
+                <div data-bind="if: !$parent.product.isConstructionMaterial">/</div>
+                <div data-bind="if: !$parent.product.isConstructionMaterial, attr: {'title' : $root.texts.requiredNumberOfBuildingsDescription.name}">
+                    <span data-bind="text: $data.requiredBuildingsFormatted()"></span>
+                    
+                </div>
+            </div>
+        </div>
+
+            <!-- Total Production -->
+            <div>
+                <div class="product-tile-amount" href="#" data-toggle="tooltip" data-bind="attr: {'title': $root.texts.production ? $root.texts.production.name : 'Production'}">
+                    <div class="product-tile-load">
+                        <span data-bind="text: formatNumber($data.totalProduction())"></span>
+                        <span> t/min</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Net Balance -->
+             <!--
+            <div>
+                <div class="product-tile-amount" href="#" data-toggle="tooltip" data-bind="attr: {'title': $root.texts.balance ? $root.texts.balance.name : 'Balance'}">
+                    <div class="product-tile-load"
+                         data-bind="css: { 'text-success': $data.netBalance() > 0.01, 'text-danger': $data.netBalance() < -0.01 }">
+                        <span data-bind="text: formatNumber($data.netBalance(), true)"></span>
+                        <span> t/min</span>
+                    </div>
+                </div>
+            </div>
+        -->
+        </div>
+
+    </div>
+</div>

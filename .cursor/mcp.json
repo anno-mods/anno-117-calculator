@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@itseasy21/mcp-knowledge-graph"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": "./docs/memory.jsonl"
+      }
+    },
+    "claude-md": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-claude-md"
+      ],
+      "env": {
+        "CLAUDE_MD_FILE_PATH": "./Claude.md"
+      }
+    }
+  }
+}

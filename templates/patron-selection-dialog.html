@@ -1,0 +1,69 @@
+<div id="patron-selection-dialog" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true" data-bind="debug: 'Patron Selection Dialog'">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 data-bind="text: $root.texts.patron.name">Patron</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body" data-bind="with: $root.island()">
+                <!-- Patron Selection and Devotion in one row -->
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label" data-bind="text: $root.texts.currentPatron.name">Selected Patron:</label>
+                    <div class="col-sm-4">
+                        <select class="form-control" data-bind="options: $data.availablePatrons, optionsText: 'name', value: $data.selectedPatron, optionsCaption: 'None'"></select>
+                    </div>
+                    <label class="col-sm-2 col-form-label" data-bind="text: $root.texts.devotion.name">Devotion:</label>
+                    <div class="col-sm-4">
+                        <div class="input-group input-group-sm spinner">
+                            <input class="form-control" type="number" value="0" step="1" min="0" data-bind="value: $data.devotion, attr: {id: 'devotion-input'}" />
+                            <div class="input-group-append">
+                                <div data-bind="component: { name: 'number-input-increment', params: { obs: $data.devotion, id: 'devotion-input' }}"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wonder Effect Checkbox -->
+                <div class="form-group row" data-bind="if: $data.selectedPatron() && $data.selectedPatron().wonder">
+                    <label class="col-sm-2 col-form-label" data-bind="text: $root.texts.wonderEffect.name">Wonder Effect:</label>
+                    <div class="col-sm-4">
+                        <div data-bind="component:{name:'icon-checkbox', params:{asset: $data.selectedPatron().wonder, checked: $data.selectedPatron().wonder.scaling}}"></div>
+                    </div>
+                    <label class="col-sm-2 col-form-label" data-bind="text: $root.texts.buffs.name">Buffs:</label>
+                    <div class="col-sm-4">
+                        <div data-bind="component: {name: 'buff-display', params: {buffs: $data.selectedPatron().wonder.buffs}}"></div>
+                    </div>
+                </div>
+
+                <!-- Patron Effects Table -->
+                <div data-bind="if: $data.selectedPatron()">
+                    <h5 data-bind="text: $root.texts.patronEffects.name">Patron Effects</h5>
+                    <div data-bind="foreach: $data.selectedPatron().localEffects || []">
+                        <table class="table">
+                            <thead style="text-align: center">
+                                <tr>
+                                    <th data-bind="text: $root.texts.milestone.name">Milestone</th>
+                                    <th data-bind="text: $root.texts.devotionRequired.name">Devotion Required</th>
+                                    <th data-bind="text: $root.texts.scaling.name">Scaling</th>
+                                </tr>
+                            </thead>                            
+                            <tbody data-bind="foreach: $data.milestones">
+
+                                <tr data-bind="css: { 'table-success': $root.island().devotion() >= $data.devotion, 'text-muted': $root.island().devotion() < $data.devotion }">
+                                    <td data-bind="text: $index() + 1"></td>
+                                    <td data-bind="text: formatNumber($data.devotion)"></td>
+                                    <td data-bind="text: formatNumber($data.buffScaling,true) + ' %'"></td>                                    
+                                </tr>
+                                
+                            </tbody>
+                            
+                        </table>
+                        <div class="inline-list-centered" data-bind="foreach: $data.effect.targets">
+                            <img class="mr-2 icon-sm" data-bind="attr: { src: $data.icon ? $data.icon : null, alt: $data.name, title: $data.getRegionExtendedName()}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

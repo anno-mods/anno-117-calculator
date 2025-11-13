@@ -1,0 +1,98 @@
+<div id="population-level-config-dialog" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" data-bind="debug: 'Population Config Dialog', with: $root.presenter.residence">
+            <div class="modal-header">
+                <h4 data-bind="text: $data.instance().name">Population Level</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+
+            </div>
+            <div class="modal-body">
+                <!-- Population Level Summary with Total Residents -->
+                <div class="d-flex justify-content-between align-items-center mb-3 p-3" style="background-color: rgba(0,0,0,0.05); border-radius: 8px;">
+                    <h5 class="mb-0" data-bind="text: $data.instance().name()"></h5>
+                    <div class="inline-list-centered">
+                        <img class="icon-sm icon-light mr-2" src="../icons/icon_resource_population.png" data-bind="attr: {title: $root.texts.residents.name()}" />
+                        <strong data-bind="text: formatNumber($data.instance().residents())"></strong>
+                    </div>
+                </div>
+
+                <!-- Residence Buildings Table -->
+                <table class="table table-striped table-fixed">
+                    <tbody data-bind="foreach: $data.instance().allResidences">
+                        <tr data-bind="debug: 'Residence Building'">
+                            <!-- ko if: $parent.instance().allResidences().length > 1 -->
+                            <td style="width: 25%;">
+                                <span data-bind="text: $data.name()"></span>
+                            </td>
+                            <!-- /ko -->
+                            <td style="width: 30%;">
+                                <div data-bind="component: { name: 'constructed-buildings-input', params: $data}"></div>
+                            </td>
+                            <td style="width: 20%;">
+                                <div class="inline-list-centered">
+                                    <img class="icon-sm icon-light mr-2" src="../icons/icon_resource_population.png" />
+                                    <span data-bind="text: formatNumber($data.residents())"></span>
+                                </div>
+                            </td>
+                            <td style="width: 15%;" data-bind="visible: $data.buildings.constructed() > 0">
+                                <div class="inline-list" data-bind="foreach: $data.effectCoverage">
+                                    <div data-bind="attr: {title: formatPercentage(100 * $data.coverage()).substr(1) + ' ' + $data.residenceEffect.name()}">
+                                        <img class="icon-sm" data-bind="attr: {src: $data.residenceEffect.icon}" />
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="width: 10%; justify-content: right">
+                                <button type="button" class="btn btn-light btn-sm">
+                                    <img data-toggle="modal" data-target="#residence-effect-dialog" class="icon-sm icon-light" src="../icons/icon_marketplace_2d_light.png" data-bind="click: () => $data.prepareResidenceEffectView()" />
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+
+
+                <!-- Population Level Needs -->
+                <div data-bind="debug: 'Need Category', foreach: $data.visibleNeedCategories()">
+                    <collapsible params="id: $data.id, heading: $data.name, data: $data, checkbox: $data.checked">
+                        <table class="table table-striped table-fixed">
+                            <tbody data-bind="foreach: $data.visiblePopulationLevelNeeds()">
+                                <tr data-bind="debug: 'Population Level Need', css:{inactive: $data.isInactive()}">
+                                    <td>
+                                        <span class="custom-control custom-checkbox" data-bind="src: {title: $data.name()}">
+                                            <input type="checkbox" class="custom-control-input" data-bind="checked: $data.checked, disabled: $data.isInactive(), attr: { id: $data.id + '-checked' }">
+                                            <label class="custom-control-label" data-bind="attr: { for: $data.id + '-checked' }" src-only style="vertical-align: top;">
+                                                <span class="mr-2">
+                                                    <span data-bind="component: { name: 'asset-icon', params: $data.product}"></span>
+                                                    <span data-bind="text: $data.name()"></span>
+                                                </span>
+                                            </label>
+                                        </span>
+                                    </td>
+                                    <td data-bind="if: $data.residentsPerResidence > 0">
+                                        <img class="icon-sm icon-light" src="../icons/icon_resource_population.png" />
+                                        <span class="ml-1" data-bind="text: formatNumber($data.residents())"></span>
+                                    </td>
+                                    <td>
+                                        <div class="inline-list" style="justify-content: right">
+                                            <div data-bind="if: $data.amount">
+                                                <span data-bind="text: formatNumber($data.amount()) + ' t/min'"></span>
+                                            </div>
+                                            <button class="btn btn-light btn-sm ml-2" data-bind="click: () => {$data.prepareResidenceEffectView()}" data-toggle="modal" data-target="#residence-effect-dialog">
+                                                <img class="icon-sm icon-light" src="../icons/icon_marketplace_2d_light.png" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                        </table>
+                    </collapsible>
+                </div>
+
+                <div class="mt-4" data-bind="component: { name: 'notes-section', params:{ $data: $data.instance()}}"></div>
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>

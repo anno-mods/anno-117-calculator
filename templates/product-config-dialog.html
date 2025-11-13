@@ -1,0 +1,192 @@
+﻿<div id="product-config-dialog" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true" data-bind="debug: 'Product Config Dialog', with: $root.presenter.productByGuid.get($root.selectedProduct().guid)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <img class="icon-md mr-2" data-bind="component: {name: 'asset-icon', params: $data}">
+                <h4 data-bind="text: $data.name()"></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <div data-bind="debug: 'consumerViewVisible', if: $data.consumerViewVisible()">
+                    <collapsible params="id: 'product-config-consumption', heading: $root.texts.consumption.name, collapsed: true, data: $data, summary: $data.totalDemand">
+                        <!-- Pass the observable and not one fixed product  -->
+                        <consumer-view params="product: $data.instance"></consumer-view>
+                    </collapsible>
+                </div>
+
+                <!-- Supplier Selection Section -->
+                <div class="mt-4 p-3" style="background-color: rgba(0,0,0,0.05); border-radius: 4px;">
+                    <div class="inline-list-stretched">
+                        
+                        <select class="custom-select col-md-4"
+                                data-bind="options: $data.availableSuppliers,
+                                            optionsText: 'label',
+                                            value: $data.selectedSupplierOption,
+                                            optionsAfterRender: function(option, item) {
+                                                if (item && item.icon) {
+                                                    $(option).prepend($('<img>').attr('src', item.icon).css({width: '20px', height: '20px', marginRight: '8px'}));
+                                                }
+                                            }">
+                        </select>
+                        <button class="btn btn-light btn-sm"
+                            data-bind="click: () => $data.selectSupplier($data.selectedSupplierOption()), enable: $data.selectedSupplierOption()">
+                
+                            <span data-bind="text: $root.texts.setAsDefault ? $root.texts.setAsDefault.name : 'Set as Default'"></span>
+                        </button>
+                        <span data-bind="text: $root.texts.currentSupplier ? $root.texts.currentSupplier.name : 'Current:'"></span>
+                        <div class="d-flex align-items-center mt-1">
+                            <img class="icon-sm mr-2" data-bind="attr: { src: $data.getDefaultSupplierIcon() }" style="width: 24px; height: 24px;">
+                            <span data-bind="text: $data.getDefaultSupplierLabel()"></span>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div data-bind="if: $data.extraGoodSuppliersVisible()">
+                    <collapsible params="id: 'product-config-extraGoods', heading: $root.texts.extraGoods.name, collapsed: false, data: $data, summary: $data.extraGoodProduction">
+                        <table class="table table-striped">
+                            <tbody data-bind="foreach: $data.availableExtraGoodSuppliers()">
+                                <tr data-bind="debug: 'extraGoodSupplier'"">
+                                    <td style="cursor: pointer" data-bind="click: () => {$root.selectedProduct($data.factory.product)}">
+                                        <span class="icon-sm icon-light mr-2" data-bind="visible: $data.island.region.id == 'Meta', component: {name: 'asset-icon', params: $data.island.region}"></span>
+                                        <img class="icon-sm" data-bind="attr: { src: $data.factory.icon ? $data.factory.icon : null, alt: $data.factory.name}">
+                                        <span class="mb-0" data-bind="text: $data.factory.name()"></span>
+                                    </td> <!-- factory icon -->
+                                    <td>
+                                        <btn-default-supplier params="supplier: $data"></btn-default-supplier>
+                                    </td>
+                                    <td>
+                                        <div class="float-right">
+                                            <span data-bind="text: formatNumber($data.currentProduction())"></span>
+                                            <span> t/min</span>
+                                        </div>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </collapsible>
+
+                </div>
+
+
+
+                <!-- Tab Navigation -->
+                <ul class="nav nav-tabs" role="tablist" id="product-config-supplier-tabs">
+                    <!-- ko foreach: $data.visibleFactories -->
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-toggle="tab" type="button" role="tab" data-bind="attr: {'data-target': '#factories-tab-' + $data.guid(), 'aria-controls': 'factories-tab-' + $data.guid(), 'aria-selected': $data.isDefaultSupplier()}, css: {'active': $data.isDefaultSupplier()}" >
+                            <span class="d-flex align-items-center">
+                                <span class="icon-sm icon-light mr-2" data-bind="visible: $data.island().region.id == 'Meta', component: {name: 'asset-icon', params: $data.region()}"></span>
+                                <span class="mb-0" data-bind="text: $data.name()"></span>
+                                <span class="ml-3" data-bind="text: $data.outputAmountFormatted()"></span>
+                            </span>
+                        </button>
+                    </li>
+                     <!-- /ko -->
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-toggle="tab" data-target="#trade-routes-tab" aria-controls="trade-routes-tab" data-bind="css: { 'active': $data.showTradeRouteTab()}">
+                            <span data-bind="text: $root.texts.trading ? $root.texts.trading.name : 'Trading'"></span>
+                            <span class="ml-3" data-bind="text: $data.tradingAmountFormatted()"></span>
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content mt-3">
+                    <!-- Factories Tab -->
+                     <!-- ko foreach: $data.visibleFactories -->
+                    <div class="tab-pane fade" data-bind="attr: {'id': 'factories-tab-' + $data.guid()}, css: {'show': $data.isDefaultSupplier(), 'active': $data.isDefaultSupplier()}" role="tabpanel">
+                        <div data-bind="template: { name: 'factory-config-section', data: $data }"></div>
+                    </div>
+                    <!-- /ko -->
+
+                    <!-- Trade Routes Tab -->
+                    <div class="tab-pane fade " id="trade-routes-tab" data-bind="css: {'show': $data.showTradeRouteTab(), 'active': $data.showTradeRouteTab()}">
+                        <div data-bind="if: $data.availableTradeIslands().length">
+                            <form class="form form-inline mb-2" style="justify-content: space-between"> 
+                                <!-- Create route for import -->
+                                <select name="islands" class="custom-select" id="trade-islands" data-bind="value: $data.selectedTradeIsland, options: $data.availableTradeIslands, optionsText: i => i.sessionExtendedName() /* + '\t' + i.assetsMap.get($data.factory.guid).overProduction() + ' t/min' */"></select>
+                                <button class="btn btn-light btn-sm"
+                                    data-bind="click: () => $data.createImportTradeRoute(), enable: $data.canCreateImportTradeRoute()">
+                                    <span data-bind="text: $root.texts.setAsDefault ? $root.texts.setAsDefault.name : 'Set as Default'"></span>
+                                </button>
+                            </form>
+                            
+                            <form class="form form-inline mb-4" style="justify-content: space-between"> 
+                                <!-- Create route for export -->
+                                <div class="input-group input-group-short spinner">
+                                    <div class="input-group-prepend">
+                                        <img class="icon-sm icon-light" src="../icons/icon_transporter_unloading_light.png" />
+                                    </div>
+                                    <input step="0.1" class="form-control" type="number" value="0" data-bind="value: $data.tradeRouteAmount" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">t/min</span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-light" data-bind="click: () => $data.createExportTradeRoute(), enable: $data.canCreateExportTradeRoute()">
+                                    <span class="fa fa-plus"></span>
+                                </button>
+                            </form>
+                            
+                        </div>
+
+                        <table class="table table-striped table-sm">
+                            <tbody>
+                                <tr>
+                                    <td data-bind="text: $root.texts.traders ? $root.texts.traders.name : 'Traders'"></td>
+                                    <td>
+                                        <img class="icon-sm icon-light" src="../icons/icon_transporter_loading_light.png" }">
+                                        <span data-bind="text: $root.texts.import ? $root.texts.import.name : 'Import'"></span>
+                                    </td>
+                                    <td>
+                                        <btn-default-supplier params="supplier: $data.instance().passiveTradeSupplier"></btn-default-supplier>
+                                    </td>
+                                    <td>
+                                        <trade-route-amount params="supplier: $data.instance().passiveTradeSupplier"></trade-route-amount>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                                <!-- ko foreach: $data.tradeList().routes -->
+                                <tr>
+                                    <td>
+                                        <span data-bind="if: $data.getOpposite($parent.tradeList()).session">
+                                            <img class="icon-sm icon-light" data-bind="attr: {src: $data.getOpposite($parent.tradeList()).session.icon}" />
+                                        </span>
+                                        <a href="#" data-bind="text: $data.getOpposite($parent.tradeList()).name, click: () => {$root.island($data.getOpposite($parent.tradeList()))}"></a>
+                                    </td>
+                                    <td>
+                                        <img class="icon-sm icon-light" data-bind="attr: { 'src': $data.isExport($parent.tradeList()) ? 'icons/icon_transporter_unloading_light.png' : 'icons/icon_transporter_loading_light.png' }">
+                                        <span data-bind="text: $data.isExport($parent.tradeList()) ? ($root.texts.export ? $root.texts.export.name : 'Export') : ($root.texts.import ? $root.texts.import.name : 'Import')"></span>
+                                    </td>
+                                    <td>
+                                        <div data-bind="if: !$data.isExport($parent.tradeList())">
+                                            <btn-default-supplier params="supplier: $data"></btn-default-supplier>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <trade-route-amount params="supplier: $data"></trade-route-amount>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-secondary btn-sm float-right" data-bind="click: () => $data.delete()">
+                                            <span class="fa fa-trash"></span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <!-- /ko -->
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                </div>
+
+                <div class="mt-4" data-bind="component: { name: 'notes-section', params:{ $data: $data.instance()}}"></div>
+            </div>
+
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>

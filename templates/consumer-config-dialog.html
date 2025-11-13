@@ -1,0 +1,163 @@
+﻿<div id="consumer-config-dialog" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true" data-bind="debug: 'Consumer Config Dialog', with: $root.selectedFactory()">
+    <div class="modal-dialog modal-lg" data-bind="css: {'modal-xl': $root.productionChain.breadth() > 5}">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="icon-light mr-2" data-bind="visible: $data.island.region.id == 'Meta', component: {name: 'asset-icon', params: $data.associatedRegions[0]}"></span>
+                <h4 data-bind="text: $data.name">Factory Name</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped table-fixed">
+                    <tbody>
+                        <tr>
+                            <!-- constructed buildings and boost -->
+                            <td>
+                                <div data-bind="component: { name: 'constructed-buildings-input', params: $data}"></div>
+
+                                 <!-- aqueduct buff -->
+                                <div data-bind="with: $data.aqueductBuff" style="float: right;">
+                                    <div class="inline-list">
+                                        <div data-bind="component: {name: 'icon-checkbox', params: {asset: $data.buff, checked: $data.scaling, id: $data.target.guid + '-aqueduct-buff'}}"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div data-bind="text: formatNumber(100 * $data.boost()) + '%'"></div>
+                                
+                            </td>
+                        </tr>
+                        <tr data-bind="debug: 'Workforce Demand', with: $data.workforceDemand">
+                            <!-- workforce -->
+                            <td>
+                                <span data-bind="text: $root.texts.workforce.name"></span>
+                            </td>
+                            <td>
+                                <div>
+                                    <span data-bind="text: formatNumber($data.amount())"></span>
+                                    <img class="mr-2 icon-sm icon-light" data-bind="attr: { src: $data.workforce().icon ? $data.workforce().icon : null, alt: $data.workforce().name}">
+                                </div>
+                            </td>
+                        </tr>
+
+
+                        <!-- ko foreach: $data.modules.filter(m => m.visible()) -->
+                        <tr data-bind="debug: 'Module Config'">
+                            <!-- extra goods module -->
+
+                            <td>
+                                <div class="inline-list">
+                                    <div data-bind="component: {name: 'icon-checkbox', params: {asset: $data, checked: $data.checked, id: $parent.guid + '-' + $data.guid}}"></div>
+                                    <span class="ml-1" data-bind="text: $data.name"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <!--<div data-bind="component: {name: 'additional-output', params: {amount: moduleExtraGoods}}"></div> -->
+                            </td>
+                        </tr>
+                        <!-- /ko -->
+                    </tbody>
+                </table>
+
+                <div data-bind="if: $data.availableItems().length">
+                    <collapsible params="id: 'factory-config-equipped-items', heading: $root.texts.itemsEquipped.name, collapsed: true, data: $data">
+                        <table class="table table-striped">
+                            <tbody data-bind="foreach: $data.availableItems">
+                                <tr data-bind="debug: 'Available Item'">
+                                    <td>
+                                        <div class="inline-list">
+                                            <div data-bind="component: {name: 'icon-checkbox', params: {asset: $data.parent, checked: $data.scaling, id: 'fc-' + $data.target.guid + '-' + $data.parent.guid + '-equipped'}}"></div>
+                                            <span class="ml-1" data-bind="text: $data.parent.name, attr: {for: 'fc-' + $data.target.guid + '-' + $data.parent.guid + '-equipped'}"></span> <!-- item name -->
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="float: right;">
+                                            <!-- productivity -->
+                                            <div data-bind="if: $data.buff.productivityUpgrade != 0">
+                                                <span data-bind="text: formatNumber($data.buff.productivityUpgrade, true) + ' %'"></span>
+                                            </div>
+                                            <!-- extra goods -->
+                                            <span data-bind="if: $data.extraGoods">
+                                                
+                                                <span class="inline-list-centered">
+                                                    <img class="icon-sm icon-light mr-2" src="../icons/icon_add_goods_socket_white.png" />
+                                                    <!-- ko foreach: $data.extraGoods -->
+                                                    <span style="flex: 100 1 auto;"></span>
+
+                                                    <span style="flex: auto;" daba-bind="visible: $data.product.available()">
+                                                        <img class="icon-sm" data-bind="attr: { src: $data.product.icon ? $data.product.icon  : null, alt: $data.product.name }" />
+                                                    </span>
+
+                                                    <span style="flex: 100 1 auto;"></span>
+                                                    <!-- /ko -->
+                                                </span>
+                                            </span>
+                                            <!-- input replacements -->
+                                            <div data-bind="if: $data.replacementArray">
+                                                <div data-bind="foreach: $data.replacementArray">
+                                                    <replacement params="{old: $data.old, new: $data.new}"></replacement>
+                                                </div>
+                                            </div>
+                                            <!-- workforce maintenance -->
+                                            <div data-bind="if: $data.buff.workforceMaintenanceFactorUpgrade != 0">
+                                                <span class="inline-list-centered">
+                                                    <span data-bind="text: formatNumber($data.buff.workforceMaintenanceFactorUpgrade, true) + ' %'"></span>
+                                                    <img class="icon-sm icon-light" data-bind="attr: { src: $data.target.workforceDemand.workforce().icon ? $data.target.workforceDemand.workforce().icon  : null, alt: $data.target.workforceDemand.workforce().name }" />
+                                                </span>
+                                            </div>
+                                            <!-- workforce replacement -->
+                                            <div data-bind="if: $data.replacingWorkforce && $parent.workforceDemand.defaultWorkforce.guid !== $data.replacingWorkforce">
+                                                <replacement params="{old: $parent.workforceDemand.defaultWorkforce, new: $data.replacingWorkforce}"></replacement>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </collapsible>
+                </div>
+               
+
+                <div data-bind="if: $data.isFactory && $data.extraGoodProductionList && $data.extraGoodProductionList.amount() > ACCURACY">
+                    <collapsible params="id: 'factory-config-extraGoods', heading: $root.texts.extraGoods.name, collapsed: false, data: $data, checkbox: $data.extraGoodProductionList.checked, summary: $data.extraGoodsDisplayAmount">
+
+                        <!--<h6><span data-bind="text: $root.texts.extraGoods.name">Extra Goods</span><span> </span><img width="35" height="35" data-bind="attr: { src: $data.product.icon ? $data.product.icon : null, alt: $data.product.name}" /></h6>-->
+                        <table class="table table-striped">
+                            <tbody data-bind="foreach: $data.extraGoodProductionList.nonZero">
+                                <tr>
+                                    <td>
+                                        <img class="icon-sm" data-bind="attr: { src: $data.item.parent.icon ? $data.item.parent.icon : null, alt: $data.item.parent.name}"> <!-- item icon -->
+                                        <img class="icon-sm" data-bind="attr: { src: $data.factory.icon ? $data.factory.icon : null, alt: $data.factory.name}">
+                                    </td> <!-- factory icon -->
+                                    <td>
+                                        <div class="float-right">
+                                            <span data-bind="text: formatNumber($data.amount())"></span>
+                                            <span> t/min</span>
+                                        </div>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </collapsible>
+
+                </div>
+
+
+                <div data-bind="if: $root.productionChain.tree()">
+                    <collapsible params="id: 'factory-config-production-chain', heading: $root.texts.production.name, collapsed: false, data: $data, summary: $data.outputAmount">
+                        <div class="tree" data-bind="with: $root.productionChain.tree()" style="justify-content: center">
+                            <ul data-bind="template: 'treeElement'"></ul>
+                        </div>
+                    </collapsible>
+                </div>
+
+                <div class="mt-4" data-bind="component: { name: 'notes-section', params:{ $data: $data}}"></div>
+            </div>
+        <div class="modal-footer">
+
+        </div>
+    </div>
+</div>
+</div>
