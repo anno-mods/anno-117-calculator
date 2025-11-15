@@ -108,8 +108,7 @@ body {
     color: #000;
     line-height: 1.5;
     font-feature-settings: 'liga' 1, 'kern' 1;
-    background: #d4b89b;
-    background-color: #d4b89b;
+    background-color: #e2cfbb;
 }
 
 /* Remove controls from Firefox */
@@ -212,7 +211,7 @@ h1 {
 }
 
 .modal-content {
-    background-color: #d4b89b;
+    background-color: #e2cfbb;
 }
 
 .dismiss {
@@ -224,7 +223,7 @@ nav {
     position: fixed !important;
     width: 100%;
     z-index: 1000;
-    margin-top: -1rem;
+    top: 0;
     padding: 0 .5rem!important;
     background-color: #ffe9de !important;
 }
@@ -243,7 +242,7 @@ nav {
     border-top: 2px solid #abb8c3;
     margin: 15px;
     margin-bottom: 20px;
-    background: rgba(255, 233, 222, 0.3);
+    background: rgba(255, 233, 222, 0.56);
     border-radius: 0 0 8px 8px;
 }
 
@@ -315,7 +314,7 @@ nav {
 
 .product-tile.danger {
     border-color: #dc3545;
-    background-color: #f8d7da;
+    background-color: #e9a4a4;
     box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
 }
 
@@ -382,8 +381,15 @@ nav {
     text-align: center;
 }
 
+.ui-item-icon-replacement {
+    text-align: center;
+    margin-top: 5px;
+    display: flex;
+    justify-content: space-evenly;
+}
+
 .ui-replacement-spacer {
-    color: #CECECE;
+    color: #999999;
     font-size: initial;
     line-height: 30px;
 }
@@ -552,7 +558,7 @@ div:last-child > .input-group-btn-vertical, div:last-child > .input-group-btn-ve
     padding: 0.5rem 0.75rem;
     border-radius: 6px;
     border: 1px solid #abb8c3;
-    background-color: #c4a485;
+    background-color: #dec0a4;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
@@ -563,7 +569,7 @@ div:last-child > .input-group-btn-vertical, div:last-child > .input-group-btn-ve
 
 .input-group-text {
     padding: 0.25rem !important;
-    background-color: #ffe9de;
+    background-color: rgb(254, 241, 235);
     border: 1px solid #abb8c3;
     border-radius: 6px;
 }
@@ -581,7 +587,7 @@ div:last-child > .input-group-btn-vertical, div:last-child > .input-group-btn-ve
 }
 
 .custom-select {
-    background-color: #c4a485;
+    background-color: #dec0a4;
     border: 1px solid #abb8c3;
     color: #000;
 }
@@ -1009,12 +1015,12 @@ right connector from last child*/
 .tree ul ul::before{
 	content: '';
 	position: absolute; top: 0; left: 50%;
-	border-left: 1px solid #ccc;
+	border-left: 1px solid #666;
 	width: 0; height: 20px;
 }
 
 .tree li shadow{
-	border: 1px solid #ccc;
+	border: 1px solid #666;
 	padding: 5px 10px;
 	text-decoration: none;
 	display: inline-block;

@@ -1567,6 +1567,7 @@
         "required": [
           "guid",
           "name",
+          "iconPath",
           "isStackable",
           "workforceModifierInPercent",
           "productivityUpgrade",
@@ -1988,6 +1989,7 @@
         "required": [
           "guid",
           "name",
+          "iconPath",
           "buffs",
           "effectScope",
           "excludeEffectSourceGUID",
@@ -2900,9 +2902,6 @@
         "data/ui/fhd/base/icon_content/icon_3d_removed.png": {
           "type": "string"
         },
-        "data/ui/fhd/base/icon_content/generic/icon_2d_productivity.png": {
-          "type": "string"
-        },
         "data/ui/fhd/base/icon_content/tech_tree/icon_2d_research_progress.png": {
           "type": "string"
         }
@@ -3208,7 +3207,6 @@
         "data/ui/fhd/base/icon_content/items_specialist/other_female/icon_3d_other_female_018.png",
         "data/ui/fhd/base/icon_content/items_specialist/unique/icon_3d_specialist_hooded_01.png",
         "data/ui/fhd/base/icon_content/icon_3d_removed.png",
-        "data/ui/fhd/base/icon_content/generic/icon_2d_productivity.png",
         "data/ui/fhd/base/icon_content/tech_tree/icon_2d_research_progress.png"
       ],
       "title": "Icon",

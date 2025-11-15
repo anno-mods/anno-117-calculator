@@ -40,7 +40,7 @@ ko.amdTemplateEngine.loader = function (templateName: string, done: Function) {
 };
 
 /** Version string for the calculator application */
-export let versionCalculator = "1.0";
+export let versionCalculator = "1.1";
 /** Flag indicating if this is a preview version */
 export let isPreview = false;
 /** Accuracy threshold for floating point comparisons */

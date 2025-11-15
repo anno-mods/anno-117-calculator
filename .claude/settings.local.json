@@ -22,7 +22,9 @@
       "Bash(git add:*)",
       "Bash(npm run test:module-boost:*)",
       "Bash(npm test:*)",
-      "Bash(npm run check-translations:*)"
+      "Bash(npm run check-translations:*)",
+      "WebFetch(domain:anno117-kalkulator.de)",
+      "WebFetch(domain:anno.land)"
     ],
     "deny": []
   },

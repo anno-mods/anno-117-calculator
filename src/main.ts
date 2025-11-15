@@ -556,7 +556,7 @@ function init(_isFirstRun: boolean, configVersion: string | null): void {
         var bindings = new Map();
 
         var language = window.view.settings.language();
-        if (language == 'chinese' || language == 'korean' || language == 'japanese' || language == 'taiwanese') {
+        if (language == 'simplified_chinese' || language == 'korean' || language == 'japanese' || language == 'traditional_chinese') {
             language = 'english';
         }
 
@@ -565,7 +565,7 @@ function init(_isFirstRun: boolean, configVersion: string | null): void {
 
             for (var c of name.toLowerCase()) {
                 if (!bindings.has(c)) {
-                    bindings.set(c, $(`.ui-tier-unit-name[tier-unit-guid=${l.guid}] ~ .input .input-group input`));
+                    bindings.set(c, $(`.ui-tier-unit-name[tier-unit-guid=${l.guid}] ~ div .input-group input`));
                     l.hotkey(c);
                     break;
                 }

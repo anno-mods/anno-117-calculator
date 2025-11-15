@@ -30,7 +30,8 @@ export class Product extends NamedElement {
 
     // === DEMAND TRACKING ===
     public demands: KnockoutObservableArray<Demand>; // All consumers demanding this product
-    public totalDemand: KnockoutComputed<number>; // Total demand from all consumers
+    public totalDemand: KnockoutComputed<number>; // Total demand from all consumers and trade routes
+    public totalDemandNoRoutes: KnockoutComputed<number>; // Total demand from all consumers
     public totalDefaultProduction: KnockoutComputed<number>; // Production from non-default suppliers
     public excessProduction: KnockoutObservable<number>; // Excess when non-default suppliers exceed demand
     public demandCalculationSubscription!: KnockoutComputed<void>; // Updates supplier demands based on total demand
@@ -87,6 +88,7 @@ export class Product extends NamedElement {
 
         // Will be initialized properly in initSuppliers after suppliers are created
         this.totalDemand = dummyComputed("product.totalDemand");
+        this.totalDemandNoRoutes = dummyComputed("product.totalDemandNoRoutes");
         this.totalDefaultProduction = dummyComputed("product.nonDefaultSupplierProduction");
 
         // Initialize supplier management (will be fully set up in initSuppliers)
@@ -162,6 +164,9 @@ export class Product extends NamedElement {
             // Create one ExtraGoodSupplier per factory
             this.extraGoodSuppliers = [];
             for (const [factory, entries] of entriesByFactory.entries()) {
+                if (factory.product.guid == this.guid)
+                    continue; // Skip self-effecting production
+
                 const supplier = new ExtraGoodSupplier(factory, this, island);
                 supplier.productionList = entries;
                 this.extraGoodSuppliers.push(supplier);
@@ -214,6 +219,14 @@ export class Product extends NamedElement {
             // Add trade route export demands (products leaving this island)
             if (this.tradeList) {
                 sum += this.tradeList.inputAmount();
+            }
+            return sum;
+        });
+
+        this.totalDemandNoRoutes = ko.pureComputed(() => {
+            let sum = 0;
+            for (const demand of this.demands()) {
+                sum += demand.amount();
             }
             return sum;
         });
@@ -287,11 +300,13 @@ export class Product extends NamedElement {
         if(supplier == null)
             throw Error(`Supplier on ${this.name()} must not be set to null.`);
 
-        if(supplier == this.defaultSupplier())
+        const prevSupplier = this.defaultSupplier()
+        if(supplier == prevSupplier)
             return;
 
-        this.defaultSupplier()?.unsetAsDefaultSupplier();
         this.defaultSupplier(supplier);
+        prevSupplier?.unsetAsDefaultSupplier();
+        // when unsetting it first, going from trade route to default supplier sets demand to zero.
     }
 
     /**

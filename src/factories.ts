@@ -501,7 +501,7 @@ export class Factory extends Consumer implements Supplier {
     public throughputByOutputSubscriptions: KnockoutComputed<void>;
 
     // === PRODUCTION CALCULATION ===
-    public selfEffectingExtraGoods: ExtraGoodProduction[];                  // Extra good entries where factory produces extra of its own output
+    public selfEffectingExtraGoods: KnockoutObservableArray<ExtraGoodProduction>;                  // Extra good entries where factory produces extra of its own output
     public extraGoodFactor: KnockoutComputed<number>;        // Multiplier from extra goods affecting this factory
     public outputAmount: KnockoutComputed<number>;           // Total output produced
     public substitutableOutputAmount: KnockoutComputed<number>; // Output that can be substituted
@@ -537,7 +537,7 @@ export class Factory extends Consumer implements Supplier {
             this.buildings.fullyUtilizeConstructed(true);
 
         // Self-effecting extra goods will be populated when ExtraGoodProduction entries are created
-        this.selfEffectingExtraGoods = [];
+        this.selfEffectingExtraGoods = ko.observableArray();
 
 
         // Initialize demand tracking
@@ -559,7 +559,7 @@ export class Factory extends Consumer implements Supplier {
             let factor = 1;
 
             // Self-effecting extra goods boost this factory's production
-            for (const e of this.selfEffectingExtraGoods) {
+            for (const e of this.selfEffectingExtraGoods()) {
                 factor += e.item.scaling() * e.defaultAmount / e.additionalOutputCycle;
             }
 

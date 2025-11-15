@@ -9,7 +9,7 @@
 
             <div class="modal-body">
                 <div data-bind="debug: 'consumerViewVisible', if: $data.consumerViewVisible()">
-                    <collapsible params="id: 'product-config-consumption', heading: $root.texts.consumption.name, collapsed: true, data: $data, summary: $data.totalDemand">
+                    <collapsible params="id: 'product-config-consumption', heading: $root.texts.consumption.name, collapsed: true, data: $data, summary: $data.totalDemandNoRoutes">
                         <!-- Pass the observable and not one fixed product  -->
                         <consumer-view params="product: $data.instance"></consumer-view>
                     </collapsible>
@@ -43,13 +43,13 @@
                 </div>
 
 
-                <div data-bind="if: $data.extraGoodSuppliersVisible()">
+                <div data-bind="debug: 'Extra Goods', if: $data.extraGoodSuppliersVisible()">
                     <collapsible params="id: 'product-config-extraGoods', heading: $root.texts.extraGoods.name, collapsed: false, data: $data, summary: $data.extraGoodProduction">
                         <table class="table table-striped">
                             <tbody data-bind="foreach: $data.availableExtraGoodSuppliers()">
                                 <tr data-bind="debug: 'extraGoodSupplier'"">
                                     <td style="cursor: pointer" data-bind="click: () => {$root.selectedProduct($data.factory.product)}">
-                                        <span class="icon-sm icon-light mr-2" data-bind="visible: $data.island.region.id == 'Meta', component: {name: 'asset-icon', params: $data.island.region}"></span>
+                                        <span class="icon-sm icon-light mr-2" data-bind="visible: $data.island.region.id == 'Meta', component: {name: 'asset-icon', params: $data.factory.associatedRegions[0]}"></span>
                                         <img class="icon-sm" data-bind="attr: { src: $data.factory.icon ? $data.factory.icon : null, alt: $data.factory.name}">
                                         <span class="mb-0" data-bind="text: $data.factory.name()"></span>
                                     </td> <!-- factory icon -->

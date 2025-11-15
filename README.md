@@ -1,21 +1,28 @@
-# Anno 117 Calculator
+# Anno 117 Calculator | Warenrechner | Produktionsketten Rechner
 
-A production chain calculator for the computer game [Anno 117: Pax Romana](https://www.ubisoft.com/de-de/game/anno/117-pax-romana/) that helps you optimize your empire's economy by calculating required production buildings, resources, and workforce based on your population needs.
+A free production chain calculator (Warenrechner / Kalkulator) for the computer game [Anno 117: Pax Romana](https://www.ubisoft.com/de-de/game/anno/117-pax-romana/) that helps you optimize your empire's economy by calculating required production buildings, resources, and workforce based on your population needs.
 
-## Features
+**Keywords**: Anno 117 Calculator, Anno 117 Warenrechner, Anno 117 Kalkulator, Anno 117 Produktionsketten, Anno Pax Romana Rechner, Anno 117 Bedarf Rechner, Anno 117 Production Chains, Anno 117 Resource Calculator
 
-- **Population Management**: Calculate production needs based on your resident population across multiple tiers
-- **Production Chains**: Automatic calculation of required factories and buildings for complete production chains
-- **Multi-Island Support**: Manage production across multiple islands with trade route integration
-- **Trade Routes**: Create and manage trade routes between islands and with neutral traders
-- **Effects System**: Apply buffs from items, researched technologies, patrons, and events
-- **Workforce Calculation**: Automatic calculation of required workforce for all buildings
-- **Multiple Languages**: Supports English, German, French, Spanish, Italian, Polish, Brazilian Portuguese, Russian, Simplified Chinese, Traditional Chinese, Japanese, and Korean
+## Features | Funktionen | Caractéristiques
+
+- **Population Management** (Bevölkerungsverwaltung): Calculate production needs based on your resident population across multiple tiers
+- **Production Chains** (Produktionsketten): Automatic calculation of required factories and buildings for complete production chains
+- **Multi-Island Support** (Mehrere Inseln): Manage production across multiple islands with trade route integration
+- **Trade Routes** (Handelsrouten): Create and manage trade routes between islands and with neutral traders
+- **Effects System** (Effekt-System): Apply buffs from items, researched technologies, patrons, and events
+- **Workforce Calculation** (Arbeitskräfte-Berechnung): Automatic calculation of required workforce for all buildings
+- **Resource Calculator** (Ressourcen-Rechner): Optimize building counts for efficient resource production
+- **Multiple Languages**: Supports English, German (Deutsch), French (Français), Spanish (Español), Italian (Italiano), Polish (Polski), Brazilian Portuguese (Português), Russian (Русский), Simplified Chinese (简体中文), Traditional Chinese (繁體中文), Japanese (日本語), and Korean (한국어)
+
+### Warenrechner für Anno 117: Pax Romana
+
+Dieser kostenlose Kalkulator hilft dir dabei, deine Produktionsketten zu optimieren. Berechne automatisch die benötigte Anzahl an Produktionsgebäuden basierend auf deinem Bevölkerungsbedarf in Latium und Albion. Der Rechner unterstützt alle Warenketten, Handelsrouten und Bevölkerungsstufen.
 
 ## How to Use
 
 ### Online Version
-Visit the online calculator at [https://anno-mods.github.io/anno-117-calculator/]
+Visit the online calculator at https://anno-mods.github.io/anno-117-calculator/
 
 ### Local Version
 1. Download the latest release from the [Releases page](https://github.com/anno-mods/anno-117-calculator/releases)

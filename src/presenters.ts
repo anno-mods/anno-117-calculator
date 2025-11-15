@@ -157,6 +157,7 @@ export class ProductPresenter {
     public extraGoodProduction: KnockoutComputed<number>;
     public totalProduction: KnockoutComputed<number>;
     public totalDemand: KnockoutComputed<number>;
+    public totalDemandNoRoutes: KnockoutComputed<number>;
     public netBalance: KnockoutComputed<number>;
 
     // === TRADE ROUTE MANAGEMENT ===
@@ -319,6 +320,7 @@ export class ProductPresenter {
         
         // Aggregate demand
         this.totalDemand = ko.pureComputed(() => this.instance().totalDemand());
+        this.totalDemandNoRoutes = ko.pureComputed(() => this.instance().totalDemandNoRoutes());
 
         // Net balance (production - demand)
         this.netBalance = ko.pureComputed(() =>
@@ -437,7 +439,8 @@ export class ProductPresenter {
             amount
         );
 
-        this.instance().tradeList.routes.push(route);
+        route.fromIslandProduct.tradeList.routes.push(route);
+        route.toIslandProduct.tradeList.routes.push(route);
         view.tradeManager.add(route);
 
         // Reset form
@@ -462,7 +465,8 @@ export class ProductPresenter {
             0
         );
 
-        this.instance().tradeList.routes.push(route);
+        route.fromIslandProduct.tradeList.routes.push(route);
+        route.toIslandProduct.tradeList.routes.push(route);
         view.tradeManager.add(route);
 
         // Set as default supplier if importing

@@ -1,10 +1,41 @@
 ﻿<!DOCTYPE HTML>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="DuxVitae">
-    <title>Anno 117 Calculator</title>
+
+    <!-- SEO Meta Tags -->
+    <title>Anno 117 Calculator - Production Chains & Population Calculator | Warenrechner</title>
+    <meta name="description" content="Free Anno 117: Pax Romana calculator for production chains, population needs, and resource management. Calculate optimal building counts for Latium and Albion. Warenrechner für Produktionsketten.">
+    <meta name="keywords" content="anno 117 calculator, anno 117 warenrechner, anno 117 production chains, anno 117 kalkulator, anno 117 produktionsketten, anno pax romana calculator, anno 117 rechner, anno 117 bedarf rechner, anno 117 population calculator, anno 117 resource calculator">
+
+    <!-- Language and Regional Settings -->
+    <meta name="language" content="en">
+    <link rel="alternate" hreflang="en" href="https://anno-mods.github.io/anno-117-calculator/">
+    <link rel="alternate" hreflang="de" href="https://anno-mods.github.io/anno-117-calculator/">
+    <link rel="alternate" hreflang="x-default" href="https://anno-mods.github.io/anno-117-calculator/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://anno-mods.github.io/anno-117-calculator/">
+    <meta property="og:title" content="Anno 117 Calculator - Production Chains & Population Calculator">
+    <meta property="og:description" content="Free Anno 117: Pax Romana calculator for production chains and population needs. Calculate optimal building counts for all regions.">
+    <meta property="og:image" content="https://anno-mods.github.io/anno-117-calculator/icons/icon_3d_game_logo_0.webp">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://anno-mods.github.io/anno-117-calculator/">
+    <meta property="twitter:title" content="Anno 117 Calculator - Production Chains & Population">
+    <meta property="twitter:description" content="Free Anno 117: Pax Romana calculator for production chains and population needs.">
+    <meta property="twitter:image" content="https://anno-mods.github.io/anno-117-calculator/icons/icon_3d_game_logo_0.webp">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://anno-mods.github.io/anno-117-calculator/">
+
+    <!-- Robots -->
+    <meta name="robots" content="index, follow">
+    <meta name="googlebot" content="index, follow">
 
 
     <!-- Latest compiled and minified CSS -->
@@ -24,6 +55,43 @@
 
     <script type="text/javascript" src="js/params.js"></script>
     <script type="text/javascript" src="./dist/calculator.bundle.js"></script>
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Anno 117 Calculator",
+      "alternateName": ["Anno 117 Warenrechner", "Anno 117 Verbrauchsrechner", "Anno Pax Romana Calculator"],
+      "description": "Free calculator for Anno 117: Pax Romana production chains, population needs, and resource management. Calculate optimal building requirements for all regions including Latium and Albion.",
+      "url": "https://anno-mods.github.io/anno-117-calculator/",
+      "applicationCategory": "GameApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "DuxVitae"
+      },
+      "inLanguage": ["en", "de", "fr", "es", "it", "pl", "pt-BR", "ru", "zh-CN", "zh-TW", "ja", "ko"],
+      "featureList": [
+        "Production chain calculator",
+        "Population needs calculation",
+        "Building requirement optimization",
+        "Multi-region support (Latium, Albion)",
+        "Trade route management",
+        "Effect and buff calculation",
+        "Multiple language support"
+      ],
+      "about": {
+        "@type": "VideoGame",
+        "name": "Anno 117: Pax Romana"
+      }
+    }
+    </script>
 
 </head>
 <body>
@@ -109,6 +177,9 @@
         <!-- /navbar -->
 
         <div class="animate-bottom">
+            <!-- avoid overlap with navbar-->
+            <div style="height: 1.5rem;"></div>
+
             <!-- population input field -->
             <fieldset class="ui-fieldset" id="residents-view">
                 <legend data-bind="text:$root.texts.residents.name">Residents</legend>

@@ -625,7 +625,7 @@ export const texts: Record<string, Record<string, string>> = {
         japanese: "新しいバージョンの計算機が利用可能です。ダウンロードボタンをクリックしてください。",
         korean: "새로운  117 계산기 버전이 제공됩니다. 다운로드 버튼을 클릭하십시오."
     },
-    newFeature: {
+    /* newFeature: {
         english: "",
         french: "",
         polish: "",
@@ -638,7 +638,7 @@ export const texts: Record<string, Record<string, string>> = {
         traditional_chinese: "",
         japanese: "",
         korean: ""
-    },
+    }, */
     helpContent: {
         german:
             `<h5>Verwendung und Aufbau</h5>

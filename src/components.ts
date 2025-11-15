@@ -344,7 +344,7 @@ ko.components.register('replacement', {
         this.old = params.old;
         this.replacing = params.new;
     }, template:
-        ` <div class="ui-fchain-item-icon-replacement">
+        ` <div class="ui-item-icon-replacement">
             <span class="strike-through">
                 <img class="icon-sm icon-light" src="" data-bind="debug: 'Replacement', attr: { src: old.icon ? old.icon : null, alt: old.name }">
             </span>

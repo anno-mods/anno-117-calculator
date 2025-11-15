@@ -115,7 +115,7 @@ export class TradeRoute implements Supplier {
             return;
 
         this.active(false);
-        view.tradeManager.remove(this);        
+        window.view.tradeManager.remove(this);        
     }
 
     // === SUPPLIER INTERFACE IMPLEMENTATION ===
