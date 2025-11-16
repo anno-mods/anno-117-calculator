@@ -1,5 +1,10 @@
 # Anno 117 Calculator | Warenrechner | Produktionsketten Rechner
 
+[![GitHub Stars](https://img.shields.io/github/stars/anno-mods/anno-117-calculator?style=social)](https://github.com/anno-mods/anno-117-calculator)
+[![Discord](https://img.shields.io/discord/1439668406973497376?logo=discord&label=Discord&color=5865F2)](https://discord.gg/jSBrJZvAEq)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg?logo=paypal)](https://www.paypal.com/donate/?hosted_button_id=8P2Y93KGWJHXQ)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A free production chain calculator (Warenrechner / Kalkulator) for the computer game [Anno 117: Pax Romana](https://www.ubisoft.com/de-de/game/anno/117-pax-romana/) that helps you optimize your empire's economy by calculating required production buildings, resources, and workforce based on your population needs.
 
 **Keywords**: Anno 117 Calculator, Anno 117 Warenrechner, Anno 117 Kalkulator, Anno 117 Produktionsketten, Anno Pax Romana Rechner, Anno 117 Bedarf Rechner, Anno 117 Production Chains, Anno 117 Resource Calculator

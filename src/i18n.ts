@@ -646,7 +646,7 @@ export const texts: Record<string, Record<string, string>> = {
 <p>Der Buchstabe in eckigen Klammern vor dem Einwohnernamen ist der <b>Hotkey</b> zum Fokussieren des Eingabefeldes. Dort kann man mit den Pfeiltasten die Anzahl erhöhen oder verringern.</p><br/>
 <p>Die Reihe darunter zeigt die <b>Arbeitskraft</b>, die zum Betrieb aller Gebäude benötigt wird (aufgerundet auf die nächste vollständige Fabrik).</p><br/>
 <p>Danach folgt eine <b>Übersicht der benötigten Waren</b>. Durch Klick auf die Überschrift kann jeder Abschnitt zusammengeklappt werden.</p><br/>
-<p>Jede Kachel zeigt den Namen des Produkts, das Icon der produzierten Ware, die Anzahl der gebauten / benötigten Gebäude und die Produktionsrate in Tonnen pro Minute. Die Anzahl der Gebäude hat, wenn aktiviert, zwei Dezimalstellen, um direkt die Menge der Überkapazitäten anzuzeigen. Am unteren Rand der Kachel wird der (benötigte) <b>Output der Fabrik</b> angezeigt (was im Ausgangslager der Fabrik erzeugt wird plus Überschuss).</p>
+<p>Jede Kachel zeigt den Namen des Ware, ihr Icon, die Anzahl der gebauten / benötigten Gebäude und die Produktionsrate in Tonnen pro Minute. Die Anzahl der Gebäude hat, wenn aktiviert, zwei Dezimalstellen, um direkt die Menge der Überkapazitäten anzuzeigen. Am unteren Rand der Kachel wird der (benötigte) <b>Output der Fabrik</b> angezeigt (was im Ausgangslager der Fabrik erzeugt wird plus Überschuss).</p>
 <p>Da <b>Baumaterialien</b> Zwischenprodukte mit Konsumgütern teilen, werden sie explizit aufgeführt (im Gegensatz zu Rechnern für frühere Anno-Teile), um die Produktion von Minen besser planen zu können. Die Anzahl der Fabriken muss manuell eingegeben werden.</p><br/>
 
 <h5>Bevölkerungskonfiguration</h5>
@@ -708,7 +708,7 @@ export const texts: Record<string, Record<string, string>> = {
 <p>hoellerich.nico@freenet.de</p><br/>
 
 <h5>Fehler und Verbesserungen</h5>
-<span>Falls Sie auf Fehler oder Unannehmlichkeiten stoßen oder Verbesserungen vorschlagen möchten, erstellen Sie ein Issue auf GitHub (</span><a href="https://github.com/NiHoel/Anno1800Calculator/issues">https://github.com/NiHoel/Anno1800Calculator/issues</a><span>)</span>`,
+<span>Um auf Fehler oder Unannehmlichkeiten hinzuweisen oder Verbesserungen vorzuschlagen, tritt dem Discord-Server bei (siehe Link oben) oder eröffne ein Issue auf GitHub (</span><a href="https://github.com/anno-mods/anno-117-calculator/issues">https://github.com/anno-mods/anno-117-calculator/issues</a><span>)</span>`,
 
 
         english:
@@ -717,7 +717,7 @@ export const texts: Record<string, Record<string, string>> = {
 <p>The letter in square brackets before the resident's name is the <b>hotkey</b> to focus the input field. There, one can use the arrow keys to inc-/decrement the number.</p><br/>
 <p>The row below displays the <b>workforce</b> that is required to run all buildings (rounded towards the next complete factory).</p><br/>
 <p>Afterwards an <b>overview of the required goods</b> follows. Clicking the heading collapses each section.</p><br/>
-<p>Each card displays the name of the good, the icon of the produced good, the number of constructed / required buildings, and the production rate in tons per minute. The number of buildings has, if activated, two decimal places to directly show the amount of overcapacities. The bottom of the tile displays the (required) <b>output of the factory</b> (which are generated in the output storage of the factory plus excess goods).</p>
+<p>Each card displays the name of the good, its icon, the number of constructed / required buildings, and the production rate in tons per minute. The number of buildings has, if activated, two decimal places to directly show the amount of overcapacities. The bottom of the tile displays the (required) <b>output of the factory</b> (which are generated in the output storage of the factory plus excess goods).</p>
 <p>Since <b>construction materials</b> share intermediate goods with consumables they are explicitly listed (unlike in calculators for previous Annos) to better plan the production of mines. The number of factories must be entered manually.</p><br/>
 
 <h5>Population Configuration</h5>
@@ -779,7 +779,76 @@ export const texts: Record<string, Record<string, string>> = {
 <p>hoellerich.nico@freenet.de</p><br/>
 
 <h5>Bugs and improvements</h5>
-<span>If you encounter any bugs or inconveniences or if you want to suggest improvements, create an Issue on GitHub (</span><a href="https://github.com/NiHoel/Anno1800Calculator/issues">https://github.com/NiHoel/Anno1800Calculator/issues</a><span>)</span>`
+<span>If you encounter any bugs or inconveniences or if you want to suggest improvements, join the Discord server (see link above) or open an Issue on GitHub (</span><a href="https://github.com/anno-mods/anno-117-calculator/issues">https://github.com/anno-mods/anno-117-calculator/issues</a><span>)</span>`,
+
+        traditional_chinese:
+                `<h5>使用方式與結構</h5>
+
+<p>在最上方一列輸入每個等級的居住建築數量。當離開輸入欄位時，生產鏈會自動更新。僅顯示所需的貨物。</p>
+<p>居民名稱前方括號內的字母是<b>快捷鍵</b>，用於聚焦該輸入欄位。在欄位中可以使用方向鍵來增加或減少數值。</p><br/>
+<p>下方的列顯示運作所有建築所需的<b>勞動力</b>（向上取整至完整工廠數量）。</p><br/>
+<p>接著會顯示<b>所需貨物總覽</b>。點擊標題可以摺疊各個區段。</p><br/>
+<p>每張卡片顯示貨物名稱、生產貨物的圖示、已建造/所需的建築數量，以及以每分鐘噸數為單位的生產率。建築數量在啟用時會有兩位小數，可直接顯示超額產能的數量。卡片底部顯示工廠的（所需）<b>產出</b>（即工廠輸出倉庫中產生的貨物加上多餘貨物）。</p>
+<p>由於<b>建築材料</b>與消耗品共享中間產物，因此會明確列出（不同於前幾代 Anno 的計算器），以便更好地規劃礦場的生產。工廠數量必須手動輸入。</p><br/>
+
+<h5>人口配置</h5>
+<p>人口等級左上方的按鈕會開啟專用選單。居民數量會根據居住建築數量、消費效果和已供應的需求自動計算。</p>
+<p>需求會依類別分組顯示在居民下方。貨物旁的核取方塊可以鎖定或解鎖該需求。點擊標題旁的核取方塊可以勾選或取消勾選整個類別。市場圖示會開啟生產鏈總覽。</p><br/>
+
+<h5>全域設定</h5>
+<span class="btn-group bg-dark mr-2 float-left">
+<button class="btn text-light"><span class="fa fa-adjust"> </span></button>
+<button class="btn text-light"><span class="fa fa-cog"> </span></button>
+<button class="btn text-light"><span class="fa fa-question-circle-o"> </span></button>
+<button class="btn text-light"><span class="fa fa-download"> </span></button>
+</span>
+<p>導覽列右側的按鈕用於管理計算器。它們可以切換深色模式、開啟設定、顯示說明或開啟下載對話框。可以在設定中調整語言和顯示資訊的數量。在<b>下載區域</b>可以匯入和匯出<b>配置</b>（設定、島嶼、生產力、建築等）。此外，也可以下載此計算器。</p><br/>
+
+<h5>貨物配置對話框</h5>
+<p>工廠左上方的按鈕會開啟更詳細的選單。在那裡可以套用或輸入物品、建築、生產力、模組、效果和供水。它只列出會改變生產力、輸入貨物或勞動力，以及提供額外貨物的物品。不屬於這三類的物品為了清晰起見不包含在內。此外，貿易路線和貿易商也在此對話框中建立。<b>從以下取得貨物</b>按鈕會讓工廠生產該貨物，或從選定的島嶼或中立貿易商進口該貨物（取決於您點擊哪一個）。</p><br/>
+
+<h5>消費效果、生產鏈和額外貨物物品</h5>
+<span class="btn-group bg-dark mr-2 float-left">
+    <button type="button" class="btn">
+        <img data-toggle="modal" data-target="#effects-dialog" class="icon-navbar" src="./icons/icon_add_goods_socket_white.png" />
+    </button>
+    <button type="button" class="btn">
+        <img data-toggle="modal" data-target="#patron-selection-dialog" class="icon-navbar" src="./icons/icon_2d_religion_belief_0.webp" />
+    </button>
+</span>
+<p>這些按鈕位於導覽列的左側。</p><br/>
+
+<span class="btn-group bg-dark mr-2 float-left"><button type="button" class="btn"><img data-toggle="modal" data-target="#good-consumption-island-upgrade-dialog" class="icon-navbar" src="icons/icon_add_goods_socket_white.png" /></button></span>
+<p>效果對話框讓您套用已研究的技術（全域）、崇高守護神效果（全域）和事件（每個時段或島嶼）。</p><br/>
+
+<span class="float-left btn-group bg-dark mr-2"> <button type="button" class="btn">
+        <img data-toggle="modal" data-target="#patron-selection-dialog" class="icon-navbar" src="icons/icon_2d_religion_belief_0.webp" />
+    </button></span>
+<p>守護神選擇對話框讓您套用守護神並輸入虔誠度。它會顯示增益效果和受影響的工廠。</p><br/>
+
+<h5>島嶼和貿易路線管理</h5>
+<div class="input-group mb-2" style=" max-width: 300px; "> <div class="input-group-prepend"> <span class="input-group-text" >已選擇的島嶼</span> </div> <select name="islands" class="custom-select" ><option value="">所有島嶼</option></select> <div class="input-group-append"> <button class="btn btn-secondary" > <span class="fa fa-cog"> </span> </button> </div> </div>
+<span class="float-left btn-group bg-dark mr-2"><button type="button" class="btn"> <img class="icon-navbar" src="icons/icon_map.png"> </button></span>
+<p>首先，必須點擊齒輪圖示開啟<b>島嶼管理對話框</b>。可以在那裡建立新島嶼。建立第一個島嶼後，導覽列中央會出現三個新的控制元素：切換島嶼、開啟島嶼管理和開啟貿易路線管理。新島嶼會與一個<b>時段</b>關聯。時段會影響顯示哪些人口等級、工廠、物品和貨物消費效果。<b>全部刪除</b>按鈕會將計算器重置為初始狀態。</p><br/>
+
+<div class="float-left mr-2"> <button class="btn btn-light btn-sm" > <span class="fa fa-sliders"></span> </button> </div>
+<p><b>貿易路線是從</b><b>貨物配置對話框</b><b>建立的</b>。有兩種貿易路線。第一種是<b>從貿易商被動購買貨物</b>的路線。點擊<b>從以下取得貨物</b>按鈕會從貿易商購買該貨物的需求量。第二種是<b>在島嶼之間運輸貨物</b>的路線。就像額外貨物一樣，額外需求會在一側增加，在另一側減少。開啟工廠配置對話框時，計算器會將<b>超額產量</b>輸入到新貿易路線的數量輸入欄位中。當生產或島嶼需求改變時，適合的貿易路線旁會出現按鈕，允許添加差額。輸入欄位上的<span class="fa fa-exclamation-triangle " style="color:red"></span>表示來源島嶼的產量不足以完全供應該貿易路線。</p><br/>
+
+<span class="float-left btn-group bg-dark mr-2"><button type="button" class="btn"> <img data-toggle="modal" data-target="#trade-routes-management-dialog" class="icon-navbar" src="icons/icon_shiptrade.png"> </button></span>
+<p>貿易路線選單包含所有貿易路線的總覽，按建立順序列出。可以在那裡刪除貿易路線並調整其載貨量。</p><br/> <br/>
+
+<h5>免責聲明</h5>
+<p>本計算器不提供任何形式的保證。此作品並未獲得 Ubisoft Mainz 的任何形式背書。所有來自 Anno 117 遊戲的素材版權歸 Ubisoft 所有。</p><br/>
+<p>這些素材尤其包括但不限於所有圖示、名稱和消費數值。</p><br/>
+
+<p>本軟體採用 MIT 授權條款。</p><br/>
+
+<h5>作者</h5>
+<p>Nico Höllerich</p>
+<p>hoellerich.nico@freenet.de</p><br/>
+
+<h5>錯誤回報與改進建議</h5>
+<span>如果您遇到任何錯誤或不便之處，或想建議改進，請加入 Discord 伺服器（見上方連結）或在 GitHub 上建立 Issue（</span><a href="https://github.com/anno-mods/anno-117-calculator/issues">https://github.com/anno-mods/anno-117-calculator/issues</a><span>）</span>`
     }
 };
 

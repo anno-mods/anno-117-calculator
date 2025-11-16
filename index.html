@@ -37,6 +37,11 @@
     <meta name="robots" content="index, follow">
     <meta name="googlebot" content="index, follow">
 
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="./favicon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="./apple-touch-icon.png">
+    <link rel="shortcut icon" href="./favicon.png">
 
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -100,21 +105,7 @@
     <div id="loader" data-bind="visible: false"></div>
 
     <div data-bind="template: 'view-mode-dialog'"></div>
-    <div id="help-dialog" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 data-bind="text: $root.texts.help.name">Settings</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-
-                </div>
-                <div class="modal-body">
-                    <div class="mt-3" data-bind="html: $root.texts.helpContent.name"></div>
-
-                </div>
-            </div>
-        </div>
-    </div>
+    <div data-bind="template: 'help-dialog'"></div>
     <div data-bind="template: 'settings-dialog'"></div>
     <div data-bind="template: 'download-dialog'"></div>
     <div data-bind="template: 'effects-dialog'"></div>

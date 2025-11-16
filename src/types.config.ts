@@ -207,7 +207,7 @@ export interface ModuleConfig {
 export interface BuildingBuffConfig {
   guid: number;
   name: string;
-  iconPath?: string;
+  iconPath: string;
   locaText?: LocaTextConfig;
   isStackable: boolean;
   workforceModifierInPercent: number;
@@ -238,7 +238,7 @@ export interface EffectConfig {
   iconPath: string;
   locaText?: LocaTextConfig;
   buffs: number[];
-  targets?: number[];
+  targets: number[];
   targetsIsAllProduction: boolean;
   effectScope: string;
   excludeEffectSourceGUID: boolean;
@@ -272,7 +272,7 @@ export interface PatronsConfig {
 export interface ItemConfig {
   guid: number;
   name: string;
-  iconPath?: string;
+  iconPath: string;
   locaText?: LocaTextConfig;
   buffs: number[];
   targets?: number[];

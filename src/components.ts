@@ -455,7 +455,9 @@ ko.components.register('collapsible', {
         this.cssClass = ko.pureComputed(() => this.collapser.collapsed() ? "hide" : "show");
         this.fieldsetClass = params.fieldsetClass ? params.fieldsetClass : "collapsible-section";
         this.data = params.data;
+        this.externalLink = params.externalLink;
         this.hasCheckbox = false;
+        this.hasExternalLink = this.externalLink != null;
 
         if (params.checkbox) {
             this.hasCheckbox = true;
@@ -515,7 +517,10 @@ ko.components.register('collapsible', {
                 <span class="fa fa-chevron-right"></span>
                 <span class="fa fa-chevron-down"></span>
                 <!-- ko if: !hasCheckbox -->
-                <span data-bind="text:heading"></span>
+                    <span data-bind="text:heading"></span>
+                    <!-- ko if: hasExternalLink -->
+                        <external-link params="subpage: externalLink"></external-link>
+                    <!-- /ko -->
                 <!-- /ko -->
                 <!-- ko if: hasCheckbox -->
                 <span class="custom-control custom-checkbox ml-1" style="display: initial">
@@ -523,6 +528,9 @@ ko.components.register('collapsible', {
                     <label class="custom-control-label" data-bind="attr: {for: target + '-check-all'}">
                         <span data-bind="text:heading"></span>
                     </label>
+                    <!-- ko if: hasExternalLink -->
+                        <external-link params="subpage: externalLink"></external-link>
+                    <!-- /ko -->
                 </span>
                 <!-- /ko -->   
             </legend>
@@ -720,6 +728,47 @@ ko.components.register('buff-display', {
                 <replacement params="{old: $data.replaceWorkforce.oldWorkforce, new: $data.replaceWorkforce.newWorkforce}"></replacement>
             </div>
         </div>`
+});
+
+/**
+ * External link component for Anno layouts website
+ * Constructs a language-appropriate link to annolayouts.de
+ * Note: Cannot check URL existence due to CORS restrictions
+ * @param params - Component parameters
+ * @param params.subpage - The subpage to link to (e.g., "research")
+ */
+ko.components.register('external-link', {
+    viewModel: function (params: any) {
+        this.subpage = params.subpage;
+        this.texts = window.view.texts;
+
+        // Language mapping from calculator languages to annolayouts codes
+        const languageMap: Record<string, string> = {
+            'english': 'en',
+            'german': 'de',
+            'french': 'fr',
+            'spanish': 'es',
+            'italian': 'it',
+            'russian': 'ru',
+            'simplified_chinese': 'cn',
+            'korean': 'kr',
+            'traditional_chinese': 'cn',  // fallback to simplified
+            'polish': 'en',                // fallback to english
+            'brazilian': 'en',             // fallback to english
+            'japanese': 'en'               // fallback to english
+        };
+
+        // Construct URL based on current language
+        this.url = ko.pureComputed(() => {
+            const currentLanguage = window.view.settings.language();
+            const langCode = languageMap[currentLanguage] || 'en';
+            return `https://annolayouts.de/117/${langCode}/${this.subpage}`;
+        });
+    },
+    template:
+        `<a data-bind="attr: { href: url, title: $root.texts.showInformation.name }" target="_blank" rel="noopener noreferrer" class="ml-2" style="font-size: 0.8em;">
+            <span class="fa fa-external-link"></span>
+        </a>`
 });
 }
 

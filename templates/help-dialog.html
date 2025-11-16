@@ -1,0 +1,28 @@
+<div id="help-dialog" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true" data-bind="debug: 'Help Dialog'">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 data-bind="text: $root.texts.help.name">Settings</h4>
+
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <a href="https://github.com/anno-mods/anno-117-calculator" target="_blank" rel="noopener noreferrer" class="mr-3">
+                        <img src="https://img.shields.io/github/stars/anno-mods/anno-117-calculator?style=social" alt="GitHub Stars">
+                    </a>
+                    <a href="https://discord.gg/jSBrJZvAEq" target="_blank" rel="noopener noreferrer" class="mr-3">
+                        <img src="https://img.shields.io/discord/1439668406973497376?logo=discord&label=Discord&color=5865F2" alt="Discord Server">
+                    </a>
+                    <a href="https://www.paypal.com/donate/?hosted_button_id=8P2Y93KGWJHXQ" target="_blank" rel="noopener noreferrer">
+                        <img src="https://img.shields.io/badge/Donate-PayPal-blue.svg?logo=paypal" alt="Donate via PayPal">
+                    </a>
+                </div>
+                
+                <div class="mt-3" data-bind="html: $root.texts.helpContent.name"></div>
+
+            </div>
+        </div>
+    </div>
+</div>

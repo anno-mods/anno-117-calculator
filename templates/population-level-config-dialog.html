@@ -51,7 +51,21 @@
                 </table>
 
 
-
+                <table class="table table-fixed">
+                    <thead>
+                        <tr>
+                            <td>
+                                <span data-bind="text: $root.texts.needs.name()"></span>
+                                <external-link params="subpage: 'production'"></external-link>
+                            </td>
+                            <td>
+                                <span data-bind="text: $root.texts.needAttributes.name()"></span>
+                                <external-link params="subpage: 'attributes'"></external-link>
+                            </td>
+                            <td></td>
+                        </tr>
+                    </thead>
+                </table>
                 <!-- Population Level Needs -->
                 <div data-bind="debug: 'Need Category', foreach: $data.visibleNeedCategories()">
                     <collapsible params="id: $data.id, heading: $data.name, data: $data, checkbox: $data.checked">

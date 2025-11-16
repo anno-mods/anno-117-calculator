@@ -51,7 +51,7 @@
     </table>
 
     <div data-bind="if: $data.instance().availableItems().length">
-        <collapsible params="id: 'factory-config-equipped-items', heading: $root.texts.itemsEquipped.name, collapsed: true, data: $data.instance()">
+        <collapsible params="id: 'factory-config-equipped-items', heading: $root.texts.itemsEquipped.name, externalLink: 'items', collapsed: true, data: $data.instance()">
             <table class="table table-striped">
                 <tbody data-bind="foreach: $data.availableItems">
                     <tr data-bind="debug: 'Available Item'">

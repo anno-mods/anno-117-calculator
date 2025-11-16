@@ -29,6 +29,11 @@ Anno 117 Calculator is a web-based calculator for the computer game Anno 117, bu
 
 See [Translation Workflow](#translation-workflow) section below for details.
 
+### SEO and Deployment
+- `npm run generate-sitemap` - Generate sitemap.xml with current date
+- Sitemap automatically regenerates before each build via `prebuild` hook
+- robots.txt and sitemap.xml are served correctly by GitHub Pages
+
 ## Project Architecture
 
 ### Dual Source Structure
@@ -586,6 +591,156 @@ The `/translate` command (defined in `.claude/commands/translate.md`):
 - Clear any background processes: check running bash shells
 - Manually add missing translations to src/i18n.ts
 - Run `npm run check-translations` to verify
+
+## SEO and Search Engine Optimization
+
+### Overview
+The calculator is hosted on GitHub Pages and optimized for search visibility, particularly for German search terms like "Anno 117 Warenrechner" and "Anno 117 Kalkulator".
+
+### SEO Implementation (index.html)
+
+**Critical Meta Tags:**
+- **Title**: Includes both English and German keywords - "Anno 117 Calculator - Production Chains & Population Calculator | Warenrechner"
+- **Description**: Bilingual description mentioning key features and German terms
+- **Keywords**: Comprehensive list including "anno 117 warenrechner", "anno 117 kalkulator", "produktionsketten"
+- **Language attributes**: `lang="en"` on html tag, meta language tag
+- **Canonical URL**: Prevents duplicate content issues
+- **Robots meta**: Explicitly allows indexing and following
+
+**Multilingual Support:**
+- **hreflang tags**: Links for all 12 supported languages (en, de, fr, es, it, pl, pt-BR, ru, zh-CN, zh-TW, ja, ko)
+- **x-default**: Default language fallback
+
+**Social Media Tags:**
+- **Open Graph**: Facebook sharing with title, description, image
+- **Twitter Cards**: Twitter sharing optimization
+- Uses `icons/icon_3d_game_logo_0.webp` for social preview image
+
+**Structured Data (JSON-LD):**
+- **@type: WebApplication**: Tells search engines this is a web app
+- **alternateName**: Includes "Anno 117 Warenrechner", "Anno 117 Kalkulator"
+- **featureList**: Lists all major features
+- **inLanguage**: All 12 supported languages
+- **offers**: Indicates free pricing (price: 0)
+- **about**: Links to Anno 117: Pax Romana game
+
+### Sitemap and Robots
+
+**robots.txt:**
+- Allows all search engine crawlers
+- Points to sitemap.xml location
+- Disallows development directories (node_modules, src, tests)
+- Served correctly by GitHub Pages from repository root
+
+**sitemap.xml:**
+- **Dynamic Generation**: Created by `scripts/generate-sitemap.js`
+- **Auto-update**: Regenerates before each build via `prebuild` hook in package.json
+- **Current date**: Uses `<lastmod>` with current date (YYYY-MM-DD format)
+- **Change frequency**: `<changefreq>daily</changefreq>` for frequent update signals
+- **Priority**: 1.0 for homepage
+- **Multilingual**: Includes hreflang links for all 12 languages
+- Served correctly by GitHub Pages from repository root
+
+### SEO Scripts
+
+**scripts/generate-sitemap.js:**
+```bash
+npm run generate-sitemap  # Manual generation
+npm run build              # Auto-generates via prebuild hook
+```
+
+**Features:**
+- Automatically uses current date for `<lastmod>` tag
+- Includes all language hreflang tags
+- Configurable BASE_URL constant
+- No manual date updates needed
+
+### README.md SEO
+
+**Optimizations:**
+- Multilingual heading with German keywords
+- Keywords prominently displayed at top
+- German section "Warenrechner für Anno 117: Pax Romana"
+- Translated feature descriptions with German terms in parentheses
+- GitHub crawls README for additional context
+
+### Key German Search Terms
+
+Critical keywords for German market:
+- **warenrechner** (goods calculator)
+- **kalkulator** (calculator)
+- **produktionsketten** (production chains)
+- **rechner** (calculator)
+- **bedarf rechner** (demand calculator)
+- **bevölkerung** (population)
+
+### Deployment and Verification
+
+**After Deployment:**
+1. Verify robots.txt: `https://anno-mods.github.io/anno-117-calculator/robots.txt`
+2. Verify sitemap.xml: `https://anno-mods.github.io/anno-117-calculator/sitemap.xml`
+3. Check meta tags: View page source in browser
+
+**Google Search Console:**
+1. Add property for the site
+2. Submit sitemap URL
+3. Monitor indexing status and search performance
+4. Check for crawl errors
+
+**Bing Webmaster Tools:**
+1. Verify site ownership
+2. Submit sitemap
+3. Monitor search queries
+
+### Performance Considerations
+
+**Current State:**
+- GitHub Pages automatically serves with compression
+- robots.txt and sitemap.xml work correctly on GitHub Pages
+- All meta tags render in static HTML (no JavaScript needed)
+- Structured data validates in Google's Rich Results Test
+
+**Implemented:**
+- ✅ Favicon support with calculator logo in multiple sizes
+  - `favicon.png` (32x32) - Standard browser favicon
+  - `favicon-192x192.png` (192x192) - High-res for Android/Chrome
+  - `apple-touch-icon.png` (192x192) - iOS home screen icon
+  - All generated from `icons/logo-calculator-duxvitae_*.png`
+
+**Future Improvements:**
+- Consider adding favicon.ico (multi-resolution ICO format) for older browser support
+- Consider adding blog/guides section with SEO content
+- Monitor Google Analytics for traffic sources
+- Track keyword rankings in Search Console
+
+### SEO Best Practices Applied
+
+1. **Bilingual Optimization**: Both English and German keywords throughout
+2. **Structured Data**: Machine-readable schema.org markup
+3. **Multilingual Tags**: Proper hreflang for 12 languages
+4. **Dynamic Sitemap**: Always current with automatic generation
+5. **Social Sharing**: Open Graph and Twitter Card optimization
+6. **Semantic HTML**: Proper lang attribute and meta tags
+7. **Canonical URLs**: Prevent duplicate content penalties
+
+### Common Issues and Solutions
+
+**Sitemap not updating:**
+- Sitemap regenerates automatically on `npm run build`
+- Check prebuild hook in package.json is present
+- Manually run `npm run generate-sitemap`
+
+**Search engines not indexing:**
+- Allow 2-4 weeks for initial indexing
+- Submit sitemap in Google Search Console
+- Check robots.txt is allowing crawlers
+- Verify canonical URL is correct
+
+**German keywords not ranking:**
+- Ensure German terms appear in title, description, headings
+- Create German content in README or documentation
+- Build backlinks from German Anno community sites
+- Monitor Search Console for German query impressions
 
 ## Product-Based Presenter Architecture (PLANNED)
 
