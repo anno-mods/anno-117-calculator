@@ -312,6 +312,34 @@ export const texts: Record<string, Record<string, string>> = {
         japanese: "商品の入手元",
         korean: "상품 공급처"
     },
+    capacityUtilisation: { // of a factory
+        english: "Capacity utilisation",
+        french: "Utilisation de la capacité",
+        polish: "Wykorzystanie mocy produkcyjnych",
+        spanish: "Utilización de capacidad",
+        italian: "Utilizzo della capacità",
+        german: "Auslastung",
+        brazilian: "Utilização de capacidade",
+        russian: "Использование мощности",
+        simplified_chinese: "产能利用率",
+        traditional_chinese: "產能利用率",
+        japanese: "稼働率",
+        korean: "가동률"
+    },
+    fullyUtilize: { // of a factory
+        english: "fully utilise",
+        french: "utiliser pleinement",
+        polish: "w pełni wykorzystać",
+        spanish: "utilizar completamente",
+        italian: "utilizzare completamente",
+        german: "voll auslasten",
+        brazilian: "utilizar totalmente",
+        russian: "полностью использовать",
+        simplified_chinese: "全力生产",
+        traditional_chinese: "全力生產",
+        japanese: "完全稼働",
+        korean: "전력 가동"
+    },
     afterIslandCreation: {
         english: "After creation:",
         french: "Après création :",
@@ -625,20 +653,20 @@ export const texts: Record<string, Record<string, string>> = {
         japanese: "新しいバージョンの計算機が利用可能です。ダウンロードボタンをクリックしてください。",
         korean: "새로운  117 계산기 버전이 제공됩니다. 다운로드 버튼을 클릭하십시오."
     },
-    /* newFeature: {
-        english: "",
-        french: "",
-        polish: "",
-        spanish: "",
-        italian: "",
-        german: "",
-        brazilian: "",
-        russian: "",
-        simplified_chinese: "",
-        traditional_chinese: "",
-        japanese: "",
-        korean: ""
-    }, */
+    newFeature: {
+        english: "Run factories at full capacity. Veneration effects are global.",
+        french: "Faire tourner les usines à pleine capacité. Les effets de vénération sont globaux.",
+        polish: "Uruchom fabryki na pełnych obrotach. Efekty czci są globalne.",
+        spanish: "Ejecutar fábricas a plena capacidad. Los efectos de veneración son globales.",
+        italian: "Eseguire le fabbriche a piena capacità. Gli effetti venerazione sono globali.",
+        german: "Fabriken voll auslasten. Anbetungseffekte sind global.",
+        brazilian: "Executar fábricas em capacidade total. Efeitos de veneração são globais.",
+        russian: "Запускать фабрики на полную мощность. Эффекты поклонения глобальные.",
+        simplified_chinese: "以满负荷运行工厂。敬神效果是全局的。",
+        traditional_chinese: "以滿負荷運行工廠。崇敬效果是全域的。",
+        japanese: "工場をフル稼働させる。崇拝の効果は世界規模です。",
+        korean: "공장을 최대 용량으로 가동합니다. 숭배 효과는 전역입니다."
+    }, 
     helpContent: {
         brazilian: `<h5>Uso e Estrutura</h5>
 <p>Digite o número atual de residências por nível na linha superior. As cadeias de produção serão atualizadas automaticamente ao sair do campo de entrada. Apenas os bens necessários são exibidos.</p>

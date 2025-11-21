@@ -40,7 +40,7 @@ ko.amdTemplateEngine.loader = function (templateName: string, done: Function) {
 };
 
 /** Version string for the calculator application */
-export let versionCalculator = "1.3";
+export let versionCalculator = "1.4";
 /** Flag indicating if this is a preview version */
 export let isPreview = false;
 /** Accuracy threshold for floating point comparisons */
@@ -443,6 +443,7 @@ export class BuildingsCalc {
     public planned: KnockoutObservable<number>;
     public required: KnockoutObservable<number>; // set by parent class
     public utilized: KnockoutComputed<number>;
+    public capacityUtilisation: KnockoutComputed<number>;
 
 
     constructor(){
@@ -452,6 +453,13 @@ export class BuildingsCalc {
         this.required = ko.observable(0);
         this.utilized = ko.computed(() => this.fullyUtilizeConstructed() ? Math.max(this.constructed(), this.required()) : this.required());   
 
+        this.capacityUtilisation = ko.pureComputed(() => {
+            const utilized = this.utilized();
+
+            if (utilized <= EPSILON) return 0;
+
+            return Math.min(1, utilized / this.constructed());
+        });
     }
 
 

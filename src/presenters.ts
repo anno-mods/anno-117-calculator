@@ -123,6 +123,10 @@ export class FactoryPresenter {
     requiredBuildingsFormatted(): string {
         return (window as any).view.settings.decimalsForBuildings.checked() ? formatNumber( this.buildings().required()) : Math.ceil( this.buildings().required() - 0.01).toString()
     }
+
+    isCapacityUtilizationVisible(): boolean {
+        return this.buildings().constructed() >= 1 && !this.parentProduct.product.isConstructionMaterial
+    }
 }
 
 /**

@@ -8,7 +8,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             </div>
 
-            <div class="modal-body">
+            <div class="modal-body" style="padding-top: 0;">
                 <div data-bind="debug: 'consumerViewVisible', if: $data.consumerViewVisible()">
                     <collapsible params="id: 'product-config-consumption', heading: $root.texts.consumption.name, collapsed: true, data: $data, summary: $data.totalDemandNoRoutes">
                         <!-- Pass the observable and not one fixed product  -->
@@ -74,7 +74,7 @@
 
 
                 <!-- Tab Navigation -->
-                <ul class="nav nav-tabs" role="tablist" id="product-config-supplier-tabs">
+                <ul class="nav nav-tabs mt-4" role="tablist" id="product-config-supplier-tabs">
                     <!-- ko foreach: $data.visibleFactories -->
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" data-toggle="tab" type="button" role="tab" data-bind="attr: {'data-target': '#factories-tab-' + $data.guid(), 'aria-controls': 'factories-tab-' + $data.guid(), 'aria-selected': $data.isDefaultSupplier()}, css: {'active': $data.isDefaultSupplier()}" >

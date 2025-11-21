@@ -25,7 +25,8 @@
       "Bash(npm run check-translations:*)",
       "WebFetch(domain:anno117-kalkulator.de)",
       "WebFetch(domain:anno.land)",
-      "Bash(npm run generate-sitemap:*)"
+      "Bash(npm run generate-sitemap:*)",
+      "SlashCommand(/translate:*)"
     ],
     "deny": []
   },

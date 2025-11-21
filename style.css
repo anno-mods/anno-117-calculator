@@ -628,7 +628,7 @@ p {
 }
 
 .collapser .summary>*{
-    background-color: rgba(255, 233, 222);
+    background-color: #e2cfbb;
     padding-left: 10px;
     float: right !important;
 }
@@ -762,6 +762,15 @@ input[type=number]::-webkit-inner-spin-button {
     width: 100%;
 }
 
+.buff-list {
+    float: right;
+    align-items: end;
+    display: flex;
+    flex-flow: column;
+    flex-wrap: nowrap;
+    flex-wrap: wrap-reverse;
+}
+
 .dlc-list li {
     display: inline-block;
     vertical-align: top;
@@ -785,6 +794,10 @@ input[type=number]::-webkit-inner-spin-button {
     border: 1px solid #4a5568;
     background: rgba(26, 26, 26, 0.9);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.bg-dark .product-tile-name {
+    color: inherit;
 }
 
 .bg-dark .product-tile.danger {

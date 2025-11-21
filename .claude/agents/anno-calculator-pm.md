@@ -20,7 +20,6 @@ Donations, Github, Discord badges
 
 Icons
 Group effects by source (discovery, religion, festival)
-Add checkbox: Fully utilize factory
 Production boost on factory tile
 layout trade route creation
 Analytics

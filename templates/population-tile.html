@@ -17,22 +17,24 @@
 
     <div class="mb-3">
         <!-- Buildings Input -->
-        <div class="input-group input-group-sm spinner mb-2">
-            <div class="input-group-prepend" data-bind="attr: {title: $root.texts.residences.name()}">
-                <div class="input-group-text">
-                    <img class="icon-sm icon-light" src="../icons/icon_house_white.png" />
-                </div>
-            </div>
+        <div class="input-group input-group-sm spinner">
             <input step="10" class="form-control input-lg" type="number" value="0" min="0" data-bind="value: $data.instance().residences[0].buildings.constructed, attr: {title: 'Press '+name()[0]+' to focus', id: $data.guid + '-buildings-constructed-input' };" />
             <div class="input-group-append">
                 <div data-bind="component: { name: 'number-input-increment', params: { obs: $data.instance().residences[0].buildings.constructed, id: $data.guid + '-buildings-constructed-input' }}"></div>
             </div>
+            <div class="input-group-append" data-bind="attr: {title: $root.texts.residences.name()}">
+                <div class="input-group-text">
+                    <img class="icon-sm icon-light" src="../icons/icon_house_white.png" />
+                </div>
+            </div>
         </div>
         
         <!-- Total Residents Display -->
-        <div class="d-flex align-items-center justify-content-center p-2" style="background-color: rgba(0,0,0,0.05); border-radius: 4px;">
-            <img class="icon-sm icon-light mr-2" src="../icons/icon_resource_population.png" data-bind="attr: {title: $root.texts.residents.name()}" />
-            <strong data-bind="text: formatNumber($data.instance().residents())"></strong>
+        <div class="d-flex p-2" style="flex-direction:row-reverse; background-color: rgba(0,0,0,0.05); border-radius: 4px;">
+            <div class="float-right">
+                <strong data-bind="text: formatNumber($data.instance().residents())" style="font-size: 14px;"></strong>
+                <img class="icon-sm icon-light ml-3" src="../icons/icon_resource_population.png" data-bind="attr: {title: $root.texts.residents.name()}" />
+            </div>
         </div>
     </div>
 

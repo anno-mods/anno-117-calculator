@@ -371,14 +371,14 @@ ko.components.register('constructed-buildings-input', {
         this.texts = window.view.texts;
     }, template:
         `<div class="input-group input-group-short spinner float-left" style="max-width: 10rem;">
-            <div class="input-group-prepend" data-bind="debug: 'Constructed buildings input', src: {title: texts.residences.name()}">
-                <div class="input-group-text">
-                    <img class="icon-sm icon-light" src="icons/icon_house_white.png" />
-                </div>
-            </div>
             <input class="form-control" type="number" value="0" step="1" min="0" data-bind="value: buildings.constructed, attr: {id: guid + '-constructed-buildings-input'}" />
             <div class="input-group-append">
                 <div data-bind="component: { name: 'number-input-increment', params: { obs: buildings.constructed, id: guid + '-constructed-buildings-input' }}"></div>
+            </div>
+            <div class="input-group-append" data-bind="debug: 'Constructed buildings input', src: {title: texts.residences.name()}">
+                <div class="input-group-text">
+                    <img class="icon-sm icon-light" src="icons/icon_house_white.png" />
+                </div>
             </div>
         </div>`
 });
@@ -688,17 +688,20 @@ ko.components.register('buff-display', {
         this.buffs = params.buffs;
         this.texts = window.view.texts;
     }, template:
-        `<div class="inline-list" data-bind="debug: 'Buffs', foreach: buffs">
+        `<div class="buff-list" data-bind="debug: 'Buffs', foreach: buffs">
             <!-- productivity -->
-            <div data-bind="debug: 'Base Productivity Upgrade', if: $data.baseProductivityUpgrade != 0">
+            <div data-bind="debug: 'Base Productivity Upgrade', if: $data.baseProductivityUpgrade != 0, attr:{title: $root.texts.productivity.name()}">
                 <span data-bind="text: formatNumber($data.baseProductivityUpgrade, true) + ' %'"></span>
+                <img class="icon-sm" src="icons/icon_2d_productivity_0.webp"></span>
             </div>
-            <div data-bind="debug: 'Productivity Upgrade', if: $data.productivityUpgrade != 0">
+            <div data-bind="debug: 'Productivity Upgrade', if: $data.productivityUpgrade != 0, attr:{title: $root.texts.productivity.name()}">
                 <span data-bind="text: formatNumber($data.productivityUpgrade, true) + ' %'"></span>
+                <img class="icon-sm" src="icons/icon_2d_productivity_0.webp"></span>
             </div>
             <!-- fuel upgrade-->
-            <div data-bind="debug: 'Fuel duration',if: $data.fuelDurationPercent != 0">
-                <span data-bind="text: formatNumber($data.fuelDurationPercent, true) + ' % s per coal'"></span>
+            <div data-bind="debug: 'Fuel duration',if: $data.fuelDurationPercent != 0, attr:{title: $root.texts.fuelEfficiency.name()}">
+                <span data-bind="text: formatNumber($data.fuelDurationPercent, true) + ' % s /'"></span>
+                <img class="icon-sm" src="icons/icon_3d_charcoal_goods_0.webp"></span>
             </div>
             <!-- extra goods -->
             <span data-bind="debug: 'additional outputs', if: $data.additionalOutputs && $data.additionalOutputs.length">
