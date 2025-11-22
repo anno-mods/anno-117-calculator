@@ -610,10 +610,16 @@ export class Island {
             literalsMap.set(key, view.literalsMap.get(key));
 
         this.sessionExtendedName = ko.pureComputed(() => {
-            if (!this.session)
-                return this.name();
+            let prefix = '';
 
-            return `${this.session.name()} - ${this.name()}`;
+            const missingFactories = this.factories.filter(
+                (factory: Factory): boolean => factory.isHighlightedAsMissing()
+            );
+            if (missingFactories.length > 0) {
+                prefix = '[!] ';
+            }
+
+            return `${prefix}${this.session.name()} - ${this.name()}`;
         });
 
         // procedures to persist inputs
