@@ -33,6 +33,7 @@ export class Product extends NamedElement {
     public totalDemand: KnockoutComputed<number>; // Total demand from all consumers and trade routes
     public totalDemandNoRoutes: KnockoutComputed<number>; // Total demand from all consumers
     public totalDefaultProduction: KnockoutComputed<number>; // Production from non-default suppliers
+    public totalCurrentProduction: KnockoutComputed<number>; // Production from all suppliers
     public excessProduction: KnockoutObservable<number>; // Excess when non-default suppliers exceed demand
     public demandCalculationSubscription!: KnockoutComputed<void>; // Updates supplier demands based on total demand
 
@@ -91,6 +92,7 @@ export class Product extends NamedElement {
         this.totalDemand = dummyComputed("product.totalDemand");
         this.totalDemandNoRoutes = dummyComputed("product.totalDemandNoRoutes");
         this.totalDefaultProduction = dummyComputed("product.nonDefaultSupplierProduction");
+        this.totalCurrentProduction = dummyComputed("product.currentSupplierProduction");
 
         // Initialize supplier management (will be fully set up in initSuppliers)
         this.defaultSupplier = ko.observable(null);
@@ -102,7 +104,7 @@ export class Product extends NamedElement {
             const supplier = this.defaultSupplier();
             
             if (supplier === null) {
-                return this.totalDemand() > 0;
+                return this.totalDemand() > this.totalCurrentProduction();
             }
 
             if(supplier.type != "factory")
@@ -244,6 +246,18 @@ export class Product extends NamedElement {
             for (const supplier of this.availableSuppliers()) {
                 sum += supplier.defaultProduction();
             }
+
+            return sum;
+        });
+
+        this.totalCurrentProduction = ko.pureComputed(() => {
+            let sum = 0;
+
+            for (const supplier of this.availableSuppliers()) {
+                sum += supplier.currentProduction();
+            }
+            
+            sum += this.passiveTradeSupplier.currentProduction();
 
             return sum;
         });
