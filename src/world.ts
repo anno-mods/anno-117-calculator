@@ -612,8 +612,8 @@ export class Island {
         this.sessionExtendedName = ko.pureComputed(() => {
             let prefix = '';
 
-            const missingFactories = this.factories.filter(
-                (factory: Factory): boolean => factory.isHighlightedAsMissing()
+            const missingFactories = this.products.filter(
+                (product: Product): boolean => product.isHighlightedAsMissing()
             );
             if (missingFactories.length > 0) {
                 prefix = '[!] ';
