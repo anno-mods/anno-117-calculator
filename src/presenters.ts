@@ -13,8 +13,8 @@ declare const view: any;
  * Option for supplier selection dropdown
  */
 export interface SupplierOption {
-    type: 'factory' | 'extra_good' | 'passive_trade';
-    supplier: Supplier;
+    type: 'factory' | 'extra_good' | 'passive_trade' | 'none';
+    supplier: Supplier | null;
     label: string;
     icon: string;
 }
@@ -241,7 +241,17 @@ export class ProductPresenter {
                 }
             }
 
-            // 3. Passive trade (always available)
+            // 3. Not obtaining (only available when no factory is available)
+            if (suppliers.length === 0) {
+                suppliers.push({
+                    type: 'none',
+                    supplier: null,
+                    label: window.view.texts.notObtaining.name(),
+                    icon: './icons/icon_not_obtaining.png'
+                });
+            }
+
+            // 4. Passive trade (always available)
             suppliers.push({
                 type: 'passive_trade',
                 supplier: this.instance().passiveTradeSupplier,
@@ -348,12 +358,7 @@ export class ProductPresenter {
         this.icon = ko.pureComputed(() => this.product.icon as string);
 
         this.isHighlightedAsMissing = ko.pureComputed(() => {
-            const supplier = this.defaultSupplier();
-
-            if(!(supplier instanceof Factory))
-                return false;
-
-            return supplier.isHighlightedAsMissing();
+            return this.instance()?.isHighlightedAsMissing() === true;
          });
 
 
@@ -505,7 +510,7 @@ export class ProductPresenter {
      */
     getDefaultSupplierLabel(): string {
         const supplier = this.defaultSupplier();
-        if (!supplier) return 'None';
+        if (!supplier) return window.view.texts.notObtaining.name();
 
         for (const option of this.availableSuppliers())
             if (option.supplier == supplier)
@@ -522,7 +527,7 @@ export class ProductPresenter {
      */
     getDefaultSupplierIcon(): string {
         const supplier = this.defaultSupplier();
-        if (!supplier) return '';
+        if (!supplier) return './icons/icon_not_obtaining.png';
 
         for (const option of this.availableSuppliers())
             if (option.supplier == supplier)

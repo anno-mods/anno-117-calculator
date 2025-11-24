@@ -1489,6 +1489,21 @@ export const texts: Record<string, Record<string, string>> = {
 
 <h5>Errores y Mejoras</h5>
 <span>Si encuentras algún error o inconveniente o si quieres sugerir mejoras, únete al servidor de Discord (ver enlace arriba) o abre un Issue en GitHub (</span><a href="https://github.com/anno-mods/anno-117-calculator/issues">https://github.com/anno-mods/anno-117-calculator/issues</a><span>)</span>`
+    },
+    
+    notObtaining: {
+        "english": "Not obtaining",
+        "french": "Ne pas obtenir",
+        "polish": "Nie pozyskiwać",
+        "spanish": "No obtener",
+        "italian": "Non ottenere",
+        "german": "Nicht beziehen",
+        "brazilian": "Não obter",
+        "russian": "Не получать",
+        "simplified_chinese": "不采购",
+        "traditional_chinese": "不採購",
+        "japanese": "仕入れない",
+        "korean": "조달하지 않음"
     }
 };
 
