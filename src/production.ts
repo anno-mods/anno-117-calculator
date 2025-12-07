@@ -33,6 +33,7 @@ export class Product extends NamedElement {
     public totalDemand: KnockoutComputed<number>; // Total demand from all consumers and trade routes
     public totalDemandNoRoutes: KnockoutComputed<number>; // Total demand from all consumers
     public totalDefaultProduction: KnockoutComputed<number>; // Production from non-default suppliers
+    public totalCurrentProduction: KnockoutComputed<number>; // Production from all suppliers
     public excessProduction: KnockoutObservable<number>; // Excess when non-default suppliers exceed demand
     public demandCalculationSubscription!: KnockoutComputed<void>; // Updates supplier demands based on total demand
 
@@ -41,6 +42,7 @@ export class Product extends NamedElement {
     public tradeList!: TradeList; // TradeList - manages trade routes for this product (initialized in initSuppliers)
     public availableSuppliers: KnockoutComputed<Supplier[]>; // All available suppliers (factories + extra goods)
     public defaultSupplier: KnockoutObservable<Supplier | null>; // User-selected default supplier
+    public defaultSupplierSet: KnockoutObservable<boolean>;
     public defaultSupplierSubscription!: KnockoutComputed<void>; // Ensures that the default supplier is unset if it is no longer available
     public island?: Island; // Island reference for supplier management
     public isHighlightedAsMissing: KnockoutComputed<boolean>;
@@ -90,19 +92,31 @@ export class Product extends NamedElement {
         this.totalDemand = dummyComputed("product.totalDemand");
         this.totalDemandNoRoutes = dummyComputed("product.totalDemandNoRoutes");
         this.totalDefaultProduction = dummyComputed("product.nonDefaultSupplierProduction");
+        this.totalCurrentProduction = dummyComputed("product.currentSupplierProduction");
 
         // Initialize supplier management (will be fully set up in initSuppliers)
         this.defaultSupplier = ko.observable(null);
+        this.defaultSupplierSet = ko.observable(false);
         this.availableSuppliers = dummyComputed("Product.availableSuppliers");
         this.availableFactories = dummyObservableArray("Product.availableFactories"); // throws if used before initialization in initSuppliers
         
         this.isHighlightedAsMissing = ko.pureComputed(() => {
             const supplier = this.defaultSupplier();
+            
+            if (supplier === null) {
+                return this.totalDemand() > this.totalCurrentProduction();
+            }
 
-            if(!supplier || supplier.type != "factory")
-                return false;
+            // Check Factory suppliers
+            if(supplier.type === "factory")
+                return (supplier as Factory).isHighlightedAsMissing();
 
-            return (supplier as Factory).isHighlightedAsMissing();
+            // Check TradeRoute suppliers - delegate to source island
+            if(supplier.type === "trade_route")
+                return (supplier as TradeRoute).isHighlightedAsMissing();
+
+            // Other supplier types (passive_trade, extra_good) never show warning
+            return false;
          });
 
         this.notes = ko.observable("");
@@ -206,7 +220,7 @@ export class Product extends NamedElement {
         });
 
         this.defaultSupplierSubscription = ko.computed(() => {
-            if(!this.defaultSupplier() || !this.defaultSupplier()?.canSupply())
+            if(!this.defaultSupplierSet() || !this.defaultSupplier()?.canSupply())
                 this.resetDefaultSupplier();
         });
 
@@ -242,15 +256,27 @@ export class Product extends NamedElement {
             return sum;
         });
 
+        this.totalCurrentProduction = ko.pureComputed(() => {
+            let sum = 0;
+
+            for (const supplier of this.availableSuppliers()) {
+                sum += supplier.currentProduction();
+            }
+            
+            sum += this.passiveTradeSupplier.currentProduction();
+
+            return sum;
+        });
+
         // Update supplier demands when total demand or supplier production changes
         this.demandCalculationSubscription = ko.computed(() => {
             const total = this.totalDemand();
             const defaultProd = this.totalDefaultProduction();
             const defaultSupp = this.defaultSupplier();
-
-            if (!defaultSupp) return;
-
-            if (defaultProd >= total) {
+            
+            if (defaultSupp === null) {
+                this.excessProduction(0);
+            } else if (defaultProd >= total) {
                 // Non-default suppliers produce more than needed
                 this.excessProduction(defaultProd - total);
                 defaultSupp.setDemand(0);
@@ -265,10 +291,12 @@ export class Product extends NamedElement {
     }
 
     /**
-     * Overwrite the current default supplier with the one used by default - a fectory in the region (if available) or passive trade
+     * Overwrite the current default supplier with the one used by default - a factory in the region (if available) or passive trade
      * @returns 
      */
     resetDefaultSupplier(){
+        this.defaultSupplierSet(true);
+        
         const guid = getForcedDefaultSupplier(this.island?.region.id, this.guid);
         if (guid != null){
             for (const factory of this.factories) {
@@ -286,8 +314,8 @@ export class Product extends NamedElement {
                 return;
             }
         }
-
-        this.updateDefaultSupplier(this.passiveTradeSupplier);
+        
+        this.updateDefaultSupplier(null);
     }
 
     /**
@@ -296,10 +324,7 @@ export class Product extends NamedElement {
      * @param supplier The new default supplier
      * @returns 
      */
-    updateDefaultSupplier(supplier: Supplier){
-        if(supplier == null)
-            throw Error(`Supplier on ${this.name()} must not be set to null.`);
-
+    updateDefaultSupplier(supplier: Supplier|null){
         const prevSupplier = this.defaultSupplier()
         if(supplier == prevSupplier)
             return;

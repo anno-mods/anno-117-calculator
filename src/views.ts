@@ -296,6 +296,10 @@ export class ProductionChainView {
                     
                     if (consumer instanceof Product && consumer.defaultSupplier()?.type != "factory"){
                         const supplier = consumer.defaultSupplier();
+                        if (supplier == null){
+                            icon = "./icons/icon_not_obtaining.png"
+                            amount = 0;
+                        }
                         if (supplier instanceof TradeRoute){
                             icon = "./icons/icon_trade_routes_0.webp"
                         }

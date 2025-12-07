@@ -28,9 +28,9 @@
                             </td>
                             <td>
                                 
-                                <div class="float-right">
-                                    <span data-bind="if: !$data.isExport($parent) && $data.product.isHighlightedAsMissing()">
-                                        <span class="fa fa-exclamation-triangle danger-icon"></span>
+                                <div class="float-right inline-list">
+                                    <span data-bind="if: !$data.isExport($parent) && $data.fromIslandProduct.isHighlightedAsMissing()">
+                                        <span class="fa fa-exclamation-triangle danger-icon mr-2" style="position: initial"></span>
                                     </span>
                                     <trade-route-amount params="supplier: $data"></trade-route-amount>
                                 </div>

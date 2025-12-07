@@ -940,7 +940,10 @@ export class Island {
                 const supplierId = localStorage.getItem(idKey);
 
                 if (supplierType && supplierId) {
-                    if (supplierType === 'factory') {
+                    if (supplierType === 'null') {
+                        p.defaultSupplier(null);
+                    }
+                    else if (supplierType === 'factory') {
                         const factory = assetsMap.get(parseInt(supplierId));
                         if (factory && p.factories.includes(factory)) {
                             p.defaultSupplier(factory);
@@ -967,8 +970,8 @@ export class Island {
                 // Subscribe to changes for persistence
                 p.defaultSupplier.subscribe((supplier: any) => {
                     if (!supplier) {
-                        localStorage.removeItem(typeKey);
-                        localStorage.removeItem(idKey);
+                        localStorage.setItem(typeKey, 'null');
+                        localStorage.setItem(idKey, 'null');
 
                     } else if (supplier.type === 'factory') {
                         localStorage.setItem(typeKey, 'factory');

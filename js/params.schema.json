@@ -1514,7 +1514,7 @@
             ]
           },
           "workforceMaintenanceFactorUpgrade": {
-            "type": "number"
+            "type": "integer"
           },
           "additionalOutputs": {
             "type": "array",

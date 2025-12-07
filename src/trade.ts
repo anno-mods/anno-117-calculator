@@ -69,7 +69,7 @@ export class TradeRoute implements Supplier {
         this.product = toIslandProduct;
 
         this.userSetAmount = createFloatInput(userSetAmount, 0);
-        this.amount = ko.observable(userSetAmount);
+        this.amount = ko.observable(0);
 
         this.active = ko.observable(true);
     }
@@ -169,6 +169,24 @@ export class TradeRoute implements Supplier {
             this.amount(this.userSetAmount());
         else
             this.delete();
+    }
+
+    /**
+     * Checks if this trade route should be highlighted as missing buildings
+     * Delegates to the source island's product to check factory capacity
+     */
+    isHighlightedAsMissing(): boolean {
+        // Check if setting is enabled
+        if (!window.view.settings.missingBuildingsHighlight ||
+            !window.view.settings.missingBuildingsHighlight.checked())
+            return false;
+
+        // Only highlight if this route is the default supplier
+        if (!this.isDefaultSupplier())
+            return false;
+
+        // Delegate to source island's product to check its factory capacity
+        return this.fromIslandProduct.isHighlightedAsMissing();
     }
 }
 

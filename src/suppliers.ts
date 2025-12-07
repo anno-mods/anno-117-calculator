@@ -23,6 +23,9 @@ export interface Supplier {
     // Demand integration
     setDemand(amount: number): void;       // Request supplier to produce/import amount
     unsetAsDefaultSupplier(): void;  // called by product when default supplier changes
+
+    // UI/Warning system (optional - only Factory and TradeRoute implement this)
+    isHighlightedAsMissing?(): boolean;    // Returns true if insufficient capacity
 }
 
 /**

@@ -29,7 +29,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -93,7 +93,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -125,7 +125,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -157,7 +157,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -189,7 +189,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -221,7 +221,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -253,7 +253,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -285,7 +285,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -317,7 +317,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -349,7 +349,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -388,7 +388,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -420,7 +420,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -452,7 +452,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -484,7 +484,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -516,7 +516,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -548,7 +548,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -644,7 +644,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -676,7 +676,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -708,7 +708,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -740,7 +740,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -772,7 +772,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -804,7 +804,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -855,7 +855,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -887,7 +887,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -921,7 +921,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -955,7 +955,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -989,7 +989,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -1023,7 +1023,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -1057,7 +1057,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -1091,7 +1091,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -1125,7 +1125,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -1159,7 +1159,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -1193,7 +1193,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -1227,7 +1227,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -1261,7 +1261,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -1295,7 +1295,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -1329,7 +1329,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -1363,7 +1363,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -1395,7 +1395,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -1427,7 +1427,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -1523,7 +1523,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -1555,7 +1555,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -1587,7 +1587,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -1704,7 +1704,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2280,7 +2280,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2319,7 +2319,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2351,7 +2351,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2383,7 +2383,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2415,7 +2415,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2447,7 +2447,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2479,7 +2479,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2511,7 +2511,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2543,7 +2543,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2575,7 +2575,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2607,7 +2607,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2639,7 +2639,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2671,7 +2671,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2703,7 +2703,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2735,7 +2735,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2767,7 +2767,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2799,7 +2799,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2831,7 +2831,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2863,7 +2863,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2895,7 +2895,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2927,7 +2927,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2959,7 +2959,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -2991,7 +2991,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3023,7 +3023,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3055,7 +3055,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3087,7 +3087,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3119,7 +3119,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3151,7 +3151,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3183,7 +3183,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3215,7 +3215,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3247,7 +3247,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3279,7 +3279,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3311,7 +3311,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3343,7 +3343,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3375,7 +3375,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3407,7 +3407,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3439,7 +3439,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3471,7 +3471,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3503,7 +3503,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3535,7 +3535,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3567,7 +3567,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3599,7 +3599,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3702,7 +3702,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3741,7 +3741,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3780,7 +3780,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3819,7 +3819,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3858,7 +3858,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3897,7 +3897,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3936,7 +3936,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -3975,7 +3975,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -4014,7 +4014,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -4053,7 +4053,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -4092,7 +4092,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -4131,7 +4131,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -4170,7 +4170,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -4209,7 +4209,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -4243,7 +4243,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -4277,7 +4277,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 10.0
     },
     {
@@ -4311,7 +4311,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -4345,7 +4345,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 10.0
     },
     {
@@ -4379,7 +4379,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -4413,7 +4413,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 10.0
     },
     {
@@ -4868,7 +4868,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -4900,7 +4900,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -4932,7 +4932,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -4964,7 +4964,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -4996,7 +4996,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -5028,7 +5028,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -5060,7 +5060,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -5085,7 +5085,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -5103,7 +5103,7 @@ if(window.params == null)window.params={
         "newWorkforce": 2198,
         "oldWorkforce": 2196
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -5135,7 +5135,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -5167,7 +5167,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -5199,7 +5199,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     },
     {
@@ -5231,7 +5231,7 @@ if(window.params == null)window.params={
         "newWorkforce": 0,
         "oldWorkforce": 0
       },
-      "workforceMaintenanceFactorUpgrade": 0.0,
+      "workforceMaintenanceFactorUpgrade": 0,
       "workforceModifierInPercent": 0.0
     }
   ],
@@ -5266,34 +5266,34 @@ if(window.params == null)window.params={
       "name": "TechEffect Production FuelConsumption 01",
       "source": "tech",
       "targets": [
-        31756,
-        3074,
         3070,
-        31755,
+        3074,
+        3091,
+        3170,
         3174,
         3192,
         3199,
         3202,
-        3091,
         3203,
-        3170,
-        13808,
-        5475,
-        5969,
+        5470,
         5472,
-        5960,
-        5959,
+        5475,
+        5570,
         5605,
-        55962,
+        5606,
         5615,
         5947,
         5954,
-        55945,
-        31772,
-        5470,
-        5570,
+        5959,
+        5960,
+        5969,
+        13808,
+        31755,
+        31756,
         31767,
-        5606
+        31772,
+        55945,
+        55962
       ],
       "targetsIsAllProduction": false
     },
@@ -5323,34 +5323,34 @@ if(window.params == null)window.params={
       "name": "TechEffect Production FuelConsumption 02",
       "source": "tech",
       "targets": [
-        31756,
-        3074,
         3070,
-        31755,
+        3074,
+        3091,
+        3170,
         3174,
         3192,
         3199,
         3202,
-        3091,
         3203,
-        3170,
-        13808,
-        5475,
-        5969,
+        5470,
         5472,
-        5960,
-        5959,
+        5475,
+        5570,
         5605,
-        55962,
+        5606,
         5615,
         5947,
         5954,
-        55945,
-        31772,
-        5470,
-        5570,
+        5959,
+        5960,
+        5969,
+        13808,
+        31755,
+        31756,
         31767,
-        5606
+        31772,
+        55945,
+        55962
       ],
       "targetsIsAllProduction": false
     },
@@ -5471,10 +5471,10 @@ if(window.params == null)window.params={
       "name": "TechEffect Repeat Mining Productivity",
       "source": "tech",
       "targets": [
-        5290,
-        5980,
-        5291,
         2918,
+        5290,
+        5291,
+        5980,
         5982,
         50280
       ],
@@ -5506,18 +5506,18 @@ if(window.params == null)window.params={
       "name": "Effect Colosseum Small 01",
       "source": "island-event",
       "targets": [
-        3174,
-        3075,
         2693,
+        3075,
+        3174,
         5960,
         5967,
         5972,
-        3177,
         2694,
         2795,
-        23753,
+        3177,
+        8427,
         23723,
-        8427
+        23753
       ],
       "targetsIsAllProduction": false
     },
@@ -5547,19 +5547,19 @@ if(window.params == null)window.params={
       "name": "Effect Colosseum Small 02",
       "source": "island-event",
       "targets": [
-        3170,
-        3070,
         2918,
+        3070,
+        3170,
         5954,
         5969,
         5982,
-        13810,
-        13839,
-        2880,
-        13808,
         2793,
+        2880,
+        2957,
         2994,
-        2957
+        13808,
+        13810,
+        13839
       ],
       "targetsIsAllProduction": false
     },
@@ -5621,9 +5621,9 @@ if(window.params == null)window.params={
       "name": "Effect Silo Roman Celtic",
       "source": "module",
       "targets": [
+        5973,
         5974,
-        15514,
-        5973
+        15514
       ],
       "targetsIsAllProduction": false
     },
@@ -5653,17 +5653,17 @@ if(window.params == null)window.params={
       "name": "Effect Cernunnos Festival Cernunnos Material Buildings",
       "source": "festival",
       "targets": [
-        3089,
         2878,
+        3089,
         5945,
         5976,
-        5935,
-        5849,
         5848,
-        41811,
+        5849,
+        5935,
         5295,
-        5977,
-        2880
+        41811,
+        2880,
+        5977
       ],
       "targetsIsAllProduction": false
     },
@@ -5693,17 +5693,17 @@ if(window.params == null)window.params={
       "name": "Effect Minerva Festival Minerva Material Buildings",
       "source": "festival",
       "targets": [
-        3129,
         2916,
         2958,
+        3129,
         5946,
         5978,
         10929,
-        3203,
+        2880,
+        2920,
         2970,
         3082,
-        2920,
-        2880
+        3203
       ],
       "targetsIsAllProduction": false
     },
@@ -5733,21 +5733,21 @@ if(window.params == null)window.params={
       "name": "Effect Boost MarsGoods",
       "source": "island-event",
       "targets": [
-        5974,
         2793,
-        5982,
+        2880,
         2918,
         2957,
-        3070,
-        5969,
         2994,
-        13808,
-        55945,
-        5954,
+        3070,
         3170,
         3190,
-        2880,
-        5977
+        5954,
+        5969,
+        5974,
+        5977,
+        5982,
+        13808,
+        55945
       ],
       "targetsIsAllProduction": false
     },
@@ -5779,23 +5779,23 @@ if(window.params == null)window.params={
       "targets": [
         2200,
         2693,
-        5972,
         2694,
-        23723,
         2699,
-        4831,
-        3075,
-        5967,
+        2795,
         2799,
+        3075,
+        3171,
+        3174,
+        3177,
+        4831,
         5474,
         5570,
         5960,
-        3174,
-        3171,
-        23753,
-        3177,
-        2795,
-        8427
+        5967,
+        5972,
+        8427,
+        23723,
+        23753
       ],
       "targetsIsAllProduction": false
     },
@@ -5825,20 +5825,20 @@ if(window.params == null)window.params={
       "name": "Effect CeresMoreFields",
       "source": "veneration-effect",
       "targets": [
-        2693,
-        5972,
+        2200,
         2669,
+        2693,
+        2799,
         5971,
+        5972,
         31750,
         31762,
-        2200,
-        2799,
-        31764,
+        2694,
         2698,
+        2699,
         2800,
         23723,
-        2694,
-        2699
+        31764
       ],
       "targetsIsAllProduction": false
     },
@@ -5869,15 +5869,15 @@ if(window.params == null)window.params={
       "source": "island-event",
       "targets": [
         2955,
-        5278,
-        8431,
         2956,
         2957,
-        3185,
-        8586,
         2971,
-        8893,
-        3186
+        3185,
+        3186,
+        5278,
+        8431,
+        8586,
+        8893
       ],
       "targetsIsAllProduction": false
     },
@@ -5910,11 +5910,11 @@ if(window.params == null)window.params={
         2786,
         2793,
         2794,
+        5847,
         5973,
         5974,
-        15514,
         5975,
-        5847
+        15514
       ],
       "targetsIsAllProduction": false
     },
@@ -5945,17 +5945,17 @@ if(window.params == null)window.params={
       "source": "island-event",
       "targets": [
         2878,
-        31752,
         3089,
-        5976,
-        31761,
         5299,
-        5851,
-        5849,
         5848,
-        31759,
+        5849,
+        5851,
+        5935,
         5945,
-        5935
+        5976,
+        31752,
+        31759,
+        31761
       ],
       "targetsIsAllProduction": false
     },
@@ -6020,23 +6020,23 @@ if(window.params == null)window.params={
       "name": "Effect Boost Minerva Goods",
       "source": "island-event",
       "targets": [
-        3191,
-        3079,
-        3187,
-        5958,
-        5608,
-        5614,
         2669,
-        5971,
-        31750,
-        31762,
-        8580,
-        2999,
-        5973,
         2786,
         2800,
+        2999,
+        3079,
+        3187,
+        3191,
         5290,
-        5469
+        5469,
+        5608,
+        5614,
+        5958,
+        5971,
+        5973,
+        8580,
+        31750,
+        31762
       ],
       "targetsIsAllProduction": false
     },
@@ -6066,9 +6066,9 @@ if(window.params == null)window.params={
       "name": "Potion Effect Full",
       "source": "session-event",
       "targets": [
-        3170,
-        3070,
         2918,
+        3070,
+        3170,
         5954,
         5969,
         5982
@@ -6101,9 +6101,9 @@ if(window.params == null)window.params={
       "name": "Potion Effect Diminished",
       "source": "session-event",
       "targets": [
-        3170,
-        3070,
         2918,
+        3070,
+        3170,
         5954,
         5969,
         5982
@@ -13246,14 +13246,14 @@ if(window.params == null)window.params={
       "name": "Specialist Campaign Elephant Handler",
       "rarity": "Rare",
       "targets": [
-        2693,
-        5972,
-        2669,
-        5971,
-        31750,
-        31762,
         2200,
-        2799
+        2669,
+        2693,
+        2799,
+        5971,
+        5972,
+        31750,
+        31762
       ]
     },
     {
@@ -13281,16 +13281,16 @@ if(window.params == null)window.params={
       "name": "Specialist Quest Valeria",
       "rarity": "Epic",
       "targets": [
+        2796,
         2955,
         2956,
         2957,
-        8580,
         2958,
-        8586,
+        5278,
         8431,
-        10929,
-        2796,
-        5278
+        8580,
+        8586,
+        10929
       ]
     },
     {
@@ -13319,10 +13319,10 @@ if(window.params == null)window.params={
       "rarity": "Epic",
       "targets": [
         30754,
-        30769,
         30762,
-        30770,
         30765,
+        30769,
+        30770,
         30771
       ]
     },
@@ -13351,16 +13351,16 @@ if(window.params == null)window.params={
       "name": "Specialist Colosseum Volunteer",
       "rarity": "Rare",
       "targets": [
-        3091,
-        5947,
-        5946,
-        3129,
-        3203,
-        41811,
-        3138,
-        5935,
         3089,
-        5945
+        3091,
+        3129,
+        3138,
+        3203,
+        5935,
+        5945,
+        5946,
+        5947,
+        41811
       ]
     },
     {
@@ -13388,14 +13388,14 @@ if(window.params == null)window.params={
       "name": "Specialist Colosseum Cook Apicius",
       "rarity": "Epic",
       "targets": [
-        31767,
-        6586,
-        3186,
-        5960,
-        3174,
-        5959,
         3171,
-        5604
+        3174,
+        3186,
+        5604,
+        5959,
+        5960,
+        6586,
+        31767
       ]
     },
     {
@@ -13480,12 +13480,12 @@ if(window.params == null)window.params={
       "name": "Specialist Maintenance C Gatherers",
       "rarity": "Common",
       "targets": [
+        2795,
         2796,
-        5849,
         5278,
-        8431,
+        5849,
         8427,
-        2795
+        8431
       ]
     },
     {
@@ -13514,13 +13514,13 @@ if(window.params == null)window.params={
       "rarity": "Common",
       "targets": [
         3177,
-        23753,
-        4831,
         3185,
-        5570,
         3189,
-        5474,
         3199,
+        4831,
+        5474,
+        5570,
+        23753,
         55962
       ]
     },
@@ -13550,16 +13550,16 @@ if(window.params == null)window.params={
       "rarity": "Common",
       "targets": [
         2957,
-        5475,
-        31756,
-        8893,
-        5477,
         2999,
-        5469,
-        31772,
-        3082,
         3075,
-        5967
+        3082,
+        5469,
+        5475,
+        5477,
+        5967,
+        8893,
+        31756,
+        31772
       ]
     },
     {
@@ -13587,12 +13587,12 @@ if(window.params == null)window.params={
       "name": "Specialist Maintenance C Smelters",
       "rarity": "Common",
       "targets": [
+        3070,
+        3074,
         5470,
-        31755,
         5472,
         5969,
-        3070,
-        3074
+        31755
       ]
     },
     {
@@ -13620,13 +13620,13 @@ if(window.params == null)window.params={
       "name": "Specialist Maintenance C Dressers",
       "rarity": "Common",
       "targets": [
-        5958,
         3187,
-        3191,
-        5614,
-        5608,
         3190,
-        5609
+        3191,
+        5608,
+        5609,
+        5614,
+        5958
       ]
     },
     {
@@ -13654,16 +13654,16 @@ if(window.params == null)window.params={
       "name": "Specialist Maintenance C Material Producers",
       "rarity": "Common",
       "targets": [
-        3091,
-        5947,
-        5946,
-        3129,
-        3203,
-        41811,
-        3138,
-        5935,
         3089,
-        5945
+        3091,
+        3129,
+        3138,
+        3203,
+        5935,
+        5945,
+        5946,
+        5947,
+        41811
       ]
     },
     {
@@ -13691,14 +13691,14 @@ if(window.params == null)window.params={
       "name": "Specialist Maintenance R Hunters & Fisheries",
       "rarity": "Rare",
       "targets": [
-        31759,
-        5975,
         5851,
+        5975,
+        31759,
         2955,
-        8586,
         2956,
         2971,
-        5299
+        5299,
+        8586
       ]
     },
     {
@@ -13726,14 +13726,14 @@ if(window.params == null)window.params={
       "name": "Specialist Maintenance R Pastures",
       "rarity": "Rare",
       "targets": [
+        2786,
+        2793,
+        2794,
         5847,
         5973,
-        2786,
-        15514,
-        2794,
-        2793,
         5974,
-        8580
+        8580,
+        15514
       ]
     },
     {
@@ -13761,14 +13761,14 @@ if(window.params == null)window.params={
       "name": "Specialist Maintenance R Cookhouses",
       "rarity": "Rare",
       "targets": [
-        31767,
-        6586,
-        3186,
-        5960,
-        3174,
-        5959,
         3171,
-        5604
+        3174,
+        3186,
+        5604,
+        5959,
+        5960,
+        6586,
+        31767
       ]
     },
     {
@@ -13796,8 +13796,8 @@ if(window.params == null)window.params={
       "name": "Specialist Maintenance R Arms Producers",
       "rarity": "Rare",
       "targets": [
-        5954,
         3170,
+        5954,
         13808,
         55945
       ]
@@ -13827,14 +13827,14 @@ if(window.params == null)window.params={
       "name": "Specialist Maintenance E Farms",
       "rarity": "Epic",
       "targets": [
-        2693,
-        5972,
-        2669,
-        5971,
-        31750,
-        31762,
         2200,
-        2799
+        2669,
+        2693,
+        2799,
+        5971,
+        5972,
+        31750,
+        31762
       ]
     },
     {
@@ -13862,17 +13862,17 @@ if(window.params == null)window.params={
       "name": "Specialist Maintenance E Mines & Pits",
       "rarity": "Epic",
       "targets": [
-        5290,
-        5980,
-        5291,
         2918,
+        5290,
+        5291,
+        5980,
         5982,
         50280,
-        31753,
-        10929,
         2958,
         2970,
-        5848
+        5848,
+        10929,
+        31753
       ]
     },
     {
@@ -13901,12 +13901,12 @@ if(window.params == null)window.params={
       "rarity": "Epic",
       "targets": [
         3081,
-        31773,
+        3198,
+        3201,
+        4832,
         5611,
         5616,
-        3198,
-        4832,
-        3201
+        31773
       ]
     },
     {
@@ -13934,12 +13934,12 @@ if(window.params == null)window.params={
       "name": "Specialist Maintenance E Plantations",
       "rarity": "Epic",
       "targets": [
-        31764,
+        2694,
         2698,
+        2699,
         2800,
         23723,
-        2694,
-        2699
+        31764
       ]
     },
     {
@@ -13967,14 +13967,14 @@ if(window.params == null)window.params={
       "name": "Specialist Maintenance E Artisans",
       "rarity": "Epic",
       "targets": [
-        5605,
-        3192,
-        31769,
-        5606,
-        31770,
         3188,
-        5615,
+        3192,
         3202,
+        5605,
+        5606,
+        5615,
+        31769,
+        31770,
         55963
       ]
     },
@@ -14031,8 +14031,8 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity C PorridgeChain",
       "rarity": "Common",
       "targets": [
-        3171,
-        2200
+        2200,
+        3171
       ]
     },
     {
@@ -14089,8 +14089,8 @@ if(window.params == null)window.params={
       "rarity": "Common",
       "targets": [
         3169,
-        3169,
         2786,
+        3169,
         5955,
         5973
       ]
@@ -14122,8 +14122,8 @@ if(window.params == null)window.params={
       "targets": [
         3168,
         3168,
-        31750,
         5956,
+        31750,
         31762
       ]
     },
@@ -14152,9 +14152,9 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity C BreadChain",
       "rarity": "Common",
       "targets": [
-        3174,
-        3075,
         2693,
+        3075,
+        3174,
         5960,
         5967,
         5972
@@ -14186,8 +14186,8 @@ if(window.params == null)window.params={
       "rarity": "Common",
       "targets": [
         3187,
-        31750,
         5958,
+        31750,
         31762
       ]
     },
@@ -14216,9 +14216,9 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity C GarumChain",
       "rarity": "Common",
       "targets": [
-        3185,
         2956,
-        2957
+        2957,
+        3185
       ]
     },
     {
@@ -14246,9 +14246,9 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity C SandalsChain",
       "rarity": "Common",
       "targets": [
-        3190,
+        2793,
         2994,
-        2793
+        3190
       ]
     },
     {
@@ -14276,9 +14276,9 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity C WritingTabletsChain",
       "rarity": "Common",
       "targets": [
+        2795,
         3201,
-        8579,
-        2795
+        8579
       ]
     },
     {
@@ -14306,9 +14306,9 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity C TorcsChain",
       "rarity": "Common",
       "targets": [
-        5606,
+        5291,
         5470,
-        5291
+        5606
       ]
     },
     {
@@ -14336,8 +14336,8 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity C AmphoraeChain",
       "rarity": "Common",
       "targets": [
-        3199,
         2970,
+        3199,
         31752
       ]
     },
@@ -14395,8 +14395,8 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity C OliveOilChain",
       "rarity": "Common",
       "targets": [
-        4831,
-        2699
+        2699,
+        4831
       ]
     },
     {
@@ -14424,12 +14424,12 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity C SoapChain",
       "rarity": "Common",
       "targets": [
-        3189,
         2698,
-        31756,
         2793,
+        3189,
         5475,
-        5974
+        5974,
+        31756
       ]
     },
     {
@@ -14457,8 +14457,8 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity C HatsChain",
       "rarity": "Common",
       "targets": [
-        3188,
-        2786
+        2786,
+        3188
       ]
     },
     {
@@ -14514,9 +14514,9 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity C BeerChain",
       "rarity": "Common",
       "targets": [
-        5570,
+        2799,
         5474,
-        2799
+        5570
       ]
     },
     {
@@ -14544,9 +14544,9 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity R BeefChain",
       "rarity": "Rare",
       "targets": [
-        31767,
+        2796,
         5847,
-        2796
+        31767
       ]
     },
     {
@@ -14574,8 +14574,8 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity R CheeseChain",
       "rarity": "Rare",
       "targets": [
-        6586,
-        5847
+        5847,
+        6586
       ]
     },
     {
@@ -14603,9 +14603,9 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity R TrousersChain",
       "rarity": "Rare",
       "targets": [
+        2800,
         5608,
-        5973,
-        2800
+        5973
       ]
     },
     {
@@ -14633,10 +14633,10 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity R ChariotsChain",
       "rarity": "Rare",
       "targets": [
+        2878,
+        5611,
         5616,
         5975,
-        5611,
-        2878,
         5976
       ]
     },
@@ -14666,12 +14666,12 @@ if(window.params == null)window.params={
       "rarity": "Rare",
       "targets": [
         3177,
-        3177,
         2694,
         2795,
-        23753,
+        3177,
+        8427,
         23723,
-        8427
+        23753
       ]
     },
     {
@@ -14699,8 +14699,8 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity R BroochesChain",
       "rarity": "Rare",
       "targets": [
-        5605,
         5472,
+        5605,
         5980
       ]
     },
@@ -14729,12 +14729,12 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity R TogasChain",
       "rarity": "Rare",
       "targets": [
-        3191,
-        3079,
-        2999,
         2669,
-        8580,
-        5971
+        2999,
+        3079,
+        3191,
+        5971,
+        8580
       ]
     },
     {
@@ -14762,10 +14762,10 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity R WigsChain",
       "rarity": "Rare",
       "targets": [
-        31769,
+        5971,
         15514,
         31766,
-        5971
+        31769
       ]
     },
     {
@@ -14793,11 +14793,11 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity R FineGlassChain",
       "rarity": "Rare",
       "targets": [
-        3202,
-        3082,
-        3074,
         2920,
         2958,
+        3074,
+        3082,
+        3202,
         10929
       ]
     },
@@ -14826,10 +14826,10 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity R ClanShieldsChain",
       "rarity": "Rare",
       "targets": [
-        31773,
         2800,
+        5291,
         5470,
-        5291
+        31773
       ]
     },
     {
@@ -14857,10 +14857,10 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity R OystersChain",
       "rarity": "Rare",
       "targets": [
+        2971,
         3186,
         8586,
-        8893,
-        2971
+        8893
       ]
     },
     {
@@ -14888,10 +14888,10 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity R PeltHatsChain",
       "rarity": "Rare",
       "targets": [
-        31770,
+        2796,
         31759,
-        31772,
-        2796
+        31770,
+        31772
       ]
     },
     {
@@ -14919,10 +14919,10 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity R CloakChain",
       "rarity": "Rare",
       "targets": [
-        5614,
         2786,
-        5469,
         2800,
+        5469,
+        5614,
         5973
       ]
     },
@@ -14951,9 +14951,9 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity R WeaponsChain",
       "rarity": "Rare",
       "targets": [
-        3170,
-        3070,
         2918,
+        3070,
+        3170,
         5954,
         5969,
         5982
@@ -14984,22 +14984,22 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity R ArmorChain",
       "rarity": "Rare",
       "targets": [
-        13839,
-        80613,
-        13810,
+        2793,
+        2880,
         2918,
-        5982,
+        2957,
+        2994,
         3070,
         5969,
-        2880,
-        5977,
-        13808,
-        55945,
-        2793,
         5974,
-        2994,
+        5977,
+        5982,
+        13808,
+        13810,
+        13839,
+        55945,
         80612,
-        2957
+        80613
       ]
     },
     {
@@ -15027,10 +15027,10 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity E NecklacesChain",
       "rarity": "Epic",
       "targets": [
-        3192,
         2920,
-        31755,
-        31753
+        3192,
+        31753,
+        31755
       ]
     },
     {
@@ -15058,10 +15058,10 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity E LyresChain",
       "rarity": "Epic",
       "targets": [
+        2786,
+        3081,
         4832,
         5481,
-        3081,
-        2786,
         8579
       ]
     },
@@ -15120,10 +15120,10 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity E MirrorsChain",
       "rarity": "Epic",
       "targets": [
-        5615,
-        8431,
         5472,
-        5980
+        5615,
+        5980,
+        8431
       ]
     },
     {
@@ -15151,13 +15151,13 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity E TonguesChain",
       "rarity": "Epic",
       "targets": [
-        5604,
-        5477,
-        31756,
-        5851,
         2793,
         5475,
-        5974
+        5477,
+        5604,
+        5851,
+        5974,
+        31756
       ]
     },
     {
@@ -15185,10 +15185,10 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity E LoungersChain",
       "rarity": "Epic",
       "targets": [
+        2786,
         3198,
         8579,
-        8887,
-        2786
+        8887
       ]
     },
     {
@@ -15512,8 +15512,8 @@ if(window.params == null)window.params={
       "rarity": "Epic",
       "targets": [
         5847,
-        5974,
-        5973
+        5973,
+        5974
       ]
     },
     {
@@ -15541,9 +15541,9 @@ if(window.params == null)window.params={
       "name": "Specialist Workforce E Roman Towers",
       "rarity": "Epic",
       "targets": [
-        54990,
         27890,
-        50972
+        50972,
+        54990
       ]
     },
     {
@@ -15571,9 +15571,9 @@ if(window.params == null)window.params={
       "name": "Specialist Workforce E Celtic Towers",
       "rarity": "Epic",
       "targets": [
-        55002,
         29546,
-        50974
+        50974,
+        55002
       ]
     },
     {
@@ -15601,12 +15601,12 @@ if(window.params == null)window.params={
       "name": "Specialist Military E Towers Happiness",
       "rarity": "Epic",
       "targets": [
-        54990,
         27890,
-        50972,
-        55002,
         29546,
-        50974
+        50972,
+        50974,
+        54990,
+        55002
       ]
     },
     {
@@ -15634,10 +15634,10 @@ if(window.params == null)window.params={
       "name": "Specialist Aqueduct E WaterConsumption",
       "rarity": "Epic",
       "targets": [
-        5290,
-        5980,
-        5291,
         2918,
+        5290,
+        5291,
+        5980,
         5982,
         50280
       ]
@@ -16014,14 +16014,14 @@ if(window.params == null)window.params={
       "name": "Specialist Colosseum Hero Favillus",
       "rarity": "Legendary",
       "targets": [
-        5470,
-        31755,
-        5472,
-        5969,
         3070,
         3074,
-        5954,
+        5470,
+        5472,
+        5969,
+        31755,
         3170,
+        5954,
         13808,
         55945
       ]
@@ -16051,10 +16051,10 @@ if(window.params == null)window.params={
       "name": "Specialist AreaPools L Mines",
       "rarity": "Legendary",
       "targets": [
-        5290,
-        5980,
-        5291,
         2918,
+        5290,
+        5291,
+        5980,
         5982,
         50280
       ]
@@ -16084,8 +16084,8 @@ if(window.params == null)window.params={
       "name": "Specialist AreaPools L Smelters",
       "rarity": "Legendary",
       "targets": [
-        5954,
         3170,
+        5954,
         13808,
         55945
       ]
@@ -16115,51 +16115,50 @@ if(window.params == null)window.params={
       "name": "Specialist ProdPools L All",
       "rarity": "Legendary",
       "targets": [
-        2955,
-        2956,
-        2957,
-        8580,
-        2958,
-        8586,
         2200,
+        2669,
         2693,
         2694,
         2698,
         2699,
-        2669,
-        8579,
-        31750,
+        2786,
+        2793,
+        2794,
+        2795,
+        2796,
+        2799,
+        2800,
         2878,
         2880,
-        31752,
-        2795,
-        2918,
-        2954,
-        2920,
         2916,
-        2786,
-        2794,
-        2793,
+        2918,
+        2920,
+        2954,
+        2955,
+        2956,
+        2957,
+        2958,
         2970,
-        31753,
         2971,
         2994,
-        31756,
         2999,
-        3079,
-        3081,
-        8887,
-        5481,
         3070,
         3074,
-        3082,
-        31755,
         3075,
-        8893,
+        3079,
+        3081,
+        3082,
+        3089,
+        3091,
+        3129,
+        3138,
+        3168,
+        3169,
+        3170,
         3171,
         3174,
-        3185,
         3177,
+        3185,
         3186,
         3187,
         3188,
@@ -16167,92 +16166,92 @@ if(window.params == null)window.params={
         3190,
         3191,
         3192,
+        3198,
         3199,
-        4831,
         3201,
         3202,
-        3198,
-        4832,
-        3089,
-        3091,
-        3129,
-        3138,
         3203,
-        3168,
-        3169,
-        3170,
-        13808,
-        8431,
-        10929,
-        23723,
-        5972,
-        31762,
-        31764,
-        5971,
-        5976,
-        5977,
-        31761,
-        5299,
-        5851,
-        8427,
-        5978,
-        5982,
-        5980,
-        5974,
-        15514,
-        5475,
-        31766,
-        5969,
-        5472,
-        5967,
-        5477,
-        5960,
-        5959,
-        5604,
-        23753,
-        5958,
-        5605,
-        31769,
-        5615,
-        5945,
-        5947,
-        5946,
-        5955,
-        5956,
-        5954,
-        2796,
+        4831,
+        4832,
         5278,
-        2799,
-        2800,
-        5849,
-        5847,
-        31759,
-        5848,
-        5975,
+        5290,
         5291,
         5295,
-        5290,
-        5295,
-        5973,
+        5299,
         5469,
-        31772,
-        5611,
         5470,
+        5472,
         5474,
-        6586,
+        5475,
+        5477,
+        5481,
         5570,
-        31767,
-        5609,
-        5608,
+        5604,
+        5605,
         5606,
+        5608,
+        5609,
+        5611,
         5614,
-        31770,
-        55963,
-        31773,
+        5615,
         5616,
+        5847,
+        5848,
+        5849,
+        5851,
         5935,
+        5945,
+        5946,
+        5947,
+        5954,
+        5955,
+        5956,
+        5958,
+        5959,
+        5960,
+        5967,
+        5969,
+        5971,
+        5972,
+        5973,
+        5974,
+        5975,
+        5976,
+        5977,
+        5978,
+        5980,
+        5982,
+        6586,
+        8427,
+        8431,
+        8579,
+        8580,
+        8586,
+        8887,
+        8893,
+        10929,
+        13808,
+        15514,
+        23723,
+        23753,
+        31750,
+        31752,
+        31753,
+        31755,
+        31756,
+        31759,
+        31761,
+        31762,
+        31764,
+        31766,
+        31767,
+        31769,
+        31770,
+        31772,
+        31773,
         41811,
-        50280
+        50280,
+        55963
       ]
     },
     {
@@ -16281,12 +16280,12 @@ if(window.params == null)window.params={
       "rarity": "Legendary",
       "targets": [
         2878,
-        5976,
-        31752,
-        31761,
         2880,
+        5976,
         5977,
-        8579
+        8579,
+        31752,
+        31761
       ]
     },
     {
@@ -16314,10 +16313,10 @@ if(window.params == null)window.params={
       "name": "Specialist ProdPools L Mines",
       "rarity": "Legendary",
       "targets": [
-        5290,
-        5980,
-        5291,
         2918,
+        5290,
+        5291,
+        5980,
         5982,
         50280
       ]
@@ -16347,12 +16346,12 @@ if(window.params == null)window.params={
       "name": "Specialist ProdPools L Smelters",
       "rarity": "Legendary",
       "targets": [
+        3070,
+        3074,
         5470,
-        31755,
         5472,
         5969,
-        3070,
-        3074
+        31755
       ]
     },
     {
@@ -16380,8 +16379,8 @@ if(window.params == null)window.params={
       "name": "Specialist ProdPools L Armouries",
       "rarity": "Legendary",
       "targets": [
-        5954,
         3170,
+        5954,
         13808,
         55945
       ]
@@ -16411,14 +16410,14 @@ if(window.params == null)window.params={
       "name": "Specialist ProdPools L Farms",
       "rarity": "Legendary",
       "targets": [
-        2693,
-        5972,
-        2669,
-        5971,
-        31750,
-        31762,
         2200,
-        2799
+        2669,
+        2693,
+        2799,
+        5971,
+        5972,
+        31750,
+        31762
       ]
     },
     {
@@ -16446,12 +16445,12 @@ if(window.params == null)window.params={
       "name": "Specialist ProdPools L Plantations",
       "rarity": "Legendary",
       "targets": [
-        31764,
+        2694,
         2698,
+        2699,
         2800,
         23723,
-        2694,
-        2699
+        31764
       ]
     },
     {
@@ -16479,14 +16478,14 @@ if(window.params == null)window.params={
       "name": "Specialist ProdPools L Pastures",
       "rarity": "Legendary",
       "targets": [
+        2786,
+        2793,
+        2794,
         5847,
         5973,
-        2786,
-        15514,
-        2794,
-        2793,
         5974,
-        8580
+        8580,
+        15514
       ]
     },
     {

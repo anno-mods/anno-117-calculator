@@ -26,7 +26,13 @@
       "WebFetch(domain:anno117-kalkulator.de)",
       "WebFetch(domain:anno.land)",
       "Bash(npm run generate-sitemap:*)",
-      "SlashCommand(/translate:*)"
+      "SlashCommand(/translate:*)",
+      "Bash(git log:*)",
+      "Bash(mkdir:*)",
+      "Bash(if [ -f .gitattributes ])",
+      "Bash(then cat .gitattributes)",
+      "Bash(else echo \"File does not exist\")",
+      "Bash(fi)"
     ],
     "deny": []
   },

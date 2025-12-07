@@ -167,7 +167,12 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <trade-route-amount params="supplier: $data"></trade-route-amount>
+                                        <div class="float-right inline-list">
+                                            <span data-bind="if: !$data.isExport($parent) && $data.fromIslandProduct.isHighlightedAsMissing()">
+                                                <span class="fa fa-exclamation-triangle danger-icon mr-2" style="position: initial"></span>
+                                            </span>
+                                            <trade-route-amount params="supplier: $data"></trade-route-amount>
+                                        </div>
                                     </td>
                                     <td>
                                         <button class="btn btn-secondary btn-sm float-right" data-bind="click: () => $data.delete()">

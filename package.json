@@ -1,7 +1,7 @@
 {
   "name": "anno-117-calculator",
   "displayName": "Anno 117 Calculator",
-  "version": "1.5",
+  "version": "1.6",
   "description": "A calculator to compute the consumption of goods in the computer game Anno 117.",
   "scripts": {
     "test": "playwright test",
@@ -29,7 +29,8 @@
     "generate-types": "node scripts/generate-config-types.js",
     "generate-sitemap": "node scripts/generate-sitemap.js",
     "check-translations": "node scripts/check-translations.js",
-    "check-translations:batch": "node scripts/check-translations.js --batch"
+    "check-translations:batch": "node scripts/check-translations.js --batch",
+    "publish": "bash scripts/publish.sh"
   },
   "author": "Nico Höllerich",
   "license": "MIT",
