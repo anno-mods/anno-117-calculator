@@ -32,7 +32,8 @@
       "Bash(if [ -f .gitattributes ])",
       "Bash(then cat .gitattributes)",
       "Bash(else echo \"File does not exist\")",
-      "Bash(fi)"
+      "Bash(fi)",
+      "Bash(git config:*)"
     ],
     "deny": []
   },

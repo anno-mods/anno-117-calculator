@@ -129,7 +129,7 @@ echo -e "${GREEN}✓ Squash merged main into release${NC}"
 
 # Step 9: Push to GitHub
 echo "Pushing release branch to GitHub..."
-git push origin release
+git push anno-mods main
 
 echo -e "${GREEN}✓ Pushed to GitHub${NC}"
 
@@ -139,7 +139,7 @@ MAX_WAIT=60
 ELAPSED=0
 
 while [ $ELAPSED -lt $MAX_WAIT ]; do
-    if git ls-remote --tags origin | grep -q "refs/tags/$TAG"; then
+    if git ls-remote --tags anno-mods | grep -q "refs/tags/$TAG"; then
         echo -e "${GREEN}✓ Tag $TAG created!${NC}"
         break
     fi
@@ -171,9 +171,6 @@ git checkout main
 
 echo "Merging release into main..."
 git merge release --no-edit
-
-echo "Pushing main to GitHub..."
-git push origin main
 
 echo ""
 echo -e "${GREEN}========================================${NC}"

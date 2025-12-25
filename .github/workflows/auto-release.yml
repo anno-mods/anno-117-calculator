@@ -16,10 +16,11 @@ jobs:
       - name: Check for release commit
         id: check
         run: |
-          MSG="${{ github.event.head_commit.message }}"
-          echo "Commit message: $MSG"
+          # Get first line of commit message for version detection
+          FIRST_LINE=$(echo "${{ github.event.head_commit.message }}" | head -n 1)
+          echo "First line: $FIRST_LINE"
 
-          if [[ "$MSG" =~ ^Release\ ([0-9]+\.[0-9]+) ]]; then
+          if [[ "$FIRST_LINE" =~ ^Release\ ([0-9]+\.[0-9]+) ]]; then
             VERSION="${BASH_REMATCH[1]}"
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "create=true" >> $GITHUB_OUTPUT
@@ -35,8 +36,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           VERSION="${{ steps.check.outputs.version }}"
-          MESSAGE="${{ github.event.head_commit.message }}"
+
+          # Use heredoc to safely handle multi-line commit message
+          cat > release_notes.md << 'EOF'
+          ${{ github.event.head_commit.message }}
+          EOF
 
           gh release create "$VERSION" \
             --title "$VERSION" \
-            --notes "$MESSAGE"
+            --notes-file release_notes.md
