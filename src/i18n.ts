@@ -752,18 +752,7 @@ export const texts: Record<string, Record<string, string>> = {
         korean: "새로운  117 계산기 버전이 제공됩니다. 다운로드 버튼을 클릭하십시오."
     },
     newFeature: {
-        english: "DLC Prophecies of Ash (enable in settings), fertilities and area buffs granting population added.",
-        german: "DLC Verheißung des Vulkans (in Einstellungen aktivieren), Fruchtbarkeiten und Bereichseffekte, welche Einwohner generieren, hinzugefügt.",
-        french: "DLC Prophéties des cendres (activer dans les paramètres), fertilités et effets de zone accordant de la population ajoutés.",
-        polish: "DLC Popielne proroctwa (włącz w ustawieniach), żyzności i efekty obszarowe przyznające populację dodane.",
-        spanish: "DLC Profecías cinéreas (activar en configuración), fertilidades y efectos de área que otorgan población añadidos.",
-        italian: "DLC Profezie cineree (abilitare nelle impostazioni), fertilità ed effetti ad area che concedono popolazione aggiunti.",
-        brazilian: "DLC Profecias das Cinzas (ativar nas configurações), fertilidades e efeitos de área que concedem população adicionados.",
-        russian: "DLC Пророчества пепла (включите в настройках), добавлены плодородия и эффекты по области, дающие население.",
-        simplified_chinese: "DLC 灰烬的预言（在设置中启用），已添加授予人口的肥沃度和范围效果。",
-        traditional_chinese: "DLC 灰燼預言（在設定中啟用），已新增授予人口的肥沃度和區域效果。",
-        japanese: "DLC 灰の予言（設定で有効化）、人口を付与する肥沃度と範囲効果が追加されました。",
-        korean: "DLC 재의 예언（설정에서 활성화）, 인구를 부여하는 비옥도 및 지역 효과가 추가되었습니다.",
+        english: "Game Update 1.5.2",
     },
     helpContent: {
         brazilian: `<h5>Uso e Estrutura</h5>
