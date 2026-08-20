@@ -7,6 +7,7 @@ import { isSupplier } from './suppliers';
 import { NumberInputHandler, EPSILON, ko, debugBindingContext, logAssetInfo } from './util';
 import { Constructible, Island, Region } from './world';
 import { TradeRoute } from './trade';
+import { compareAggregateDemands, isAggregateModeFor, isAggregating } from './aggregate';
 
 declare const $: any;
 declare const window: any;
@@ -136,6 +137,34 @@ interface Demand {
     };
 
     /**
+     * Virtual bindings that gate a block on whether the current island is shown as a read-only
+     * aggregate. `<!-- ko ifEditable: true -->` renders only when NOT aggregating (mutating
+     * controls); `<!-- ko ifAggregated: true -->` renders only while aggregating (read-only
+     * replacements). The passed value is ignored; write `true` for readability.
+     *
+     * These delegate to KO's own `if` binding, so each binding site gets its own computed and its
+     * own dependency set - the shared memoized pureComputed that caused the stale-$data glitch
+     * (templates/AGENTS.md) is deliberately NOT reintroduced here.
+     *
+     * Prefer these ONLY for blocks that must genuinely disappear while aggregating (supplier
+     * pickers, item equip sections). For a control with a sensible read-only rendering, pass the
+     * aggregate object down and let the component branch on `buildings().readOnly`.
+     */
+    ko.bindingHandlers.ifEditable = {
+        init: (element: HTMLElement, _valueAccessor: () => unknown, allBindings: any, viewModel: any,
+            bindingContext: any) =>
+            ko.bindingHandlers['if'].init(element, () => !isAggregating(), allBindings, viewModel, bindingContext)
+    };
+    ko.virtualElements.allowedBindings.ifEditable = true;
+
+    ko.bindingHandlers.ifAggregated = {
+        init: (element: HTMLElement, _valueAccessor: () => unknown, allBindings: any, viewModel: any,
+            bindingContext: any) =>
+            ko.bindingHandlers['if'].init(element, () => isAggregating(), allBindings, viewModel, bindingContext)
+    };
+    ko.virtualElements.allowedBindings.ifAggregated = true;
+
+    /**
      * Number input component with increment/decrement buttons
      * Provides vertical buttons for adjusting numeric values with step increments
      */
@@ -257,24 +286,69 @@ ko.components.register('trade-route-amount', {
  */
 ko.components.register('factory-header', {
     viewModel: function (params: any) {
-        this.$data = params.data;
+        const data = params.data;
         this.hasButton = params.button;
         this.$root = window.view;
+
+        this.instance = ko.pureComputed(() => {
+            if (!data) return null;
+            if (typeof data.instance === 'function') {
+                return data.instance();
+            }
+            return data.instance || data;
+        });
+
+        this.name = ko.pureComputed(() => {
+            const inst = this.instance();
+            if (inst && typeof inst.name === 'function') {
+                return inst.name();
+            }
+            return inst?.name || data?.name || '';
+        });
+
+        this.icon = ko.pureComputed(() => {
+            const inst = this.instance();
+            return inst?.icon || data?.icon;
+        });
+
+        this.island = ko.pureComputed(() => {
+            if (data && data.island) {
+                return typeof data.island === 'function' ? data.island() : data.island;
+            }
+            const inst = this.instance();
+            if (inst && inst.island) {
+                return typeof inst.island === 'function' ? inst.island() : inst.island;
+            }
+            return window.view.island();
+        });
+
+        this.availableRegions = ko.pureComputed(() => {
+            const inst = this.instance();
+            if (inst && typeof inst.availableRegions === 'function') {
+                return inst.availableRegions();
+            }
+            if (data && data.availableRegions) {
+                return typeof data.availableRegions === 'function' ? data.availableRegions() : data.availableRegions;
+            }
+            return [];
+        });
     },
     template:
         `<div class="ui-fchain-item-tr-button" data-bind="debug: 'Factory header', if: hasButton">
             <div>
-                <button class="btn btn-light btn-sm" data-bind="click: () => {$root.selectedFactory($data.instance())}" data-toggle="modal" data-target="#factory-config-dialog">
+                <button class="btn btn-light btn-sm" data-bind="click: () => {$root.selectedFactory(instance())}" data-toggle="modal" data-target="#factory-config-dialog">
                     <span class="fa fa-sliders"></span>
                 </button>
             </div>
         </div>
 
-        <div class="ui-fchain-item-name" data-bind="text: $data.name, visible: !$root.settings.hideNames.checked()"></div>
+        <div class="ui-fchain-item-name" data-bind="text: name, visible: !$root.settings.hideNames.checked()"></div>
 
         <div class="ui-fchain-item-icon mb-2">
-            <img class="icon-tile" data-bind="attr: { src: $data.icon ? $data.icon : null, alt: $data.name }">
-            <img class="superscript-icon icon-light" data-bind="visible: $data.island.region.id == 'Meta', attr: {src: $data.availableRegions()[0] ? $data.availableRegions()[0].icon : null, title: $data.availableRegions()[0] ? $data.availableRegions()[0].name : null}">
+            <img class="icon-tile" data-bind="attr: { src: icon ? icon : null, alt: name }">
+            <!-- ko if: island() -->
+            <img class="superscript-icon icon-light" data-bind="visible: island().region.id == 'Meta', attr: {src: availableRegions()[0] ? availableRegions()[0].icon : null, title: availableRegions()[0] ? availableRegions()[0].name : null}">
+            <!-- /ko -->
         </div>`
 });
 
@@ -346,41 +420,56 @@ ko.components.register('replacement', {
     }, template:
         ` <div class="ui-item-icon-replacement">
             <span class="strike-through">
-                <img class="icon-sm icon-light" src="" data-bind="debug: 'Replacement', attr: { src: old.icon ? old.icon : null, alt: old.name }">
+                <img class="icon-sm" src="" data-bind="debug: 'Replacement', attr: { src: old.icon ? old.icon : null, alt: old.name }">
             </span>
             <!-- ko if: replacing -->
             <div class="ui-replacement-spacer">
                     &rarr;
             </div>
             <div>
-                <img class="icon-sm icon-light" src="" data-bind="attr: { src: replacing.icon ? replacing.icon : null, alt: replacing.name }">
+                <img class="icon-sm" src="" data-bind="attr: { src: replacing.icon ? replacing.icon : null, alt: replacing.name }">
             </div>
             <!-- /ko -->
         </div>`
 });
 
 /**
- * Existing buildings input component for setting building counts
- * Provides a numeric input with increment/decrement buttons for existing building counts
- * @param asset - The asset object to configure existing buildings for
+ * Constructed-buildings control. Accepts either a Constructible (`{guid, buildings}`) or a
+ * presenter/row exposing `guid`/`buildings` as computeds - both resolve to the same reactive shape.
+ *
+ * The editable/read-only branch lives HERE rather than at each call site: `buildings()` already
+ * returns an AggregateBuildingsCalc (readOnly === true) when the owning presenter is aggregating,
+ * so a call site passes one object and never needs an aggregate condition of its own.
+ *
+ * @param params - a Constructible, or a presenter/row with observable `guid`/`buildings`
  */
 ko.components.register('constructed-buildings-input', {
-    viewModel: function (asset: Constructible) {
-        this.guid = asset.guid;
-        this.buildings = asset.buildings;
+    viewModel: function (params: Constructible | { guid: unknown; buildings: unknown }) {
+        // Read params through pureComputeds, never unwrapped once in this body: a presenter
+        // allocates a fresh AggregateBuildingsCalc on every recompute, and unwrapping eagerly
+        // would freeze the first one.
+        this.guid = ko.pureComputed(() => ko.unwrap(params.guid));
+        this.buildings = ko.pureComputed(() => ko.unwrap(params.buildings));
+        this.readOnly = ko.pureComputed(() => this.buildings()?.readOnly === true);
+        this.constructed = ko.pureComputed(() => this.buildings()?.constructed() ?? 0);
         this.texts = window.view.texts;
     }, template:
-        `<div class="input-group input-group-short spinner float-left" style="max-width: 10rem;">
-            <input class="form-control" type="number" value="0" step="1" min="0" data-bind="value: buildings.constructed, attr: {id: guid + '-constructed-buildings-input'}" />
+        `<!-- ko ifnot: readOnly -->
+        <div class="input-group input-group-short spinner float-left" style="max-width: 10rem;">
+            <input class="form-control" type="number" value="0" step="1" min="0" data-bind="value: buildings().constructed, attr: {id: guid() + '-constructed-buildings-input'}" />
             <div class="input-group-append">
-                <div data-bind="component: { name: 'number-input-increment', params: { obs: buildings.constructed, id: guid + '-constructed-buildings-input' }}"></div>
+                <div data-bind="component: { name: 'number-input-increment', params: { obs: buildings().constructed, id: guid() + '-constructed-buildings-input' }}"></div>
             </div>
             <div class="input-group-append" data-bind="debug: 'Constructed buildings input', src: {title: texts.residences.name()}">
                 <div class="input-group-text">
                     <img class="icon-sm icon-light" src="icons/icon_house_white.png" />
                 </div>
             </div>
-        </div>`
+        </div>
+        <!-- /ko -->
+        <!-- ko if: readOnly -->
+        <span data-bind="text: constructed, attr: {id: guid() + '-constructed-buildings-readonly'}"></span>
+        <!-- /ko -->`
 });
 
 /**
@@ -415,6 +504,57 @@ ko.components.register('icon-checkbox', {
                 </span>
             </label>
         </div>`
+});
+
+/**
+ * Tri-state toggle for equipped factory items (Off / Base / Boosted).
+ * Backwards compatible with a plain equip checkbox: when hasBoost is false it only cycles Off <-> Base.
+ * @param params.asset - The item asset (used for the icon)
+ * @param params.state - KO observable holding the slot state (0 = Off, 1 = Base, 2 = Boosted)
+ * @param params.hasBoost - boolean/observable: whether a boosted variant exists (enables the third state)
+ * @param params.id - Optional element id
+ */
+ko.components.register('tri-state-toggle', {
+    viewModel: function (params: any) {
+        this.asset = params.asset;
+        this.state = params.state;
+        this.hasBoost = params.hasBoost;
+        this.id = params.id || (this.asset && this.asset.guid);
+        this.texts = window.view && window.view.texts;
+
+        var self = this;
+        this.title = ko.pureComputed(function () {
+            var s = ko.unwrap(self.state);
+            var t = self.texts;
+            if (s === 2) return t && t.boostBoosted ? t.boostBoosted.name() : 'Boosted';
+            if (s === 1) return t && t.boostBase ? t.boostBase.name() : 'Base';
+            return t && t.boostOff ? t.boostOff.name() : 'Off';
+        });
+
+        this.cycle = function () {
+            var max = ko.unwrap(self.hasBoost) ? 2 : 1;
+            var s = ko.unwrap(self.state);
+            self.state(s >= max ? 0 : s + 1);
+        };
+
+        this.onKeydown = function (_data: any, e: KeyboardEvent) {
+            if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Enter') {
+                self.cycle();
+                return false;
+            }
+            return true;
+        };
+    }, template:
+        `<span class="tri-state-toggle" role="button"
+               data-bind="attr: { id: id, title: title(), 'aria-label': title() },
+                          click: cycle, event: { keydown: onKeydown }" tabindex="0">
+            <span class="tri" data-bind="attr: { 'data-state': state }"></span>
+            <!-- ko if: asset && asset.icon -->
+            <span class="tri-icon ml-1">
+                <img class="icon-sm" data-bind="attr: { src: asset.icon, alt: title() }" />
+            </span>
+            <!-- /ko -->
+        </span>`
 });
 
 /**
@@ -557,7 +697,7 @@ ko.components.register('consumer-unknown', {
  */
 ko.components.register('consumer-residence', {
     template:
-        `<div class="inline-list" style="cursor: pointer" data-dismiss="modal" data-bind="debug: 'Consumer: Residence', click: () => {$root.presenter.residence.update($data.consumer.populationLevel); setTimeout(() => {  $('#population-level-config-dialog').modal('show')}, 500);}" >
+        `<div class="inline-list" style="cursor: pointer" data-dismiss="modal" data-bind="debug: 'Consumer: Residence', click: () => {$root.presenter.residence.open($data.consumer.populationLevel); setTimeout(() => {  $('#population-level-config-dialog').modal('show')}, 500);}" >
             <div data-bind="component: {name: 'asset-icon', params: $data.consumer.populationLevel}"></div>
             <span class="ml-2" data-bind="text: $data.consumer.populationLevel.name"></span>
         </div>`
@@ -633,7 +773,59 @@ ko.components.register('consumer-view', {
         });
 
         this.demands = ko.pureComputed(() => {
-            var demands = this.product().demands().filter((d: Demand) => d.amount() > EPSILON);
+            const currentProduct = this.product();
+            if (!currentProduct) return [];
+            const island = currentProduct.island as Island;
+
+            if (isAggregateModeFor(island)) {
+                const realIslands = window.view.islands().filter((i: Island) => !i.isAllIslands());
+                const groupMap = new Map<string, { consumer: any, module: any, amounts: number[] }>();
+
+                for (const realIsland of realIslands) {
+                    const productOnIsland = realIsland.assetsMap.get(currentProduct.guid) as Product | undefined;
+                    if (!productOnIsland) continue;
+
+                    for (const demand of productOnIsland.demands()) {
+                        const d = demand as any;
+                        const amount = d.amount();
+                        if (amount <= EPSILON) continue;
+
+                        let key = '';
+                        if (d.module) {
+                            key = `module-${d.module.guid}-${d.consumer.guid}`;
+                        } else if (d.consumer instanceof ResidenceBuilding) {
+                            key = `residence-${d.consumer.populationLevel.guid}`;
+                        } else {
+                            key = `factory-${d.consumer.guid}`;
+                        }
+
+                        let entry = groupMap.get(key);
+                        if (!entry) {
+                            entry = {
+                                consumer: d.consumer,
+                                module: d.module,
+                                amounts: []
+                            };
+                            groupMap.set(key, entry);
+                        }
+                        entry.amounts.push(amount);
+                    }
+                }
+
+                const result = Array.from(groupMap.values()).map(entry => {
+                    const totalAmount = entry.amounts.reduce((sum, val) => sum + val, 0);
+                    return {
+                        consumer: entry.consumer,
+                        module: entry.module,
+                        amount: () => totalAmount
+                    };
+                });
+
+                const indexOf = (guid: number) => this.populationResidenceIndices().get(guid);
+                return result.sort((a, b) => compareAggregateDemands(indexOf, a, b));
+            }
+
+            var demands = currentProduct.demands().filter((d: Demand) => d.amount() > EPSILON);
             return demands.sort((a: Demand, b: Demand) => {
                 if (a.consumer instanceof ResidenceNeed && b.consumer instanceof ResidenceNeed)
                     return this.populationResidenceIndices().get(a.consumer.residence.populationLevel) - this.populationResidenceIndices().get(b.consumer.residence.populationLevel);
@@ -737,6 +929,25 @@ ko.components.register('buff-display', {
             <div data-bind="if: $data.addedFertility" class="inline-list-centered">
                 <span data-bind="text: formatNumber($data.fertilityPercent, true) + ' %'"></span>
                 <img class="icon-sm ml-1" data-bind="attr: { src: $data.addedFertility && $data.addedFertility.icon ? $data.addedFertility.icon : null, alt: $data.addedFertility && $data.addedFertility.name, title: $data.addedFertility && $data.addedFertility.name }">
+            </div>
+            <!-- reduced consumption (all needs) -->
+            <div class="inline-list-centered" data-bind="debug: 'Consumption modifier', if: $data.consumptionModifierInPercent != 0, attr: {title: $root.texts.reduceConsumption.name()}">
+                <span data-bind="text: formatNumber($data.consumptionModifierInPercent, true) + ' %'"></span>
+                <img class="icon-sm icon-light ml-1" src="icons/icon_marketplace_2d_light.png">
+            </div>
+            <!-- reduced consumption (per affected good) -->
+            <div class="inline-list-centered" data-bind="debug: 'Goods consumption', if: $data.goodConsumptionUpgrade && $data.goodConsumptionUpgrade.length, attr: {title: $root.texts.reduceConsumption.name()}">
+                <!-- ko foreach: $data.goodConsumptionUpgrade -->
+                <span class="ml-1" data-bind="text: formatNumber($data.amountInPercent, true) + ' %'"></span>
+                <img class="icon-sm" data-bind="attr: {src: $data.product && $data.product.icon ? $data.product.icon : null, alt: $data.product && $data.product.name, title: $data.product && $data.product.name}">
+                <!-- /ko -->
+            </div>
+            <!-- additional needs -->
+            <div data-bind="debug: 'Additional needs', if: $data.additionalNeeds && $data.additionalNeeds.length" class="inline-list-centered">
+                <img class="icon-sm icon-light mr-1" src="icons/icon_2d_extra_demand.png" data-bind="attr: {title: $root.texts.additionalNeed.name()}">
+                <!-- ko foreach: $data.additionalNeeds -->
+                <img class="icon-sm ml-1" data-bind="attr: {src: $data.icon ? $data.icon : null, alt: $data.name, title: $data.name}">
+                <!-- /ko -->
             </div>
         </div>`
 });

@@ -58,19 +58,19 @@ test.describe('Session Icons on Factory Tiles', () => {
       const config = await getWithDataConfig();
       config["calculatorSettings"] = JSON.stringify({ "settings.showAllProducts": "1" });
       await configLoader.loadConfigObject(page, config);
-      await page.goto('http://localhost:8080/index.html');
+      await page.goto('/');
       await page.waitForLoadState('networkidle');
     });
 
-    test('Latium, product Cheese -> session icon Albion', async ({ page }) => {
+    test('Latium, product Aurochs -> session icon Albion', async ({ page }) => {
       // Select Latium
       await page.evaluate(() => {
           const island = window.view.islands().find((i: any) => i.name() === "Latium");
           if (island) { window.view.island(island); }
       });
 
-      const info = await checkProduct(page, 2153); // Cheese
-      console.log('Cheese on Latium:', info);
+      const info = await checkProduct(page, 2105); // Aurochs
+      console.log('Aurochs on Latium:', info);
       expect(info.hasIcon).toBe(true);
       expect(info.title).toBe("Albion");
     });
@@ -131,7 +131,7 @@ test.describe('Session Icons on Factory Tiles', () => {
     config["calculatorSettings"] = JSON.stringify({ "settings.showAllProducts": "1" });
     
     await configLoader.loadConfigObject(page, config);
-    await page.goto('http://localhost:8080/index.html');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     // Select All Islands
@@ -154,7 +154,7 @@ test.describe('Session Icons on Factory Tiles', () => {
     config["calculatorSettings"] = JSON.stringify({ "settings.showAllProducts": "1" });
     
     await configLoader.loadConfigObject(page, config);
-    await page.goto('http://localhost:8080/index.html');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     // Select All Islands
@@ -174,12 +174,12 @@ test.describe('Session Icons on Factory Tiles', () => {
     expect(info.hasIcon).toBe(true);
   });
 
-  test('DLC active: Minerals has session icon', async ({ page }) => {
+  test('DLC active: Sardines has session icon (Latium-only)', async ({ page }) => {
     const config = await getBasicConfig();
     config["calculatorSettings"] = JSON.stringify({ "settings.showAllProducts": "1" });
     
     await configLoader.loadConfigObject(page, config);
-    await page.goto('http://localhost:8080/index.html');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     // Select All Islands
@@ -193,8 +193,8 @@ test.describe('Session Icons on Factory Tiles', () => {
         window.view.dlcs.forEach((d: any) => d.checked(true));
     });
 
-    // Minerals (8563)
-    const info = await checkProduct(page, 8563);
+    // Sardines (2088)
+    const info = await checkProduct(page, 2088);
     expect(info.hasIcon).toBe(true);
   });
 });

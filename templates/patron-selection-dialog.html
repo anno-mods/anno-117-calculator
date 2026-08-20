@@ -62,7 +62,11 @@
                                             <span data-bind="text: '+' + formatNumber($data.buffScaling)"></span>
                                             <img class="icon-sm icon-light" src="../icons/icon_resource_population.png" />
                                             <!-- /ko -->
-                                            <!-- ko ifnot: $parent.isPopulationBuff -->
+                                            <!-- ko if: $parent.isConsumptionModifier -->
+                                            <span data-bind="text: formatNumber(-$data.buffScaling) + ' %'"></span>
+                                            <img class="icon-sm icon-light" src="../icons/icon_marketplace_2d_light.png" />
+                                            <!-- /ko -->
+                                            <!-- ko ifnot: $parent.isPopulationBuff || $parent.isConsumptionModifier -->
                                             <span data-bind="text: formatNumber($data.buffScaling, true) + ' %'"></span>
                                             <img class="icon-sm icon-light" src="../icons/icon_2d_productivity_0.webp" />
                                             <!-- /ko -->

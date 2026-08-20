@@ -43,8 +43,8 @@ test.describe('Wig Maker and Oat Demand Calculation', () => {
         // 1 Wig Maker (90s) needs 0.666 Wig Base/min.
         // 1 Wig Base Maker (120s) needs 0.5 Flax/min per 1.0 output.
         // 0.666 Wig Base needs 0.666 Flax/min.
-        // If Oat Farm produces 1 Flax every 12 cycles, it needs 0.666 * 12 = 8.0 cycles/min.
-        expect(farmThroughput).toBeGreaterThanOrEqual(8);
+        // If Oat Farm produces 1 Flax every 10 cycles (Casponia Casta), it needs 0.666 * 10 = 6.66 cycles/min.
+        expect(farmThroughput).toBeGreaterThanOrEqual(6.66);
 
         // Reset Wig Maker to zero buildings
         await page.evaluate((guid) => {

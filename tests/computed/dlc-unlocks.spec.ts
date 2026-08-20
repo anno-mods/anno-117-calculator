@@ -20,7 +20,7 @@ test.describe('DLC Unlock Logic', () => {
     const config = await getBasicConfig();
     
     await configLoader.loadConfigObject(page, config);
-    await page.goto('http://localhost:8080/index.html');
+    await page.goto('/');
     await page.waitForFunction(() => (window as any).view && (window as any).view.islands().length > 0);
     await page.waitForTimeout(300);
 
@@ -55,7 +55,7 @@ test.describe('DLC Unlock Logic', () => {
     const config = await getBasicConfig();
     
     await configLoader.loadConfigObject(page, config);
-    await page.goto('http://localhost:8080/index.html');
+    await page.goto('/');
     await page.waitForFunction(() => (window as any).view && (window as any).view.islands().length > 0);
     await page.waitForTimeout(300);
 
@@ -89,7 +89,7 @@ test.describe('DLC Unlock Logic', () => {
     const config = await getBasicConfig();
     
     await configLoader.loadConfigObject(page, config);
-    await page.goto('http://localhost:8080/index.html');
+    await page.goto('/');
     await page.waitForFunction(() => (window as any).view && (window as any).view.islands().length > 0);
     await page.waitForTimeout(300);
 
@@ -122,7 +122,7 @@ test.describe('DLC Unlock Logic', () => {
     });
     
     await configLoader.loadConfigObject(page, config);
-    await page.goto('http://localhost:8080/index.html');
+    await page.goto('/');
     await page.waitForFunction(() => (window as any).view && (window as any).view.islands().length > 0);
     await page.waitForTimeout(300);
 
@@ -152,7 +152,7 @@ test.describe('DLC Unlock Logic', () => {
     const config = await getBasicConfig();
     
     await configLoader.loadConfigObject(page, config);
-    await page.goto('http://localhost:8080/index.html');
+    await page.goto('/');
     await page.waitForFunction(() => (window as any).view && (window as any).view.islands().length > 0);
     await page.waitForTimeout(300);
 
@@ -221,7 +221,7 @@ test.describe('DLC Unlock Logic', () => {
     test.beforeEach(async ({ page }) => {
         const config = await getBasicConfig();
         await configLoader.loadConfigObject(page, config);
-        await page.goto('http://localhost:8080/index.html');
+        await page.goto('/');
         await page.waitForFunction(() => (window as any).view && (window as any).view.islands().length > 0);
         await page.waitForTimeout(300);
 

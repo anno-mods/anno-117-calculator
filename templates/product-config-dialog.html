@@ -17,9 +17,10 @@
                 </div>
 
                 <!-- Supplier Selection Section -->
+                <!-- ko ifEditable: true -->
                 <div class="grouping-box mt-4 p-3">
                     <div class="inline-list-stretched">
-                        
+
                         <select class="custom-select col-md-4"
                                 data-bind="options: $data.availableSuppliers,
                                             optionsText: 'label',
@@ -32,7 +33,7 @@
                         </select>
                         <button class="btn btn-light btn-sm"
                             data-bind="click: () => $data.selectSupplier($data.selectedSupplierOption()), enable: $data.selectedSupplierOption()">
-                
+
                             <span data-bind="text: $root.texts.setAsDefault ? $root.texts.setAsDefault.name : 'Set as Default'"></span>
                         </button>
                         <span data-bind="text: $root.texts.currentSupplier ? $root.texts.currentSupplier.name : 'Current:'"></span>
@@ -42,6 +43,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- /ko -->
 
 
                 <div data-bind="debug: 'Extra Goods', if: $data.extraGoodSuppliersVisible()">
@@ -55,7 +57,9 @@
                                         <span class="mb-0" data-bind="text: $data.factory.name()"></span>
                                     </td> <!-- factory icon -->
                                     <td>
+                                        <!-- ko ifEditable: true -->
                                         <btn-default-supplier params="supplier: $data"></btn-default-supplier>
+                                        <!-- /ko -->
                                     </td>
                                     <td>
                                         <div class="float-right">
@@ -105,6 +109,7 @@
 
                     <!-- Trade Routes Tab -->
                     <div class="tab-pane fade " id="trade-routes-tab" data-bind="css: {'show': $data.showTradeRouteTab(), 'active': $data.showTradeRouteTab()}">
+                        <!-- ko ifEditable: true -->
                         <div  data-bind="if: $data.availableTradeIslands().length">
                             <div class="inline-list-stretched grouping-box mb-4 p-3">
                                 <!-- Shared island selector -->
@@ -195,6 +200,7 @@
                                 <!-- /ko -->
                             </tbody>
                         </table>
+                        <!-- /ko -->
                     </div>
 
 

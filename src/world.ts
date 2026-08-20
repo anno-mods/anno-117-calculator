@@ -170,6 +170,22 @@ export class Region extends NamedElement {
         if (config.iconPath && window.params && window.params.icons) {
             this.icon = window.params.icons[config.iconPath];
         }
+
+        const parentAvailable = this.available;
+        this.available = ko.pureComputed(() => {
+            if (!parentAvailable()) {
+                return false;
+            }
+            const view = (window as any).view;
+            if (!view || !view.sessions || view.sessions.length === 0) {
+                return true;
+            }
+            const regionSessions = view.sessions.filter((s: any) => s.region === this);
+            if (regionSessions.length === 0) {
+                return true;
+            }
+            return regionSessions.some((s: any) => s.available());
+        });
     }
 }
 
@@ -901,7 +917,7 @@ export class Island {
 
             // For regular islands, only show effects that have targets in this island's session
             return this.allEffects.filter(e => {
-                if (!e.available() || this.patronEffects.indexOf(e) != -1) {
+                if (!e.available() || this.patronEffects.indexOf(e) != -1 || e.source == 'building') {
                     return false;
                 }
 
@@ -987,9 +1003,11 @@ export class Island {
 
             if (localStorage) {
 
-                for (var equip of i.equipments) {
-                    let id = `${equip.target.guid}[${i.guid}].scaling`;
-                    persistFloat(equip, "scaling", id);
+                // Persist the per-slot tri-state under the same key as the former equip scaling.
+                // int 0/1/2; old float saves (0/1) load cleanly. Boost equipments are derived, never persisted.
+                for (var f of i.factories) {
+                    let id = `${f.guid}[${i.guid}].scaling`;
+                    persistInt({ state: i.slotStates.get(f) }, "state", id);
                 }
 
             }
@@ -1293,6 +1311,7 @@ export interface Constructible extends NamedElement{
     buildings: BuildingsCalc,
     island: Island
     addBuff(appliedBuff: AppliedBuff) : void;
+    getRegionExtendedName(): string;
   }
 
 /**

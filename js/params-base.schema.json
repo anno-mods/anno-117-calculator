@@ -1,0 +1,2467 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Anno 117 Calculator Parameters",
+  "description": "Generated schema for Anno 117 calculator parameters",
+  "type": "object",
+  "properties": {
+    "constants": {
+      "type": "object",
+      "title": "Constants",
+      "properties": {
+        "fuelProductionTime": {
+          "type": "integer",
+          "description": "How long does 1t of this product activate a production in seconds"
+        },
+        "fuelProduct": {
+          "type": "integer",
+          "description": "which product can be used as fuel"
+        }
+      },
+      "required": [
+        "fuelProductionTime",
+        "fuelProduct"
+      ]
+    },
+    "dlcs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "id"
+        ]
+      },
+      "title": "DLC",
+      "description": "DLC definitions with GUIDs and identifiers"
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Language",
+      "description": "Supported localization languages"
+    },
+    "needConsumptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "consumptionFactor": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "locaText",
+          "consumptionFactor"
+        ]
+      },
+      "title": "NeedConsumption",
+      "description": "Scaling factor for NeedConsumptionRate"
+    },
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "id"
+        ]
+      },
+      "title": "Region",
+      "description": "Game regions data with GUID, name, icon, and localized text"
+    },
+    "fertilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "regions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "regions"
+        ]
+      },
+      "title": "Fertility",
+      "description": "Island fertililities and deposits that farms/mines require to operate. Referenced by factories (neededFertility) and building buffs (addedFertility)."
+    },
+    "sessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "region": {
+            "type": "integer"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "region"
+        ]
+      },
+      "title": "Session",
+      "description": "Game session information including region associations"
+    },
+    "needAttributes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "iconPath",
+          "locaText"
+        ]
+      },
+      "title": "NeedAttribute",
+      "description": "Attributes obtained from needs"
+    },
+    "needCategories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "iconPath",
+          "locaText"
+        ]
+      },
+      "title": "NeedCategory",
+      "description": "Categories for needs"
+    },
+    "needs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "needProduct": {
+            "type": "integer"
+          },
+          "needCategory": {
+            "type": "string"
+          },
+          "supplyWeight": {
+            "type": "number"
+          },
+          "isBuilding": {
+            "type": "boolean"
+          },
+          "needAttributes": {
+            "type": "object",
+            "properties": {
+              "Population": {
+                "type": "integer"
+              },
+              "Money": {
+                "type": "integer"
+              },
+              "Happiness": {
+                "type": "integer"
+              },
+              "Health": {
+                "type": "integer"
+              },
+              "FireSafety": {
+                "type": "integer"
+              },
+              "Belief": {
+                "type": "integer"
+              },
+              "Knowledge": {
+                "type": "integer"
+              },
+              "Prestige": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "Population",
+              "Money",
+              "Happiness",
+              "Health",
+              "FireSafety",
+              "Belief",
+              "Knowledge",
+              "Prestige"
+            ]
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "needProduct",
+          "needCategory",
+          "supplyWeight",
+          "isBuilding",
+          "needAttributes"
+        ]
+      },
+      "title": "Need",
+      "description": "Population group definitions with associated levels"
+    },
+    "populationGroups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "populationLevels": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "region": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "locaText",
+          "populationLevels",
+          "region"
+        ]
+      },
+      "title": "PopulationGroup",
+      "description": "Population group definitions with associated levels"
+    },
+    "residenceBuildings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "associatedRegions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "possibleUpgrades": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "populationLevel": {
+            "type": "integer"
+          },
+          "needsList": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "need": {
+                  "type": "integer"
+                },
+                "needConsumptionRate": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "need"
+              ]
+            }
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "associatedRegions",
+          "populationLevel",
+          "needsList"
+        ]
+      },
+      "title": "ResidenceBuilding",
+      "description": "Residence building for a population level"
+    },
+    "populationLevels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "connectedWorkforce": {
+            "type": "integer"
+          },
+          "populationToWorkforceFactor": {
+            "type": "number"
+          },
+          "associatedRegions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "connectedWorkforce",
+          "populationToWorkforceFactor",
+          "associatedRegions"
+        ]
+      },
+      "title": "PopulationLevel",
+      "description": "Population level definitions with needs and requirements"
+    },
+    "products": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "isAbstract": {
+            "type": "boolean"
+          },
+          "isConstructionMaterial": {
+            "type": "boolean"
+          },
+          "associatedRegions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "isAbstract",
+          "isConstructionMaterial"
+        ]
+      },
+      "title": "Product",
+      "description": "Product definitions with producer information"
+    },
+    "workforce": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "associatedRegions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "associatedRegions"
+        ]
+      },
+      "title": "Workforce",
+      "description": "Product definitions with producer information"
+    },
+    "productFilters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "guid": {
+            "type": "integer"
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        "required": [
+          "iconPath",
+          "locaText",
+          "guid",
+          "products"
+        ]
+      },
+      "title": "ProductFilter",
+      "description": "Product category filters for UI organization"
+    },
+    "factories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "associatedRegions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "needsFuelInput": {
+            "type": "boolean"
+          },
+          "outputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product": {
+                  "type": "integer"
+                },
+                "amount": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "product",
+                "amount"
+              ]
+            }
+          },
+          "maintenances": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product": {
+                  "type": "integer"
+                },
+                "amount": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "product",
+                "amount"
+              ]
+            }
+          },
+          "cycleTime": {
+            "type": "integer"
+          },
+          "neededFertility": {
+            "type": "integer"
+          },
+          "modulesLimit": {
+            "type": "integer"
+          },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product": {
+                  "type": "integer"
+                },
+                "amount": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "product",
+                "amount"
+              ]
+            }
+          },
+          "buffs": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "aqueductProductivityBuff": {
+            "type": "integer"
+          },
+          "additionalModule": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "associatedRegions",
+          "needsFuelInput",
+          "outputs",
+          "maintenances",
+          "cycleTime",
+          "neededFertility",
+          "modulesLimit"
+        ]
+      },
+      "title": "Factory",
+      "description": "Factory building definitions with inputs, outputs, maintenances, and production rates"
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "associatedRegions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product": {
+                  "type": "integer"
+                },
+                "amount": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "product",
+                "amount"
+              ]
+            }
+          },
+          "needsFuelInput": {
+            "type": "boolean"
+          },
+          "cycleTime": {
+            "type": "integer"
+          },
+          "neededFertility": {
+            "type": "integer"
+          },
+          "modulesLimit": {
+            "type": "integer"
+          },
+          "buffs": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "associatedRegions",
+          "inputs",
+          "needsFuelInput",
+          "cycleTime",
+          "neededFertility",
+          "modulesLimit",
+          "buffs"
+        ]
+      },
+      "title": "Module",
+      "description": "Modules attachable to factories with inputs, maintenances, and production rates"
+    },
+    "buildingBuffs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "isStackable": {
+            "type": "boolean"
+          },
+          "baseProductivityUpgrade": {
+            "type": "integer"
+          },
+          "workforceModifierInPercent": {
+            "type": "number"
+          },
+          "productivityUpgrade": {
+            "type": "number"
+          },
+          "fuelDurationPercent": {
+            "type": "number"
+          },
+          "addedFertility": {
+            "type": "integer"
+          },
+          "fertilityPercent": {
+            "type": "integer"
+          },
+          "replaceWorkforce": {
+            "type": "object",
+            "properties": {
+              "newWorkforce": {
+                "type": "integer"
+              },
+              "oldWorkforce": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "newWorkforce",
+              "oldWorkforce"
+            ]
+          },
+          "workforceMaintenanceFactorUpgrade": {
+            "type": "integer"
+          },
+          "population": {
+            "type": "number"
+          },
+          "additionalOutputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product": {
+                  "type": "integer"
+                },
+                "forceProductSameAsFactoryOutput": {
+                  "type": "boolean"
+                },
+                "additionalOutputCycle": {
+                  "type": "integer"
+                },
+                "amount": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "product",
+                "forceProductSameAsFactoryOutput",
+                "additionalOutputCycle",
+                "amount"
+              ]
+            }
+          },
+          "additionalWorkforces": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "replaceInputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "newInput": {
+                  "type": "integer"
+                },
+                "oldInput": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "newInput",
+                "oldInput"
+              ]
+            }
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "isStackable",
+          "baseProductivityUpgrade",
+          "workforceModifierInPercent",
+          "productivityUpgrade",
+          "fuelDurationPercent",
+          "addedFertility",
+          "fertilityPercent",
+          "replaceWorkforce",
+          "workforceMaintenanceFactorUpgrade",
+          "population"
+        ]
+      },
+      "title": "BuildingBuff",
+      "description": "Building buff assets with upgrade properties for buildings, residences, and factories. Determine what the effect is. See effects for where they apply."
+    },
+    "areaBuffs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "addedFertility": {
+            "type": "integer"
+          },
+          "fertilityPercent": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "addedFertility",
+          "fertilityPercent"
+        ]
+      },
+      "title": "AreaBuff",
+      "description": "Area buff assets that add a fertility to all buildings in range."
+    },
+    "effects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "buffs": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "targetsIsAllProduction": {
+            "type": "boolean"
+          },
+          "effectScope": {
+            "type": "string"
+          },
+          "excludeEffectSourceGUID": {
+            "type": "boolean"
+          },
+          "effectDuration": {
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "buffs",
+          "targetsIsAllProduction",
+          "effectScope",
+          "excludeEffectSourceGUID",
+          "effectDuration",
+          "source"
+        ]
+      },
+      "title": "Effect",
+      "description": "Building buff combined with targets (pool of building GUIDs). Source is an enum with literals 'module', 'tech', 'festival', 'veneration-effect', 'session-event', 'island-event', 'building'"
+    },
+    "techs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "effects": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "isRepeatable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "effects",
+          "isRepeatable"
+        ]
+      },
+      "title": "Tech",
+      "description": "Technologies from the discovery tree with relevant effects"
+    },
+    "patrons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "localEffects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "effect": {
+                  "type": "integer"
+                },
+                "milestones": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "devotion": {
+                        "type": "integer"
+                      },
+                      "buffScaling": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "devotion",
+                      "buffScaling"
+                    ]
+                  }
+                },
+                "title": {
+                  "type": "object",
+                  "properties": {
+                    "english": {
+                      "type": "string"
+                    },
+                    "german": {
+                      "type": "string"
+                    },
+                    "spanish": {
+                      "type": "string"
+                    },
+                    "french": {
+                      "type": "string"
+                    },
+                    "italian": {
+                      "type": "string"
+                    },
+                    "japanese": {
+                      "type": "string"
+                    },
+                    "korean": {
+                      "type": "string"
+                    },
+                    "polish": {
+                      "type": "string"
+                    },
+                    "brazilian": {
+                      "type": "string"
+                    },
+                    "russian": {
+                      "type": "string"
+                    },
+                    "simplified_chinese": {
+                      "type": "string"
+                    },
+                    "traditional_chinese": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "english",
+                    "german",
+                    "spanish",
+                    "french",
+                    "italian",
+                    "japanese",
+                    "korean",
+                    "polish",
+                    "brazilian",
+                    "russian",
+                    "simplified_chinese",
+                    "traditional_chinese"
+                  ]
+                }
+              },
+              "required": [
+                "effect",
+                "milestones",
+                "title"
+              ]
+            }
+          },
+          "wonder": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText"
+        ]
+      },
+      "title": "Patrons",
+      "description": "Patrons with effects increased by devotion."
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "buffs": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "effectScope": {
+            "type": "string"
+          },
+          "excludeEffectSourceGUID": {
+            "type": "boolean"
+          },
+          "rarity": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "buffs",
+          "effectScope",
+          "excludeEffectSourceGUID",
+          "rarity"
+        ]
+      },
+      "title": "Item",
+      "description": "Items equipable in Villa with relevant buffs."
+    },
+    "icons": {
+      "type": "object",
+      "title": "Icon",
+      "description": "Icon data URLs indexed by icon identifier",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "texts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "lineID": {
+            "type": "integer"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "lineID",
+          "locaText"
+        ]
+      },
+      "title": "Text",
+      "description": "Texts from the game with localization."
+    }
+  },
+  "required": [
+    "dlcs",
+    "languages",
+    "needConsumptions",
+    "regions",
+    "fertilities",
+    "sessions",
+    "needAttributes",
+    "needCategories",
+    "needs",
+    "populationGroups",
+    "residenceBuildings",
+    "populationLevels",
+    "products",
+    "workforce",
+    "productFilters",
+    "factories",
+    "modules",
+    "buildingBuffs",
+    "areaBuffs",
+    "effects",
+    "techs",
+    "patrons",
+    "items",
+    "icons",
+    "texts"
+  ]
+}

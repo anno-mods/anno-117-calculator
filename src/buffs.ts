@@ -15,8 +15,8 @@ export class AppliedBuff {
     public parent: Item|Effect|Module;
     public target: Constructible;
     public buff: Buff;
-    public replacements?: Map<Product, Product>;
-    public replacementArray?: {old: Product, new: Product}[];
+    public replacements?: Map<Product, Product | undefined>;
+    public replacementArray?: {old: Product, new?: Product | undefined}[];
     public replacingWorkforce?: Workforce;
     public baseProductivityUpgrade: KnockoutObservable<number>;
     public productivityUpgrade: KnockoutObservable<number>;
@@ -24,10 +24,16 @@ export class AppliedBuff {
     public workforceMaintenanceFactorUpgrade: KnockoutObservable<number>;
     public fertilityPercent: KnockoutObservable<number>;
     public populationBonus: KnockoutComputed<number>;
+    public consumptionModifierInPercent: KnockoutComputed<number>;
+    public goodConsumptionUpgrade: KnockoutComputed<{ product: Product; amountInPercent: number }[]>;
     public extraGoods?: ExtraGoodProduction[];
     public available: KnockoutComputed<boolean>;
     public visible: KnockoutComputed<boolean>;
     public scaling: KnockoutObservable<number>;
+    public isBoostBuff: boolean;
+    // For an item base equipment, resolves to the boost buff while the slot is Boosted, else the base buff.
+    // Set by the owning Item after boost equipments are created; drives the displayed numbers.
+    public activeBuff?: KnockoutComputed<Buff>;
 
 
     /**
@@ -35,8 +41,11 @@ export class AppliedBuff {
      * @param config - Configuration object for the equipped item
      * @param assetsMap - Map of all available assets
      * @param useParentScaling - use the sacling attribute from parent instead of creating a new observable
+     * @param scalingOverride - externally-owned observable/computed to use as scaling (e.g. a state-driven per-slot computed)
+     * @param isBoostBuff - marks this buff as the boosted variant of an item slot (excluded from the item row list)
      */
-    constructor(parent: Item|Effect|Module, buff: Buff, factory: Constructible, _assetsMap: AssetsMap, useParentScaling=true) {
+    constructor(parent: Item|Effect|Module, buff: Buff, factory: Constructible, _assetsMap: AssetsMap, useParentScaling=true,
+                scalingOverride?: KnockoutObservable<number> | KnockoutComputed<number>, isBoostBuff=false) {
         // Validate required parameters
         if (!parent) {
             throw new Error('AppliedBuff parent is required');
@@ -52,7 +61,11 @@ export class AppliedBuff {
         this.parent = parent;
         this.target = factory;
         this.buff = buff;
-        if(useParentScaling){
+        this.isBoostBuff = isBoostBuff;
+        if (scalingOverride) {
+            this.scaling = scalingOverride; // externally-owned scaling (e.g. per-slot state-driven computed)
+        }
+        else if(useParentScaling){
             if (!(this.parent instanceof Effect)){
                 throw new Error(`useParentScaling was set but parent with GUID ${this.parent.guid} was not an Effect`);
             }
@@ -109,27 +122,28 @@ export class AppliedBuff {
             return this.scaling() * this.buff.population;
         });
 
+        this.consumptionModifierInPercent = ko.pureComputed(() => {
+            return this.scaling() * this.buff.consumptionModifierInPercent;
+        });
+
+        this.goodConsumptionUpgrade = ko.pureComputed(() => {
+            return this.scaling() > 0 ? this.buff.goodConsumptionUpgrade : [];
+        });
+
         this.replacements = new Map();
         this.replacementArray = [];
-        if (this.buff.replaceInputs) {
-
-            this.buff.replaceInputs.forEach((r: any) => {
+        if (this.buff.replaceInputs && this.buff.replaceInputs.length > 0) {
+            this.buff.replaceInputs.forEach((r) => {
                 if (!r.oldInput) {
-                    throw new Error('ReplaceInputs must have OldInput and NewInput properties');
+                    throw new Error('ReplaceInputs entry must have an oldInput');
                 }
-                const oldProduct = _assetsMap.get(parseInt(r.OldInput));
+                const oldProduct = _assetsMap.get(r.oldInput.guid) as Product;
                 if (!oldProduct) {
-                    throw new Error(`Old input product with GUID ${r.OldInput} not found in assetsMap`);
+                    throw new Error(`Old input product with GUID ${r.oldInput.guid} not found in assetsMap`);
                 }
-                const newProduct = _assetsMap.get(parseInt(r.NewInput));
-                if (!newProduct) {
-                    throw new Error(`New input product with GUID ${r.NewInput} not found in assetsMap`);
-                }
-                this.replacementArray!.push({
-                    old: oldProduct,
-                    new: newProduct
-                });
-                this.replacements!.set(r.OldInput, r.NewInput);
+                const newProduct = r.newInput ? _assetsMap.get(r.newInput.guid) as Product : undefined;
+                this.replacementArray!.push({ old: oldProduct, new: newProduct });
+                this.replacements!.set(oldProduct, newProduct);
             });
         }
 

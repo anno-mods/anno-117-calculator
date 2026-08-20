@@ -3,7 +3,7 @@ import { ConfigLoader } from './helpers/config-loader';
 
 test('debug DLC assets', async ({ page }) => {
     const configLoader = new ConfigLoader();
-    await page.goto('http://localhost:8080/index.html');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     const dlcAssets = await page.evaluate(() => {

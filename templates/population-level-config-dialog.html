@@ -12,21 +12,26 @@
                     <h5 class="mb-0" data-bind="text: $data.instance().name()"></h5>
                     <div class="inline-list-centered">
                         <img class="icon-sm icon-light mr-2" src="../icons/icon_resource_population.png" data-bind="attr: {title: $root.texts.residents.name()}" />
-                        <strong data-bind="text: formatNumber($data.instance().residents())"></strong>
+                        <!-- Uses the presenter's own residents (already formatNumber-ed), not instance().residents()
+                             directly, so this reflects the aggregate sum across real islands when isAggregateMode() -->
+                        <strong data-bind="text: $data.residents"></strong>
                     </div>
                 </div>
 
                 <!-- Residence Buildings Table -->
                 <table class="table table-striped table-fixed">
-                    <tbody data-bind="foreach: $data.instance().allResidences">
+                    <tbody data-bind="foreach: $data.residenceRows">
                         <tr data-bind="debug: 'Residence Building'">
-                            <!-- ko if: $parent.instance().allResidences().length > 1 -->
+                            <!-- ko if: $parent.residenceRows().length > 1 -->
                             <td style="width: 25%;">
                                 <span data-bind="text: $data.name()"></span>
                             </td>
                             <!-- /ko -->
                             <td style="width: 30%;">
-                                <div data-bind="component: { name: 'constructed-buildings-input', params: $data}"></div>
+                                <!-- No aggregate condition: the row's buildings() is an
+                                     AggregateBuildingsCalc (readOnly === true) while aggregating,
+                                     and constructed-buildings-input branches on that itself. -->
+                                <div data-bind="component: { name: 'constructed-buildings-input', params: {guid: $data.guid, buildings: $data.buildings}}"></div>
                             </td>
                             <td style="width: 20%;">
                                 <div class="inline-list-centered">
@@ -34,8 +39,8 @@
                                     <span data-bind="text: formatNumber($data.residents())"></span>
                                 </div>
                             </td>
-                            <td style="width: 15%;" data-bind="visible: $data.buildings.constructed() > 0">
-                                <div class="inline-list" data-bind="foreach: $data.effectCoverage">
+                            <td style="width: 15%;" data-bind="visible: $data.buildings().constructed() > 0">
+                                <div class="inline-list" data-bind="foreach: $data.effectCoverage()">
                                     <div data-bind="attr: {title: formatPercentage(100 * $data.coverage()).substr(1) + ' ' + $data.residenceEffect.name()}">
                                         <img class="icon-sm" data-bind="attr: {src: $data.residenceEffect.icon}" />
                                     </div>
@@ -68,6 +73,15 @@
                 </table>
                 <!-- Population Level Needs -->
                 <div data-bind="debug: 'Need Category', foreach: $data.visibleNeedCategories()">
+                    <!-- The collapsible component captures its `checkbox` param once, at DOM-creation
+                         time, and is not reactive to later param changes - so the category-level
+                         "select all" checkbox (which writes into the representative real island's
+                         PopulationLevelNeed.checked, violating R13 if left live in aggregate mode)
+                         is gated by rendering two structurally distinct <collapsible> instances behind
+                         an if/ifnot pair, rather than a single instance with a conditionally-computed
+                         `checkbox` param. Both share the same collapsible id, so collapsed/expanded
+                         state is preserved across mode switches; only one is ever in the DOM at a time. -->
+                    <!-- ko if: $root.presenter.residence.editable() -->
                     <collapsible params="id: $data.id, heading: $data.name, data: $data, checkbox: $data.checked">
                         <table class="table table-striped table-fixed">
                             <tbody data-bind="foreach: $data.visiblePopulationLevelNeeds()">
@@ -100,6 +114,36 @@
                                 </tr>
                         </table>
                     </collapsible>
+                    <!-- /ko -->
+                    <!-- ko ifnot: $root.presenter.residence.editable() -->
+                    <collapsible params="id: $data.id, heading: $data.name, data: $data">
+                        <table class="table table-striped table-fixed">
+                            <tbody data-bind="foreach: $data.visiblePopulationLevelNeeds()">
+                                <tr data-bind="debug: 'Population Level Need (aggregate)', css:{inactive: $data.isInactive()}">
+                                    <td>
+                                        <div class="inline-list" data-bind="attr: {title: $data.name()}">
+                                            <span data-bind="component: { name: 'asset-icon', params: $data.product}"></span>
+                                            <span class="ml-2" data-bind="text: $data.name()"></span>
+                                        </div>
+                                    </td>
+                                    <td data-bind="if: $data.residentsPerResidence > 0">
+                                        <img class="icon-sm icon-light" src="../icons/icon_resource_population.png" />
+                                        <span class="ml-1" data-bind="text: formatNumber($data.residents())"></span>
+                                    </td>
+                                    <td>
+                                        <div class="inline-list" style="justify-content: right">
+                                            <div data-bind="if: $data.amount">
+                                                <span data-bind="text: formatNumber($data.amount()) + ' t/min'"></span>
+                                            </div>
+                                            <button class="btn btn-light btn-sm ml-2" data-bind="click: () => {$data.prepareResidenceEffectView()}" data-toggle="modal" data-target="#residence-effect-dialog">
+                                                <img class="icon-sm icon-light" src="../icons/icon_marketplace_2d_light.png" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                        </table>
+                    </collapsible>
+                    <!-- /ko -->
                 </div>
 
                 <!-- Population Buffs from Area Effects & Specialists -->
@@ -111,6 +155,7 @@
                                 <tr>
                                     <td>
                                         <!-- ko if: !$data.isPatronEffect -->
+                                        <!-- ko if: $root.presenter.residence.editable() -->
                                         <span class="custom-control custom-checkbox">
                                             <input type="checkbox" class="custom-control-input" data-bind="checked: $data.checked, attr: {id: 'pop-buff-' + $data.appliedBuff.parent.guid}">
                                             <label class="custom-control-label" data-bind="attr: {for: 'pop-buff-' + $data.appliedBuff.parent.guid}">
@@ -118,6 +163,18 @@
                                                 <span data-bind="text: $data.appliedBuff.parent.name()"></span>
                                             </label>
                                         </span>
+                                        <!-- /ko -->
+                                        <!-- ko ifnot: $root.presenter.residence.editable() -->
+                                        <!-- Read-only aggregate row. The Bootstrap custom-control classes must leave with
+                                             the <input>, not outlive it: a .custom-control.custom-checkbox wrapper with a
+                                             .custom-control-label but no checkbox still paints an empty box in front of
+                                             every row (templates/AGENTS.md). Same shape as the patron-effect branch below,
+                                             whose padding-left keeps the name aligned with the editable rows. -->
+                                        <span style="padding-left: 24px;">
+                                            <span data-bind="component: {name: 'asset-icon', params: $data.appliedBuff.parent}"></span>
+                                            <span data-bind="text: $data.appliedBuff.parent.name()"></span>
+                                        </span>
+                                        <!-- /ko -->
                                         <!-- /ko -->
                                         <!-- ko if: $data.isPatronEffect -->
                                         <span style="padding-left: 24px;">

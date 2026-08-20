@@ -10,9 +10,12 @@ if (typeof require !== 'undefined') {
 import { AssetsMap, LiteralsMap } from './types';
 import { DarkMode, ResidencePresenter } from './views';
 import { CategoryPresenter } from './presenters';
+import { PopulationGroupPresenter } from './population-presenters';
+import { PublicServicePresenter, PublicRecipeBuildingPresenter, RecipeListPresenter } from './public-building-presenters';
 import { ConstantsConfig, NeedConsumptionConfig, TextConfig } from './types.config';
 import { Storage as SubStorage, Island, Region, Session } from './world';
 import { Effect, ProductCategory, Fertility, AreaBuff } from './production';
+import { isAggregating, compareAggregateDemands } from './aggregate';
 
 
 declare const $: any;
@@ -26,6 +29,10 @@ window.formatNumber = formatNumber;
 window.formatPercentage = formatPercentage;
 window.factoryReset = factoryReset;
 window.exportConfig = exportConfig;
+
+// Knockout itself, for console debugging (ko.dataFor/contextFor on a live element) and so binding
+// tests can assert which binding handlers are registered. The app never reads it back off window.
+window.ko = ko;
 
 // Make debug utilities globally available
 window.debugKO = {
@@ -47,6 +54,22 @@ window.view = {
     },
     constants: {} as  ConstantsConfig,
     texts: {},
+    effectsFilter: {
+        search: ko.observable(''),
+        source: ko.observable('all')
+    },
+    filteredEffects: ko.pureComputed((): Effect[] => {
+        const island = window.view.island;
+        if (!island || !island()) return [];
+        const search = window.view.effectsFilter.search().trim().toLowerCase();
+        const source = window.view.effectsFilter.source();
+        return island().availableEffects().filter((e: Effect) => {
+            if (source !== 'all' && e.source !== source) return false;
+            if (search && !e.name().toLowerCase().includes(search)) return false;
+            if (e.buffs.length > 0 && e.buffs.every((b) => b.hasNoDisplayableEffect())) return false;
+            return true;
+        });
+    }),
     dlcs: [],
     dlcsMap: new Map(),
     dlcsGuidMap: new Map(),
@@ -90,6 +113,14 @@ window.view = {
         verboseMode: ko.observable(false)
     }
 };
+
+// Exposed for templates/bindings (and tests) that need the aggregate-mode condition without a
+// presenter in scope. A plain function, never a computed - see the note in aggregate.ts.
+window.view.isAggregating = isAggregating;
+
+// Exposed so the aggregate demand ordering can be unit-tested directly (see
+// tests/computed/aggregate-demand-sort.spec.ts).
+window.view.compareAggregateDemands = compareAggregateDemands;
 
 // Restore debug settings from localStorage
 const debugEnabled = localStorage.getItem('debug.enabled');
@@ -519,17 +550,8 @@ function init(_isFirstRun: boolean, configVersion: string | null): void {
     // Set up trade manager
     window.view.tradeManager = new (require('./trade').TradeManager)();
 
-    // Set up templates
+    // Set up presenters and templates
     const allIslands = window.view.islandManager.allIslands as Island;
-    const selectedIsland = window.view.island();
-    const templates: any[] = [];
-    const arrayToTemplate = (name: string) => allIslands[name].map((asset: any, index: number) => {
-        const t = new (require('./views').Template)(asset, selectedIsland, name, index);
-        templates.push(t);
-        return t;
-    });
-
-    window.view.island.subscribe((i: any) => templates.forEach(t => t.parentInstance(i)));
 
     const presenter = window.view.presenter;
     presenter.categories = [] as CategoryPresenter[];
@@ -544,11 +566,27 @@ function init(_isFirstRun: boolean, configVersion: string | null): void {
         }
     });
 
+    const populationGroupPresenters: PopulationGroupPresenter[] = allIslands.populationGroups.map(
+        group => new PopulationGroupPresenter(group, window.view.island)
+    );
+
+    const publicServicesPresenters = allIslands.publicServices.map(
+        building => new PublicServicePresenter(building, window.view.island)
+    );
+
+    const publicRecipeBuildingsPresenters = allIslands.publicRecipeBuildings.map(
+        building => new PublicRecipeBuildingPresenter(building, window.view.island)
+    );
+
+    const recipeListPresenters = allIslands.recipeLists.map(
+        list => new RecipeListPresenter(list, window.view.island)
+    );
+
     window.view.template = {
-        populationGroups: arrayToTemplate("populationGroups"),
-        consumers: arrayToTemplate("consumers"),
-        publicServices: arrayToTemplate("publicServices"),
-        publicRecipeBuildings: arrayToTemplate("publicRecipeBuildings")
+        populationGroups: populationGroupPresenters,
+        publicServices: publicServicesPresenters,
+        publicRecipeBuildings: publicRecipeBuildingsPresenters,
+        recipeLists: recipeListPresenters
     };
     window.view.presenter.residence = new ResidencePresenter(allIslands.needCategories, allIslands.populationLevels[0]);
     
@@ -559,6 +597,14 @@ function init(_isFirstRun: boolean, configVersion: string | null): void {
 
     // Register Knockout components (before bindings are applied)
     registerComponents();
+
+    // Expose constructors for test suites
+    (window as any).PublicServicePresenter = PublicServicePresenter;
+    (window as any).PublicRecipeBuildingPresenter = PublicRecipeBuildingPresenter;
+    (window as any).RecipeListPresenter = RecipeListPresenter;
+    (window as any).PublicConsumerBuilding = require('./factories').PublicConsumerBuilding;
+    (window as any).RecipeList = require('./consumption').RecipeList;
+    (window as any).Product = require('./production').Product;
 
     // Apply Knockout bindings
     ko.applyBindings(window.view, $(document.body)[0]);
@@ -598,7 +644,7 @@ function init(_isFirstRun: boolean, configVersion: string | null): void {
         }
 
         for (var l of (window.view.island() as Island).populationLevels) {
-            var name = l.locaText[language];
+            var name = l.locaText[language] || l.locaText['english'] || "";
 
             for (var c of name.toLowerCase()) {
                 if (!bindings.has(c)) {

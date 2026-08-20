@@ -1,4 +1,4 @@
-﻿<!DOCTYPE HTML>
+<!DOCTYPE HTML>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -129,7 +129,7 @@
                 <button type="button" class="btn">
                     <img data-toggle="modal" data-target="#effects-dialog" class="icon-navbar" src="./icons/icon_2d_reward_buff_0.webp" />
                 </button>
-                <button type="button" class="btn">
+                <button type="button" class="btn" data-bind="disable: $root.isAggregating()">
                     <img data-toggle="modal" data-target="#patron-selection-dialog" class="icon-navbar" src="./icons/icon_2d_religion_belief_0.webp" />
                 </button>
             </div>
@@ -213,8 +213,7 @@
 
                     <div data-bind="foreach: $root.template.publicServices">
 
-                        <!-- power plants and public services -->
-                        <div class="ui-service-building-item" data-bind="visible: $data.instance().visible(), css: {'no-name': $root.settings.hideNames.checked()}">
+                        <div class="ui-service-building-item" data-bind="visible: $data.visible(), css: {'no-name': $root.settings.hideNames.checked(), 'danger': $data.isHighlightedAsMissing()}">
                             <factory-header params="data: $data, button: true"></factory-header>
 
 
@@ -222,57 +221,38 @@
                             <div class="ui-fchain-item-count">
                                 <div href="#" data-toggle="tooltip" data-bind="attr: {'title' : $root.texts.requiredNumberOfBuildings.name}">
 
+                                    <!-- ko ifEditable: true -->
                                     <div class="input-group input-group-sm mb-3 spinner">
-                                        <input class="form-control" type="number" value="0" step="1" min="0" data-bind="value:  $data.instance().buildings.constructed, attr: { id: $data.guid + '-buildings.constructed-input'}" />
+                                        <input class="form-control" type="number" value="0" step="1" min="0" data-bind="value:  $data.buildings().constructed, attr: { id: $data.guid + '-buildings.constructed-input'}" />
                                         <div class="input-group-append">
-                                            <div data-bind="component: { name: 'number-input-increment', params: { obs: $data.instance().buildings.constructed, id: $data.guid + '-buildings.constructed-input' }}"></div>
+                                            <div data-bind="component: { name: 'number-input-increment', params: { obs: $data.buildings().constructed, id: $data.guid + '-buildings.constructed-input' }}"></div>
                                             <span class="input-group-text">x</span>
                                         </div>
                                     </div>
+                                    <!-- /ko -->
+                                    <!-- ko ifAggregated: true -->
+                                    <span data-bind="text: $data.buildings().constructed()"></span>
+                                    <span>x</span>
+                                    <!-- /ko -->
 
                                 </div>
                             </div>
 
-                            <div href="#" data-toggle="tooltip" data-bind="attr: {'title' : $root.texts.tonsPerMinute.name}">
-                                <div class="ui-fchain-item-load"><span data-bind="text: formatNumber($data.instance().inputAmount())"></span><span> t/min</span></div>
+                            <div href="#" data-toggle="tooltip" data-bind="attr: {'title' : $root.texts.talentumPerMinute.name}">
+                                <div class="ui-fchain-item-load"><span data-bind="text: formatNumber($data.inputAmount())"></span><span> t/min</span></div>
 
-                            </div>
-                        </div>
-
-                    </div>
-                    <!-- /power plants -->
-                    <!-- products without factories: mail and research papers -->
-                    <div data-bind="foreach: $root.island().noFactoryProducts">
-                        <div class="ui-service-building-item" data-bind="visible: $data.visible, css: {'no-name': $root.settings.hideNames.checked()}">
-                            <factory-header params="data: $data, button: false"></factory-header>
-
-                            <div style="margin-top: 1rem; display: flex; flex-flow: column; height: calc(100% - 3rem  - 55px); justify-content: space-between;">
-                                <div class="ui-fchain-item-count">
-
-                                    <span href="#" data-toggle="tooltip" data-bind="attr: {'title' : $root.texts.residents.name}">
-                                        <img class="icon-sm icon-light" src="./icons/icon_resource_population.png" />
-                                        <span data-bind="text: formatNumber(Math.round($data.residentsInput()))"></span>
-                                    </span>
-
-
-                                </div>
-
-                                <div href="#" data-toggle="tooltip" data-bind="attr: {'title' : $root.texts.tonsPerMinute.name}">
-                                    <div class="ui-fchain-item-load"><span data-bind="text: formatNumber($data.amount())"></span><span> t/min</span></div>
-
-                                </div>
                             </div>
                         </div>
 
                     </div>
-                    <!-- /products without factories: mail and research papers -->
                     <!-- public recipe buildings -->
-                    <div data-bind="foreach: $root.island().recipeLists">
+                    <div data-bind="foreach: $root.template.recipeLists">
 
                         <div class="ui-service-building-item" data-bind="visible: $data.visible(), css: {'no-name': $root.settings.hideNames.checked()}">
                             <factory-header params="data: $data, button: false"></factory-header>
 
 
+                            <!-- ko ifEditable: true -->
                             <div class="form-group">
                                 <select class="custom-select-sm form-control" data-bind="value: $data.selectedRecipe, options: $data.unusedRecipes, optionsText: r => r.recipeName()"></select>
                             </div>
@@ -282,6 +262,7 @@
                                     <span class="fa fa-plus"></span>
                                 </button>
                             </div>
+                            <!-- /ko -->
                         </div>
 
                     </div>
@@ -289,7 +270,7 @@
                     <!-- recipes -->
                     <div data-bind="foreach: $root.template.publicRecipeBuildings">
 
-                        <div class="ui-service-building-item" data-bind="visible: $data.instance().visible() && $data.instance().buildings.constructed() > 0, css: {'no-name': $root.settings.hideNames.checked()}">
+                        <div class="ui-service-building-item" data-bind="visible: $data.visible() && $data.buildings().constructed() > 0, css: {'no-name': $root.settings.hideNames.checked()}">
                             <div class="ui-fchain-item-tr-button">
                                 <div>
                                     <button class="btn btn-light btn-sm" data-bind="click: () => {$root.selectedFactory($data.instance())}" data-toggle="modal" data-target="#factory-config-dialog">
@@ -299,26 +280,32 @@
                             </div>
 
                             <div class="ui-fchain-item-name" data-bind="text:  $data.recipeName(), visible: !$root.settings.hideNames.checked()"></div>
-                            <div class="ui-fchain-item-icon mb-2"><img class="icon-tile" src="" data-bind="attr: { src: $data.icon, alt: $data.name }"></div>
+                            <div class="ui-fchain-item-icon mb-2"><img class="icon-tile" src="" data-bind="attr: { src: $data.icon, alt: $data.name() }"></div>
 
 
                             <!-- buildings counter -->
                             <div class="ui-fchain-item-count">
                                 <div href="#" data-toggle="tooltip" data-bind="attr: {'title' : $root.texts.requiredNumberOfBuildings.name}">
 
+                                    <!-- ko ifEditable: true -->
                                     <div class="input-group input-group-sm mb-3 spinner">
-                                        <input class="form-control" type="number" value="0" step="1" min="0" data-bind="value:  $data.instance().buildings.constructed, attr: { id: $data.guid + '-buildings.constructed-input'}" />
+                                        <input class="form-control" type="number" value="0" step="1" min="0" data-bind="value:  $data.buildings().constructed, attr: { id: $data.guid + '-buildings.constructed-input'}" />
                                         <div class="input-group-append">
-                                            <div data-bind="component: { name: 'number-input-increment', params: { obs: $data.instance().buildings.constructed, id: $data.guid + '-buildings.constructed-input' }}"></div>
+                                            <div data-bind="component: { name: 'number-input-increment', params: { obs: $data.buildings().constructed, id: $data.guid + '-buildings.constructed-input' }}"></div>
                                             <span class="input-group-text">x</span>
                                         </div>
                                     </div>
+                                    <!-- /ko -->
+                                    <!-- ko ifAggregated: true -->
+                                    <span data-bind="text: $data.buildings().constructed()"></span>
+                                    <span>x</span>
+                                    <!-- /ko -->
 
                                 </div>
                             </div>
 
-                            <div href="#" data-toggle="tooltip" data-bind="attr: {'title' : $root.texts.tonsPerMinute.name}">
-                                <div class="ui-fchain-item-load"><span data-bind="text: formatNumber($data.instance().inputAmount())"></span><span> t/min</span></div>
+                            <div href="#" data-toggle="tooltip" data-bind="attr: {'title' : $root.texts.talentumPerMinute.name}">
+                                <div class="ui-fchain-item-load"><span data-bind="text: formatNumber($data.inputAmount())"></span><span> t/min</span></div>
 
                             </div>
                         </div>

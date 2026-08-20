@@ -10,8 +10,7 @@ test.describe('DOM Inspection', () => {
     await configLoader.loadConfig(page, 'tests/fixtures/with-data.json');
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(3000);
+    await page.waitForFunction(() => (window as any).view && (window as any).view.island());
 
     // Check what actually rendered
     const domInfo = await page.evaluate(() => {

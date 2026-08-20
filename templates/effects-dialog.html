@@ -10,9 +10,22 @@
 
             </div>
             <div class="modal-body">
+                <form class="form form-inline mb-3" style="justify-content: space-between">
+                    <input type="text" class="form-control" style="max-width: 50%"
+                           data-bind="textInput: $root.effectsFilter.search, attr: {placeholder: $root.texts.effectsSearchPlaceholder.name()}" />
+                    <select class="custom-select" style="max-width: 40%" data-bind="value: $root.effectsFilter.source">
+                        <option value="all" data-bind="text: $root.texts.effectsFilterAll.name"></option>
+                    <option value="mythical-item" data-bind="text: $root.texts.heroicSpecialist.name"></option>
+                        <option value="tech" data-bind="text: $root.texts.discovery.name"></option>
+                        <option value="festival" data-bind="text: $root.texts.festival.name"></option>
+                        <option value="veneration-effect" data-bind="text: $root.texts.venerationEffects.name"></option>
+                        <option value="session-event" data-bind="text: $root.texts.sessionEvent.name"></option>
+                        <option value="island-event" data-bind="text: $root.texts.islandEvent.name"></option>
+                    </select>
+                </form>
                 <table class="table">
                     <thead style="text-align: center">
-                    <tbody data-bind="foreach: $root.island().availableEffects">
+                    <tbody data-bind="foreach: $root.filteredEffects">
                         <tr>
                             <td> 
                                 <div data-bind="if:$data.isStackable">
@@ -40,7 +53,8 @@
                                 </div>
                                 <div data-bind="if: !$data.targetsIsAllProduction">
                                     <div class="inline-list-centered" data-bind="foreach: $data.targets">
-                                        <img class="mr-2 icon-sm" data-bind="attr: { src: $data.icon ? $data.icon : null, alt: $data.name, title: $data.getRegionExtendedName()}">
+                                        <!-- Residences all share one icon, so show the population-level icon to tell tiers apart. -->
+                                        <img class="mr-2 icon-sm" data-bind="attr: { src: $data.populationLevel ? $data.populationLevel.icon : ($data.icon ? $data.icon : null), alt: $data.name, title: $data.getRegionExtendedName()}">
                                     </div>
                                 </div>
                             </td>

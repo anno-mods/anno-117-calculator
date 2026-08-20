@@ -104,6 +104,48 @@ export const texts: Record<string, Record<string, string>> = {
         "russian": "Используемые предметы",
         "brazilian": "Itens equipados"
     },
+    boostOff: {
+        "english": "Off",
+        "simplified_chinese": "关闭",
+        "traditional_chinese": "關閉",
+        "italian": "Disattivato",
+        "spanish": "Desactivado",
+        "german": "Aus",
+        "polish": "Wyłączony",
+        "french": "Désactivé",
+        "korean": "끄기",
+        "japanese": "オフ",
+        "russian": "Выкл.",
+        "brazilian": "Desativado"
+    },
+    boostBase: {
+        "english": "Activated",
+        "simplified_chinese": "已激活",
+        "traditional_chinese": "已啟用",
+        "italian": "Attivato",
+        "spanish": "Activado",
+        "german": "Aktiviert",
+        "polish": "Aktywny",
+        "french": "Activé",
+        "korean": "활성화",
+        "japanese": "有効",
+        "russian": "Активно",
+        "brazilian": "Ativado"
+    },
+    boostBoosted: {
+        "english": "Boosted",
+        "simplified_chinese": "强化",
+        "traditional_chinese": "強化",
+        "italian": "Potenziato",
+        "spanish": "Mejorado",
+        "german": "Verstärkt",
+        "polish": "Wzmocniony",
+        "french": "Amélioré",
+        "korean": "강화",
+        "japanese": "強化",
+        "russian": "Усиленный",
+        "brazilian": "Reforçado"
+    },
     extraGoods: {
         "english": "Extra Goods",
         "simplified_chinese": "额外货物",
@@ -145,6 +187,34 @@ export const texts: Record<string, Record<string, string>> = {
         "traditional_chinese": "全區域事件",
         "japanese": "セッション全体のイベント",
         "korean": "세션 전체 이벤트"
+    },
+    "effectsSearchPlaceholder": {
+        "english": "Search effects...",
+        "german": "Effekte suchen...",
+        "french": "Rechercher des effets...",
+        "polish": "Szukaj efektów...",
+        "spanish": "Buscar efectos...",
+        "italian": "Cerca effetti...",
+        "brazilian": "Buscar efeitos...",
+        "russian": "Поиск эффектов...",
+        "simplified_chinese": "搜索效果...",
+        "traditional_chinese": "搜尋效果...",
+        "japanese": "効果を検索...",
+        "korean": "효과 검색..."
+    },
+    "effectsFilterAll": {
+        "english": "All sources",
+        "german": "Alle Quellen",
+        "french": "Toutes les sources",
+        "polish": "Wszystkie źródła",
+        "spanish": "Todas las fuentes",
+        "italian": "Tutte le fonti",
+        "brazilian": "Todas as fontes",
+        "russian": "Все источники",
+        "simplified_chinese": "所有来源",
+        "traditional_chinese": "所有來源",
+        "japanese": "すべてのソース",
+        "korean": "모든 출처"
     },
     "devotion": {
         "english": "Devotion",
@@ -241,6 +311,20 @@ export const texts: Record<string, Record<string, string>> = {
         "russian": "Снижение уровня потребления",
         "spanish": "Reducir consumo",
         "traditional_chinese": "降低消耗量"
+    },
+    "additionalNeed": {
+        "simplified_chinese": "额外需求",
+        "english": "Additional Need",
+        "french": "Besoin supplémentaire",
+        "german": "Zusätzliches Bedürfnis",
+        "italian": "Bisogno aggiuntivo",
+        "japanese": "追加需要",
+        "korean": "추가 요구",
+        "polish": "Dodatkowa potrzeba",
+        "russian": "Дополнительная потребность",
+        "brazilian": "Necessidade adicional",
+        "spanish": "Necesidad adicional",
+        "traditional_chinese": "額外需求"
     },
 
 
@@ -339,20 +423,6 @@ export const texts: Record<string, Record<string, string>> = {
         traditional_chinese: "生產消費品所需的建築數量",
         japanese: "消費財を生産するために必要な建物の数",
         korean: "소비재 생산에 필요한 건물 수"
-    },
-    tonsPerMinute: {
-        "english": "Tons per minute (t/min)",
-        "simplified_chinese": "每分钟吨数（吨／分钟）",
-        "traditional_chinese": "每分鐘噸數（噸／分鐘）",
-        "italian": "Tonnellate al minuto (t/min)",
-        "spanish": "Toneladas por minuto (t/min)",
-        "german": "Tonnen pro Minute (t/min)",
-        "polish": "Tony na minutę (t/min)",
-        "french": "Tonnes par minute (t/min)",
-        "korean": "톤/분(1분당 톤 수)",
-        "japanese": "トン毎分 (トン/分)",
-        "russian": "Тонн в минуту (т./мин.)",
-        "brazilian": "Toneladas por minuto (t/min)"
     },
     currentSupplier: {
         english: "Current:",
@@ -752,7 +822,18 @@ export const texts: Record<string, Record<string, string>> = {
         korean: "새로운  117 계산기 버전이 제공됩니다. 다운로드 버튼을 클릭하십시오."
     },
     newFeature: {
-        english: "Game Update 1.5.2",
+        english: "DLC02. Island-wide heroic item effects. Show a combined summary in the \"Global - All Islands\" view.",
+        french: "DLC02. Effets d'objets héroïques à l'échelle de l'île. Afficher un récapitulatif global dans la vue « Global - Toutes les îles ».",
+        polish: "DLC02. Efekty heroicznych przedmiotów na całej wyspie. Pokaż zbiorcze podsumowanie w widoku „Globalny - Wszystkie wyspy”.",
+        spanish: "DLC02. Efectos de objetos heroicos en toda la isla. Mostrar un resumen conjunto en la vista «Global - Todas las islas».",
+        italian: "DLC02. Effetti degli oggetti eroici su tutta l'isola. Mostra un riepilogo complessivo nella vista «Globale - Tutte le isole».",
+        german: "DLC02. Inselweite heldenhafte Item-Effekte. Gesamtübersicht in der Ansicht „Global - Alle Inseln“ anzeigen.",
+        brazilian: "DLC02. Efeitos de itens heroicos em toda a ilha. Mostrar um resumo consolidado na visão “Global - Todas as ilhas”.",
+        russian: "DLC02. Эффекты героических предметов по всему острову. Показывать сводку по всем островам в представлении «Глобально - Все острова».",
+        simplified_chinese: "DLC02。全岛英雄物品效果。在“全局 - 所有岛屿”视图中显示汇总概览。",
+        traditional_chinese: "DLC02。全島英雄物品效果。在「全域 - 所有島嶼」檢視中顯示彙總概覽。",
+        japanese: "DLC02。島全体のヒロイックアイテム効果。「グローバル - すべての島」ビューで全体の集計を表示。",
+        korean: "DLC02. 섬 전역의 영웅 아이템 효과. “글로벌 - 모든 섬” 보기에서 전체 요약 표시.",
     },
     helpContent: {
         brazilian: `<h5>Uso e Estrutura</h5>
@@ -1650,6 +1731,23 @@ export const options: Record<string, any> = {
             "traditional_chinese": "顯示該地區所有可用的產品",
             "japanese": "地域で利用可能なすべての製品を表示",
             "korean": "지역에서 사용 가능한 모든 제품 표시"
+        }
+    },
+    "aggregateAllIslands": {
+        "name": "Show a combined summary in the “Global - All Islands” view",
+        "locaText": {
+            "english": "Show a combined summary in the “Global - All Islands” view",
+            "french": "Afficher un récapitulatif global dans la vue « Global - Toutes les îles »",
+            "polish": "Pokaż zbiorcze podsumowanie w widoku „Globalny - Wszystkie wyspy”",
+            "spanish": "Mostrar un resumen conjunto en la vista «Global - Todas las islas»",
+            "italian": "Mostra un riepilogo complessivo nella vista «Globale - Tutte le isole»",
+            "german": "Gesamtübersicht in der Ansicht „Global - Alle Inseln“ anzeigen",
+            "brazilian": "Mostrar um resumo consolidado na visão “Global - Todas as ilhas”",
+            "russian": "Показывать сводку по всем островам в представлении «Глобально - Все острова»",
+            "simplified_chinese": "在“全局 - 所有岛屿”视图中显示汇总概览",
+            "traditional_chinese": "在「全域 - 所有島嶼」檢視中顯示彙總概覽",
+            "japanese": "「グローバル - すべての島」ビューで全体の集計を表示",
+            "korean": "“글로벌 - 모든 섬” 보기에서 전체 요약 표시"
         }
     },
     "missingBuildingsHighlight": {

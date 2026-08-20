@@ -5,6 +5,7 @@ import { Island, Region } from './world';
 import { ExtraGoodSupplier, Supplier } from './suppliers';
 import { TradeRoute, TradeList } from './trade';
 import { ProductionChainView } from './views';
+import { AggregateBuildingsCalc, isAggregateModeFor, sumAcrossRealIslands, sumBuildingsAcrossRealIslands } from './aggregate';
 
 declare const $: any;
 declare const view: any;
@@ -38,9 +39,11 @@ export class FactoryPresenter {
     public outputAmount: KnockoutComputed<number>;
     public modules: KnockoutComputed<Module[]>;
     public items: KnockoutComputed<AppliedBuff[]>;
+    public workforceAmount: KnockoutComputed<number>;
     public visible: KnockoutComputed<boolean>;
     public canSupply: KnockoutComputed<boolean>;
     public isDefaultSupplier: KnockoutComputed<boolean>;
+    public representativeInstance: KnockoutComputed<Factory | null>;
     public productionChain: ProductionChainView;
     
 
@@ -67,12 +70,94 @@ export class FactoryPresenter {
         this.guid = ko.pureComputed(() => this.instance()?.guid);
         this.name = ko.pureComputed(() => this.instance()?.name());
         this.region = ko.pureComputed(() => this.instance()?.associatedRegions[0]);
-        this.buildings = ko.pureComputed(() => this.instance()?.buildings || 0);
+        // Built once (the guid never changes) so its single cross-island pass stays memoized across
+        // recomputes instead of being rebuilt each time. Lazy: costs nothing off aggregate mode.
+        const aggregateBuildingSums = sumBuildingsAcrossRealIslands(this.factory.guid);
+        this.buildings = ko.pureComputed(() => {
+            if (!isAggregateModeFor(this.island()))
+                return this.instance()?.buildings || new BuildingsCalc();
 
-        this.boost = ko.pureComputed(() => this.instance()?.boost() || 1);
-        this.outputAmount = ko.pureComputed(() => this.instance()?.outputAmount() || 0);
+            // Sum this one factory type's buildings across every real island (KTD1). A fresh
+            // AggregateBuildingsCalc is returned each recompute - only this computed's own bound
+            // value changes, never the productPresenters/factoryPresenters array identity templates
+            // iterate, so this never triggers a tile-grid rebuild.
+            return new AggregateBuildingsCalc(aggregateBuildingSums);
+        });
+
+        this.boost = ko.pureComputed(() => {
+            if (isAggregateModeFor(this.island())) {
+                let totalUtilized = 0;
+                let weightedBoostSum = 0;
+                for (const island of view.islands()) {
+                    if (island.isAllIslands()) continue;
+                    const factory = island.assetsMap.get(this.factory.guid) as Factory | undefined;
+                    if (factory) {
+                        const utilized = factory.buildings.utilized();
+                        const boost = factory.boost();
+                        totalUtilized += utilized;
+                        weightedBoostSum += boost * utilized;
+                    }
+                }
+
+                if (totalUtilized > EPSILON) {
+                    return weightedBoostSum / totalUtilized;
+                }
+
+                // Fallback: weight by constructed buildings if utilized is 0
+                let totalConstructed = 0;
+                let weightedBoostSumConstructed = 0;
+                for (const island of view.islands()) {
+                    if (island.isAllIslands()) continue;
+                    const factory = island.assetsMap.get(this.factory.guid) as Factory | undefined;
+                    if (factory) {
+                        const constructed = factory.buildings.constructed();
+                        const boost = factory.boost();
+                        totalConstructed += constructed;
+                        weightedBoostSumConstructed += boost * constructed;
+                    }
+                }
+
+                if (totalConstructed > EPSILON) {
+                    return weightedBoostSumConstructed / totalConstructed;
+                }
+
+                // If constructed is also 0, use the boost of the first non-null factory instance, or fallback to 1
+                for (const island of view.islands()) {
+                    if (island.isAllIslands()) continue;
+                    const factory = island.assetsMap.get(this.factory.guid) as Factory | undefined;
+                    if (factory) {
+                        return factory.boost();
+                    }
+                }
+
+                return 1;
+            }
+            return this.instance()?.boost() || 1;
+        });
+        this.outputAmount = ko.pureComputed(() => {
+            if (isAggregateModeFor(this.island())) {
+                return sumAcrossRealIslands(island => {
+                    const factory = island.assetsMap.get(this.factory.guid) as Factory | undefined;
+                    return factory ? factory.outputAmount() : 0;
+                });
+            }
+            return this.instance()?.outputAmount() || 0;
+        });
         this.modules = ko.pureComputed(() => this.instance()?.modules || []);
         this.items = ko.pureComputed(() => this.instance()?.availableItems() || []);
+
+        // Sums this one factory type's required workforce across every real island (mirrors
+        // .buildings above) - the All-Islands pseudo-island's own workforceDemand.amount() is
+        // otherwise always 0 (it has no constructed/utilized buildings of its own).
+        this.workforceAmount = ko.pureComputed(() => {
+            if (!isAggregateModeFor(this.island()))
+                return this.instance()?.workforceDemand?.amount() ?? 0;
+
+            return sumAcrossRealIslands(island => {
+                const factory = island.assetsMap.get(this.factory.guid) as Factory | undefined;
+                return factory ? factory.workforceDemand.amount() : 0;
+            });
+        });
 
         this.visible = ko.computed(() => {
             if (!this.instance()?.available())
@@ -88,11 +173,51 @@ export class FactoryPresenter {
             this.instance()?.canSupply() || false
         );
 
-        this.isDefaultSupplier = ko.pureComputed(() =>
-            this.instance()?.isDefaultSupplier() || false
-        );
+        this.isDefaultSupplier = ko.pureComputed(() => {
+            if (!isAggregateModeFor(this.island()))
+                return this.instance()?.isDefaultSupplier() || false;
 
-        this.productionChain = new ProductionChainView(this.instance, this.outputAmount);
+            // No single real island's default-supplier choice is coherent once summed (KTD7):
+            // deterministically treat the first visible factory type as active so the product-config
+            // dialog's tabs never resolve to zero active tabs (blank pane) or an arbitrary stale one.
+            const visibleFactories = this.parentProduct.visibleFactories();
+            return visibleFactories.length > 0 && visibleFactories[0] === this;
+        });
+
+        /**
+         * The Factory whose per-island configuration the production chain is drawn from.
+         *
+         * Outside aggregate mode this is simply instance(). While aggregating, instance() resolves
+         * to the All-Islands pseudo-island's Factory - unmodified boost, no supplier selections -
+         * so a chain rendered from it is meaningless. A summed chain is not well-defined either
+         * (islands can choose different suppliers for the same input, so there is no single tree),
+         * so show the shape from the island producing the most of this good, driven by the
+         * aggregate outputAmount. Ties break on view.islands() order, which is stable.
+         */
+        this.representativeInstance = ko.pureComputed(() => {
+            if (!isAggregateModeFor(this.island()))
+                return this.instance();
+
+            let best: Factory | null = null;
+            let bestProduction = -1;
+
+            for (const island of view.islands()) {
+                if (island.isAllIslands()) continue;
+
+                const factory = island.assetsMap.get(this.factory.guid) as Factory | undefined;
+                if (!factory) continue;
+
+                const production = factory.currentProduction();
+                if (production > bestProduction) {
+                    bestProduction = production;
+                    best = factory;
+                }
+            }
+
+            return best ?? this.instance();
+        });
+
+        this.productionChain = new ProductionChainView(this.representativeInstance, this.outputAmount);
     }
 
     /**
@@ -104,6 +229,14 @@ export class FactoryPresenter {
 
     outputAmountFormatted(): string {
         return formatNumber(this.outputAmount()).toString() + ' t/min';
+    }
+
+    /**
+     * False while this presenter shows read-only aggregate values. A plain method, not a computed -
+     * see the note on isAggregateModeFor in src/aggregate.ts.
+     */
+    editable(): boolean {
+        return !isAggregateModeFor(this.island());
     }
 
     incConstructedBuildings(): void {
@@ -218,11 +351,83 @@ export class ProductPresenter {
         );
 
         this.factoryPresenterIfDefaultSupplier = ko.pureComputed(() => {
-            for(const factory of this.visibleFactories())
-                if(factory.isDefaultSupplier())
-                    return factory;
+            if (!isAggregateModeFor(this.island())) {
+                for(const factory of this.visibleFactories())
+                    if(factory.isDefaultSupplier())
+                        return factory;
 
-            return null;
+                return null;
+            }
+
+            // A product with no visible factory type (e.g. import-only, no local producer) must
+            // resolve to null here too, exactly like the non-aggregate branch above - otherwise
+            // product-tile.html's `with:` binding renders a "0/0" count row for products that
+            // normally show no count row at all, which overflows the tile's fixed-height layout
+            // (.product-tile-attribute-group has a fixed height and doesn't grow with content).
+            if (this.visibleFactories().length === 0)
+                return null;
+
+            // Same null-parity requirement when every real island is importing this product
+            // (defaultSupplier is passive trade / not-obtaining / a trade route) rather than
+            // producing it locally anywhere - the non-aggregate branch above returns null in that
+            // case (no visible factory isDefaultSupplier()), so the aggregate branch must too.
+            // Only applies when at least one real island exists - with zero real islands there is
+            // no per-island choice to be consistent with, so the synthetic all-zero object is kept
+            // (matches the pre-existing "zero real islands" contract, tested elsewhere).
+            const realIslands = view.islands().filter((island: Island) => !island.isAllIslands());
+            const producedLocallyOnSomeIsland = realIslands.some((island: Island) => {
+                const product = island.assetsMap.get(this.product.guid) as Product | undefined;
+                return product?.defaultSupplier()?.type === 'factory';
+            });
+            if (realIslands.length > 0 && !producedLocallyOnSomeIsland)
+                return null;
+
+            // A non-default factory can still carry real required demand via an extra-good supplier
+            // (Factory.throughputByExtraGoodSupplier, independent of default-supplier status), so the
+            // aggregate compact count sums every factory type for this product, across every real
+            // island, rather than "whichever factory each island happens to default to" (KTD6/R17).
+            // The returned object is a synthetic stand-in, not a real FactoryPresenter: templates/
+            // product-tile.html only calls instance().buildings.constructed()/.required() and
+            // requiredBuildingsFormatted() on it in the always-rendered part of the tile - the +/-
+            // construction controls that would need inc/decConstructedBuildings() are gated out via
+            // if:/ifnot: in a later unit (U3/KTD4), so they are never bound against this object.
+            const factoryTypes = this.product.factories;
+
+            const sumBuildingMetric = (metric: 'constructed' | 'required'): number => {
+                let sum = 0;
+                for (const factoryType of factoryTypes) {
+                    sum += sumAcrossRealIslands(island => {
+                        const factory = island.assetsMap.get(factoryType.guid) as Factory | undefined;
+                        return factory ? factory.buildings[metric]() : 0;
+                    });
+                }
+                return sum;
+            };
+
+            const aggregateInstance = {
+                buildings: {
+                    constructed: () => sumBuildingMetric('constructed'),
+                    required: () => sumBuildingMetric('required'),
+                }
+            };
+
+            return {
+                instance: () => aggregateInstance,
+                requiredBuildingsFormatted: (): string =>
+                    window.view.settings.decimalsForBuildings.checked()
+                        ? formatNumber(aggregateInstance.buildings.required())
+                        : Math.ceil(aggregateInstance.buildings.required() - 0.01).toString(),
+                // Names the contributing factory types (KTD6/Key Decisions) - only meaningful when
+                // more than one type is being summed. Consumed by a later template unit (U3); not
+                // bound anywhere yet.
+                contributingFactoryNames: (): string => {
+                    if (factoryTypes.length <= 1) return '';
+                    return this.visibleFactories()
+                        .map(fp => fp.name())
+                        .filter((name): name is string => !!name)
+                        .join(', ');
+                },
+            };
         });
 
         // Available suppliers for selection (excluding islands - they get separate UI)
@@ -278,18 +483,49 @@ export class ProductPresenter {
         });
 
         this.availableExtraGoodSuppliers = ko.pureComputed(() => {
-            var suppliers = [];
+            if (!isAggregateModeFor(this.island())) {
+                var suppliers = [];
 
-            const extraGoodSuppliers = this.instance().extraGoodSuppliers;
-            if (extraGoodSuppliers) {
-                for (const supplier of extraGoodSuppliers) {
-                    if (supplier.canSupply() && supplier.island === island()) {
-                        suppliers.push(supplier);
+                const extraGoodSuppliers = this.instance().extraGoodSuppliers;
+                if (extraGoodSuppliers) {
+                    for (const supplier of extraGoodSuppliers) {
+                        if (supplier.canSupply() && supplier.island === island()) {
+                            suppliers.push(supplier);
+                        }
                     }
+                }
+
+                return suppliers;
+            }
+
+            // Each real island has its own ExtraGoodSupplier instance per factory type (extra-good
+            // suppliers, like factories, are per-island). Group by factory GUID across every real
+            // island and sum each factory type's production (mirrors FactoryPresenter.buildings/
+            // outputAmount's per-factory-type aggregation, KTD1) - a factory type is included if it
+            // canSupply() on at least one real island, even if its production is currently 0 there
+            // (e.g. effect enabled but no buildings constructed yet).
+            const byFactoryGuid = new Map<number, { factory: Factory; island: Island; currentProduction: () => number }>();
+
+            for (const realIsland of view.islands()) {
+                if (realIsland.isAllIslands()) continue;
+                const product = realIsland.assetsMap.get(this.product.guid) as Product | undefined;
+                for (const supplier of product?.extraGoodSuppliers || []) {
+                    if (!supplier.canSupply() || byFactoryGuid.has(supplier.factory.guid)) continue;
+
+                    const factoryGuid = supplier.factory.guid;
+                    byFactoryGuid.set(factoryGuid, {
+                        factory: supplier.factory,
+                        island: this.island(),
+                        currentProduction: () => sumAcrossRealIslands(anIsland => {
+                            const p = anIsland.assetsMap.get(this.product.guid) as Product | undefined;
+                            const s = p?.extraGoodSuppliers?.find(s => s.factory.guid === factoryGuid);
+                            return s ? s.currentProduction() : 0;
+                        }),
+                    });
                 }
             }
 
-            return suppliers;
+            return Array.from(byFactoryGuid.values());
         })
 
         // Delegate to product's defaultSupplier
@@ -345,15 +581,67 @@ export class ProductPresenter {
         });
 
 
-        this.extraGoodProduction = ko.pureComputed(() => this.instance().extraGoodSuppliers?.reduce((sum,prod) => sum + prod.currentProduction(), 0));
+        this.extraGoodProduction = ko.pureComputed(() => {
+            if (!isAggregateModeFor(this.island()))
+                return this.instance().extraGoodSuppliers?.reduce((sum,prod) => sum + prod.currentProduction(), 0);
 
+            return sumAcrossRealIslands(island => {
+                const product = island.assetsMap.get(this.product.guid) as Product | undefined;
+                return product?.extraGoodSuppliers?.reduce((sum, supplier) => sum + supplier.currentProduction(), 0) || 0;
+            });
+        });
+
+        // Sums one real island's production excluding trade routes (KTD3): every non-'trade_route'
+        // availableSuppliers() entry (factories + extra goods) plus passiveTradeSupplier as a
+        // separate term, mirroring Product.totalCurrentProduction's own shape (production.ts:253-263)
+        // but never double-counting goods moved between two of the user's own islands via trade route
+        // (the exporting island's own production is already counted directly; only the importing
+        // island's trade_route supplier entry is excluded here).
+        const nonRouteProductionFor = (island: Island): number => {
+            const product = island.assetsMap.get(this.product.guid) as Product | undefined;
+            if (!product) return 0;
+
+            let sum = 0;
+            for (const supplier of product.availableSuppliers()) {
+                if (supplier.type !== 'trade_route')
+                    sum += supplier.currentProduction();
+            }
+            sum += product.passiveTradeSupplier.currentProduction();
+            return sum;
+        };
 
         // Calculate total production (from all local suppliers + trade imports)
-        this.totalProduction = ko.pureComputed(() => this.instance().totalDemand() + this.instance().excessProduction());
-        
+        this.totalProduction = ko.pureComputed(() => {
+            if (!isAggregateModeFor(this.island()))
+                return this.instance().totalDemand() + this.instance().excessProduction();
+
+            // Mirrors the per-island formula (totalDemand + excessProduction == max(demand,
+            // production), see AGENTS.md "Product demand/production reactivity") using the
+            // trade-route-safe aggregate sums instead of All-Islands' own (empty) totalDemand/
+            // totalCurrentProduction - the tile keeps showing "at least the demand target" even
+            // when under-producing, without ever re-deriving the demand-resolution pipeline itself
+            // (only summing already-computed per-island outputs, per R5).
+            return Math.max(this.totalDemandNoRoutes(), sumAcrossRealIslands(nonRouteProductionFor));
+        });
+
         // Aggregate demand
-        this.totalDemand = ko.pureComputed(() => this.instance().totalDemand());
-        this.totalDemandNoRoutes = ko.pureComputed(() => this.instance().totalDemandNoRoutes());
+        this.totalDemand = ko.pureComputed(() => {
+            if (isAggregateModeFor(this.island())) {
+                return this.totalDemandNoRoutes();
+            }
+            return this.instance().totalDemand();
+        });
+        this.totalDemandNoRoutes = ko.pureComputed(() => {
+            if (!isAggregateModeFor(this.island()))
+                return this.instance().totalDemandNoRoutes();
+
+            // Local consumer demand only (excludes this island's own export obligations to another
+            // of the user's islands), summed across every real island (R6).
+            return sumAcrossRealIslands(island => {
+                const product = island.assetsMap.get(this.product.guid) as Product | undefined;
+                return product ? product.totalDemandNoRoutes() : 0;
+            });
+        });
 
         // Net balance (production - demand)
         this.netBalance = ko.pureComputed(() =>
@@ -381,7 +669,22 @@ export class ProductPresenter {
         this.icon = ko.pureComputed(() => this.product.icon as string);
 
         this.isHighlightedAsMissing = ko.pureComputed(() => {
-            return this.instance()?.isHighlightedAsMissing() === true;
+            if (!isAggregateModeFor(this.island()))
+                return this.instance()?.isHighlightedAsMissing() === true;
+
+            // The All-Islands pseudo-island's own Product never carries real demand/production
+            // (isHighlightedAsMissing() on instance() is always false there), so re-derive the
+            // same "required > constructed" check from the aggregate building counts already
+            // computed for the compact tile count (factoryPresenterIfDefaultSupplier, KTD6) -
+            // summed across every producing factory type and every real island.
+            if (!window.view.settings.missingBuildingsHighlight || !window.view.settings.missingBuildingsHighlight.checked())
+                return false;
+
+            const aggregate = this.factoryPresenterIfDefaultSupplier();
+            const buildings = aggregate?.instance()?.buildings;
+            if (!buildings) return false;
+
+            return buildings.required() > buildings.constructed() + ACCURACY;
          });
 
 
@@ -411,24 +714,37 @@ export class ProductPresenter {
                 return true;
 
             for (var presenter of this.visibleFactories()){
-                const factory = presenter.instance();
-                if (!factory) throw new Error(`Visible factory with GUID ${presenter.guid()} has no instance on island ${presenter.island().name()}`);
-                if (Math.abs(factory.throughput()) > EPSILON ||
-                    factory.buildings.constructed() > 0)
-                    return true;
+                if (isAggregateModeFor(this.island())) {
+                    if (presenter.outputAmount() > EPSILON || presenter.buildings().constructed() > 0)
+                        return true;
+                } else {
+                    const factory = presenter.instance();
+                    if (!factory) throw new Error(`Visible factory with GUID ${presenter.guid()} has no instance on island ${presenter.island().name()}`);
+                    if (Math.abs(factory.throughput()) > EPSILON ||
+                        factory.buildings.constructed() > 0)
+                        return true;
+                }
             }
 
             // Don't show if none of the conditions are met
             return false;
         });
 
-        this.consumerViewVisible = ko.pureComputed(() => this.instance().totalDemand() > ACCURACY);
+        this.consumerViewVisible = ko.pureComputed(() => {
+            if (isAggregateModeFor(this.island())) {
+                return this.totalDemandNoRoutes() > ACCURACY;
+            }
+            return this.instance().totalDemand() > ACCURACY;
+        });
 
         this.regionIconVisible = ko.pureComputed(() => this.region() != null && this.island().region != this.region());
 
         this.tradeListVisible = ko.pureComputed(() => this.tradeList()?.visible());
 
         this.extraGoodSuppliersVisible = ko.pureComputed(() => {
+            if (isAggregateModeFor(this.island())) {
+                return this.availableExtraGoodSuppliers().length > 0;
+            }
             for(var supplier of this.availableSuppliers()){
                 if (supplier.type === 'extra_good')
                     return true;
@@ -438,8 +754,27 @@ export class ProductPresenter {
         })
     }
 
-    showTradeRouteTab(): boolean{
-        return this.defaultSupplier()?.type != "factory"
+    /**
+     * False while this presenter shows read-only aggregate values. A plain method, not a computed -
+     * see the note on isAggregateModeFor in src/aggregate.ts.
+     */
+    editable(): boolean {
+        return !isAggregateModeFor(this.island());
+    }
+
+    /**
+     * Whether the Trading tab is the active pane. Must be the exact complement of "some visible
+     * factory reports isDefaultSupplier()", or product-config-dialog.html gives two panes
+     * `show active` at once and they render stacked. While aggregating, the pseudo-island's own
+     * defaultSupplier() is meaningless (usually unset, and any non-factory choice left over from
+     * a real-island session survives here), so ask the factory presenters directly - they already
+     * implement the aggregate "first visible factory is active" rule.
+     */
+    showTradeRouteTab(): boolean {
+        if (isAggregateModeFor(this.island()))
+            return !this.visibleFactories().some(f => f.isDefaultSupplier());
+
+        return this.defaultSupplier()?.type != "factory";
     }
 
     /**

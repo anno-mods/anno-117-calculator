@@ -76,11 +76,9 @@ test.describe('Obsidian Production Fixture Test', () => {
     // 1000 Patrician = 8.333 demand. 
     // Roman Limestone Quarry (2916) at 100% produces 1/12 obsidian as byproduct.
     // Base production of 2916 is 1 t/min. 1/12 = 0.0833 t/min per factory.
-    // 1000 Patricians need 100 Limestone quarries to be fully supplied? 
-    // Wait, my previous run showed 2.1506 produced.
-    // 2.1506 / 0.08333 = 25.8 factories? 
-    // Anyway, the key is that it's using the ExtraGoodSupplier.
-    expect(results.produced).toBeCloseTo(2.1506, 4);
+    // 1000 Patricians need 100 Limestone quarries to be fully supplied, which are driven
+    // by the ExtraGoodSupplier.
+    expect(results.produced).toBeCloseTo(8.333, 3);
   });
 
   test('Albion: check if settings load correctly', async ({ page }) => {

@@ -40,7 +40,7 @@ ko.amdTemplateEngine.loader = function (templateName: string, done: Function) {
 };
 
 /** Version string for the calculator application */
-export let versionCalculator = "2.1";
+export let versionCalculator = "3.0";
 /** Flag indicating if this is a preview version */
 export let isPreview = false;
 /** Accuracy threshold for floating point comparisons */
@@ -462,6 +462,14 @@ export class BuildingsCalc {
     public utilized: KnockoutComputed<number>;
     public capacityUtilisation: KnockoutComputed<number>;
 
+    /**
+     * False for a real, per-island BuildingsCalc. True only for AggregateBuildingsCalc, whose
+     * values are summed across islands and whose setters are no-ops. UI code renders a read-only
+     * display instead of an editable control when this is true, rather than relying on a
+     * template-level aggregate-mode condition.
+     */
+    public readonly readOnly: boolean = false;
+
 
     constructor(){
         this.fullyUtilizeConstructed = ko.observable(false);
@@ -626,11 +634,7 @@ export function safeUnwrap(value: unknown): unknown {
 export function getAssetType(data: unknown): string {
     if (!data) return 'null/undefined';
 
-    // Check if it's a Template wrapper
-    if (typeof data === 'object' && data !== null && 'instance' in data && isKnockoutObservable((data as Record<string, unknown>).instance)) {
-        const unwrapped = safeUnwrap((data as Record<string, unknown>).instance);
-        return `Template(${getAssetType(unwrapped)})`;
-    }
+
 
     // Check for NamedElement properties
     if (typeof data === 'object' && data !== null) {

@@ -1,7 +1,7 @@
-<div class="ui-tier-unit" data-bind="debug: 'Population Tile', visible: $data.instance().visible()">
+<div class="ui-tier-unit" data-bind="debug: 'Population Tile', visible: $data.visible()">
     <div style="margin-left: 100%;direction: rtl;" class="">
         <div style="position: absolute;">
-            <button class="btn btn-light btn-sm" data-bind="click: () => {$root.presenter.residence.update($data.instance())}" data-toggle="modal" data-target="#population-level-config-dialog">
+            <button class="btn btn-light btn-sm" data-bind="click: () => $root.presenter.residence.open($data.instance())" data-toggle="modal" data-target="#population-level-config-dialog">
                 <span class="fa fa-sliders"></span>
             </button>
         </div>
@@ -11,14 +11,15 @@
 
     </div>
     <div class="ui-tier-unit-name" data-bind="visible: !$root.settings.hideNames.checked(), attr: {'tier-unit-guid' : guid}">
-        <span data-bind="visible: $data.instance().hotkey, text: $data.instance().hotkey() ? '[' + $data.instance().hotkey().toUpperCase() + '] ' : ''"></span>
+        <span data-bind="visible: $data.hotkey, text: $data.hotkey() ? '[' + $data.hotkey().toUpperCase() + '] ' : ''"></span>
         <span data-bind="text: name"></span>
     </div>
 
     <div class="mb-3">
-        <!-- Buildings Input -->
+        <!-- Buildings Input (normal, editable) -->
+        <!-- ko ifnot: $data.isAggregateMode() -->
         <div class="input-group input-group-sm spinner">
-            <input step="10" class="form-control input-lg" type="number" value="0" min="0" data-bind="value: $data.instance().residences[0].buildings.constructed, attr: {title: 'Press '+name()[0]+' to focus', id: $data.guid + '-buildings-constructed-input' };" />
+            <input step="10" class="form-control input-lg text-right" type="number" value="0" min="0" data-bind="value: $data.instance().residences[0].buildings.constructed, attr: {title: 'Press '+name()[0]+' to focus', id: $data.guid + '-buildings-constructed-input' };" />
             <div class="input-group-append">
                 <div data-bind="component: { name: 'number-input-increment', params: { obs: $data.instance().residences[0].buildings.constructed, id: $data.guid + '-buildings-constructed-input' }}"></div>
             </div>
@@ -28,12 +29,30 @@
                 </div>
             </div>
         </div>
-        
+        <!-- /ko -->
+
+        <!-- Buildings count (aggregate, read-only) -->
+        <!-- ko if: $data.isAggregateMode() -->
+        <div class="input-group input-group-sm spinner">
+            <span class="form-control input-lg text-right" data-bind="text: $data.aggregateBuildingsConstructed(), attr: {id: $data.guid + '-buildings-constructed-readonly'}"></span>
+            <div class="input-group-append" data-bind="attr: {title: $root.texts.residences.name()}">
+                <div class="input-group-text">
+                    <img class="icon-sm icon-light" src="../icons/icon_house_white.png" />
+                </div>
+            </div>
+        </div>
+        <!-- /ko -->
+
         <!-- Total Residents Display -->
-        <div class="d-flex p-2" style="flex-direction:row-reverse; background-color: rgba(0,0,0,0.05); border-radius: 4px;">
-            <div class="float-right">
-                <strong data-bind="text: formatNumber($data.instance().residents())" style="font-size: 14px;"></strong>
-                <img class="icon-sm icon-light ml-3" src="../icons/icon_resource_population.png" data-bind="attr: {title: $root.texts.residents.name()}" />
+        <div class="input-group input-group-sm spinner mt-1">
+            <span class="form-control input-lg text-right" style="background-color: rgba(0,0,0,0.05); border: none; pointer-events: none;" data-bind="attr: {id: $data.guid + '-residents-readonly'}">
+                <strong data-bind="text: formatNumber($data.residents())" style="font-size: 14px;"></strong>
+            </span>
+
+            <div class="input-group-append" data-bind="attr: {title: $root.texts.residents.name()}">
+                <div class="input-group-text" style="background-color: rgba(0,0,0,0.05); border: none;">
+                    <img class="icon-sm icon-light" src="../icons/icon_resource_population.png" data-bind="css: {'ml-3': !$data.isAggregateMode()}"/>
+                </div>
             </div>
         </div>
     </div>

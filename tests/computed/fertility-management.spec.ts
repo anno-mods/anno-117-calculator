@@ -11,8 +11,6 @@ test.describe('Fertility Management Tests', () => {
     asserter = new ComputedValueAsserter();
     await configLoader.loadConfig(page, 'tests/fixtures/with-data.json');
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
     await page.waitForFunction(() => (window as any).view && (window as any).view.island());
   });
 

@@ -2,7 +2,7 @@ import { NamedElement, ko } from './util';
 import { ResidenceBuilding, PopulationLevel } from './population';
 import { AssetsMap, LiteralsMap, ResidenceNeedConfig } from './types';
 import { NeedCategoryConfig, NeedConfig } from './types.config';
-import { Demand, Product } from './production';
+import { Demand, Product, Effect } from './production';
 import { Island, Region } from './world';
 import { Factory } from './factories';
 import { ResidenceEffectView } from './views';
@@ -103,7 +103,29 @@ export class PopulationLevelNeed {
         
         this.checked = ko.observable(true); // Default to activated
         this.notes = ko.observable("");
-        this.hidden = ko.computed(() => false);
+        this.hidden = ko.pureComputed(() => {
+            // A need is AVAILABLE (hidden === false) whenever it is consumed ungated by any residence at
+            // this population level. Conditional needs (those referenced by an effect's
+            // additionalNeedsDemand) are gated on every target residence via requiresItem and carry NO
+            // ungated sibling in params.js, so they fall through to the effect check below and stay
+            // hidden until their granting effect is active.
+            const residenceNeeds = this.populationLevel.allResidences()
+                .map(r => r.needsMap.get(this.need.guid))
+                .filter((rn): rn is ResidenceNeed => rn !== undefined);
+
+            // A plain base need has requiresItem === undefined on every residence, so no gated entry is
+            // found and the need stays shown. A gated conditional need surfaces its resolved effect here.
+            const gated = residenceNeeds.find(rn => rn.requiresItem !== undefined);
+            if (!gated) {
+                return false;
+            }
+            // Reuse the effect ResidenceNeed already resolved in initDemands (gatingEffect observable)
+            // rather than a fresh island.assetsMap lookup: reading the observable keeps this reactive to
+            // the effect's scaling/availability and avoids touching assetsMap (which is unset while the
+            // Island is still constructing). This computed is only ever read lazily (UI / getVisibleNeeds).
+            const effect = gated.gatingEffect();
+            return !effect || !effect.available() || effect.scaling() !== 1;
+        });
         this.available = ko.pureComputed(() => this.need.available());
         
         // Calculate residents gained from this specific need
@@ -175,9 +197,15 @@ export class PopulationLevelNeed {
  * Activation is handeled by PopulationLevelNeed
  */
 export class ResidenceNeed {
-    public residence: ResidenceBuilding; 
-    public need: Need; 
+    public residence: ResidenceBuilding;
+    public need: Need;
     public needConsumptionRate: number;
+    public requiresItem?: number;
+    // The effect that gates a conditional need, resolved from requiresItem during initDemands. Kept as
+    // an observable (not a plain reference) because the residents/amount computeds are evaluated eagerly
+    // in the ResidenceBuilding constructor — before initDemands runs and before island.assetsMap exists.
+    // Writing it later re-triggers those computeds so they bind to the effect's available()/scaling().
+    public gatingEffect: KnockoutObservable<Effect | undefined>;
     public checked: KnockoutComputed<boolean>; // Now computed from population level
     public amount: KnockoutComputed<number>;
     public residents: KnockoutComputed<number>;
@@ -204,25 +232,55 @@ export class ResidenceNeed {
         }
         this.need = need as Need;
         this.needConsumptionRate = config.needConsumptionRate || 0;
+        if (config.requiresItem !== undefined) {
+            this.requiresItem = config.requiresItem;
+        }
+        // Resolved in initDemands once assetsMap is fully populated (see field comment).
+        this.gatingEffect = ko.observable(undefined);
 
         this.checked = ko.observable(true); // set from populationLevelNeed which is constructed later({
 
 
         this.amount = ko.pureComputed(() => {
-            if(!this.checked())
+            if(!this.checked() || this.gatingEffectInactive())
                 return 0;
-            
-            return this.residence.buildings.constructed() * this.needConsumptionRate * window.view.settings.selectedNeedConsumptionSetting().consumptionFactor;
+
+            let consumptionModifierInPercent = 0;
+            for (const b of this.residence.buffs()) {
+                consumptionModifierInPercent += b.consumptionModifierInPercent();
+                for (const entry of b.goodConsumptionUpgrade()) {
+                    if (entry.product === this.need.product) {
+                        consumptionModifierInPercent += entry.amountInPercent;
+                    }
+                }
+            }
+
+            return this.residence.buildings.constructed() * this.needConsumptionRate * window.view.settings.selectedNeedConsumptionSetting().consumptionFactor * (1 + consumptionModifierInPercent / 100);
         });
 
         this.residents = ko.pureComputed(() => {
-            if(!this.checked())
+            if(!this.checked() || this.gatingEffectInactive())
                 return 0;
 
             return this.residence.buildings.constructed() * this.need.residents;
         })
 
         this.available = ko.pureComputed(() => this.need.available() && this.residence.available())
+    }
+
+    /**
+     * A conditional (mythical-item / monument) need carries a requiresItem pointing at the effect that
+     * grants it. It is consumed ONLY while that effect is available and fully active (scaling === 1);
+     * otherwise the residence does not consume it and it provides no residents. Plain base needs have
+     * no requiresItem and are never gated. Until initDemands resolves gatingEffect, a gated need is
+     * treated as inactive (0 consumption / residents) rather than dereferencing an unset assetsMap.
+     */
+    private gatingEffectInactive(): boolean {
+        if (this.requiresItem === undefined) {
+            return false;
+        }
+        const effect = this.gatingEffect();
+        return !effect || !effect.available() || effect.scaling() !== 1;
     }
 
     /**
@@ -279,6 +337,13 @@ export class ResidenceNeed {
     }
 
     initDemands(assetsMap: AssetsMap){
+        // Resolve the gating effect now that assetsMap is populated. Setting the observable re-triggers
+        // the residents/amount computeds that were first evaluated during construction, so they bind to
+        // the effect's available()/scaling() and react to it being toggled on or off.
+        if (this.requiresItem !== undefined) {
+            this.gatingEffect(assetsMap.get(this.requiresItem) as Effect | undefined);
+        }
+
         if (!this.need.product.isAbstract){
             this.demand = new Demand(this.need.product, this.residence, assetsMap, ko.observable(1));
             this.demand.updateAmount(this.amount());

@@ -79,6 +79,12 @@ test.describe('Population Needs Calculation Tests', () => {
         for (const residence of residences) {
           for (const residenceNeed of residence.needsMap.values()) {
             const need = residenceNeed.need;
+            // Conditional (mythical-item / monument) needs carry a requiresItem and consume 0 until
+            // their granting effect is active. The plain constructed*rate*factor formula does not apply
+            // to them while gated, so skip them here - gating is covered by the mythical-item specs.
+            if (residenceNeed.requiresItem !== undefined) {
+              continue;
+            }
             const amount = residenceNeed.amount();
             const expectedAmount = residenceNeed.residence.buildings.constructed() * residenceNeed.needConsumptionRate * (window as any).view.settings.selectedNeedConsumptionSetting().consumptionFactor;
 

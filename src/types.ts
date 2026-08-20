@@ -108,6 +108,7 @@ export interface NeedConfig {
 export interface ResidenceNeedConfig {
   need: number;
   needConsumptionRate?: number;
+  requiresItem?: number;
 }
 
 export interface ResidenceBuildingConfig extends NamedElementConfig {

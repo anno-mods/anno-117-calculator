@@ -64,6 +64,7 @@ export interface FertilityConfig {
   iconPath: string;
   locaText: LocaTextConfig;
   regions: string[];
+  dlcUnlocks?: number[];
 }
 
 // Session configuration interface
@@ -73,6 +74,7 @@ export interface SessionConfig {
   iconPath: string;
   region: number;
   locaText?: LocaTextConfig;
+  dlcUnlocks?: number[];
 }
 
 // NeedAttribute configuration interface
@@ -136,6 +138,7 @@ export interface ResidenceBuildingConfig {
   needsList: {
     need: number;
     needConsumptionRate?: number;
+    requiresItem?: number;
   }[];
 }
 
@@ -148,6 +151,7 @@ export interface PopulationLevelConfig {
   connectedWorkforce: number;
   populationToWorkforceFactor: number;
   associatedRegions: string[];
+  dlcUnlocks?: number[];
 }
 
 // Product configuration interface
@@ -169,6 +173,7 @@ export interface WorkforceConfig {
   iconPath: string;
   locaText: LocaTextConfig;
   associatedRegions: string[];
+  dlcUnlocks?: number[];
 }
 
 // ProductFilter configuration interface
@@ -224,6 +229,7 @@ export interface ModuleConfig {
   neededFertility: number;
   modulesLimit: number;
   buffs: number[];
+  dlcUnlocks?: number[];
 }
 
 // BuildingBuff configuration interface
@@ -245,6 +251,13 @@ export interface BuildingBuffConfig {
   };
   workforceMaintenanceFactorUpgrade: number;
   population: number;
+  consumptionModifierInPercent: number;
+  goodConsumptionUpgrade?: {
+    product: number;
+    amountInPercent: number;
+  }[];
+  providedNeedUpgrade?: number[];
+  additionalNeedsDemand?: number[];
   additionalOutputs?: {
     product: number;
     forceProductSameAsFactoryOutput: boolean;
@@ -252,11 +265,11 @@ export interface BuildingBuffConfig {
     amount: number;
   }[];
   additionalWorkforces?: number[];
-  dlcUnlocks?: number[];
   replaceInputs?: {
     newInput: number;
     oldInput: number;
   }[];
+  dlcUnlocks?: number[];
 }
 
 // AreaBuff configuration interface
@@ -274,14 +287,15 @@ export interface EffectConfig {
   guid: number;
   name: string;
   iconPath: string;
-  locaText: LocaTextConfig;
+  locaText?: LocaTextConfig;
   buffs: number[];
   targets?: number[];
   targetsIsAllProduction: boolean;
-  effectScope: string;
   excludeEffectSourceGUID: boolean;
   effectDuration: number;
+  effectScope: string;
   source: string;
+  boostBuffs?: number[];
   dlcUnlocks?: number[];
 }
 
@@ -293,6 +307,7 @@ export interface TechConfig {
   locaText: LocaTextConfig;
   effects: number[];
   isRepeatable: boolean;
+  dlcUnlocks?: number[];
 }
 
 // Patrons configuration interface
@@ -322,6 +337,7 @@ export interface ItemConfig {
   excludeEffectSourceGUID: boolean;
   rarity: string;
   dlcUnlocks?: number[];
+  boostBuffs?: number[];
 }
 
 // Icon configuration interface

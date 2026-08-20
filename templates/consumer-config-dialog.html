@@ -61,24 +61,42 @@
 
                 <div data-bind="if: $data.availableItems().length">
                     <collapsible params="id: 'factory-config-equipped-items', heading: $root.texts.itemsEquipped.name, collapsed: true, data: $data">
+                        <!-- tri-state legend: Off / Base / Boosted -->
+                        <div class="text-muted small mb-2" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
+                            <span style="display: inline-flex; align-items: center; gap: .35rem;">
+                                <span class="tri-state-toggle" style="cursor: default;"><span class="tri" data-state="0"></span></span>
+                                <span data-bind="text: $root.texts.boostOff.name"></span>
+                            </span>
+                            <span style="display: inline-flex; align-items: center; gap: .35rem;">
+                                <span class="tri-state-toggle" style="cursor: default;"><span class="tri" data-state="1"></span></span>
+                                <span data-bind="text: $root.texts.boostBase.name"></span>
+                            </span>
+                            <span style="display: inline-flex; align-items: center; gap: .35rem;">
+                                <span class="tri-state-toggle" style="cursor: default;"><span class="tri" data-state="2"></span></span>
+                                <span data-bind="text: $root.texts.boostBoosted.name"></span>
+                            </span>
+                        </div>
                         <table class="table table-striped">
                             <tbody data-bind="foreach: $data.availableItems">
                                 <tr data-bind="debug: 'Available Item'">
                                     <td>
                                         <div class="inline-list">
-                                            <div data-bind="component: {name: 'icon-checkbox', params: {asset: $data.parent, checked: $data.scaling, id: 'fc-' + $data.target.guid + '-' + $data.parent.guid + '-equipped'}}"></div>
+                                            <tri-state-toggle params="asset: $data.parent,
+                                                                      state: $data.parent.slotStates.get($data.target),
+                                                                      hasBoost: $data.parent.boostEquipments.length > 0,
+                                                                      id: 'fc-' + $data.target.guid + '-' + $data.parent.guid + '-equipped'"></tri-state-toggle>
                                             <span class="ml-1" data-bind="text: $data.parent.name, attr: {for: 'fc-' + $data.target.guid + '-' + $data.parent.guid + '-equipped'}"></span> <!-- item name -->
                                         </div>
                                     </td>
                                     <td>
                                         <div style="float: right;">
                                             <!-- base productivity -->
-                                            <div data-bind="if: $data.buff.baseProductivityUpgrade != 0">
-                                                <span data-bind="text: formatNumber($data.buff.baseProductivityUpgrade, true) + ' %"></span>
+                                            <div data-bind="if: $data.activeBuff().baseProductivityUpgrade != 0">
+                                                <span data-bind="text: formatNumber($data.activeBuff().baseProductivityUpgrade, true) + ' %'"></span>
                                             </div>
                                             <!-- productivity -->
-                                            <div data-bind="if: $data.buff.productivityUpgrade != 0">
-                                                <span data-bind="text: formatNumber($data.buff.productivityUpgrade, true) + ' %'"></span>
+                                            <div data-bind="if: $data.activeBuff().productivityUpgrade != 0">
+                                                <span data-bind="text: formatNumber($data.activeBuff().productivityUpgrade, true) + ' %'"></span>
                                             </div>
                                             <!-- extra goods -->
                                             <span data-bind="if: $data.extraGoods">
@@ -103,9 +121,9 @@
                                                 </div>
                                             </div>
                                             <!-- workforce maintenance -->
-                                            <div data-bind="if: $data.buff.workforceMaintenanceFactorUpgrade != 0">
+                                            <div data-bind="if: $data.activeBuff().workforceMaintenanceFactorUpgrade != 0">
                                                 <span class="inline-list-centered">
-                                                    <span data-bind="text: formatNumber($data.buff.workforceMaintenanceFactorUpgrade, true) + ' %'"></span>
+                                                    <span data-bind="text: formatNumber($data.activeBuff().workforceMaintenanceFactorUpgrade, true) + ' %'"></span>
                                                     <img class="icon-sm icon-light" data-bind="attr: { src: $data.target.workforceDemand.workforce().icon ? $data.target.workforceDemand.workforce().icon  : null, alt: $data.target.workforceDemand.workforce().name }" />
                                                 </span>
                                             </div>

@@ -621,57 +621,6 @@
           "iconPath": {
             "type": "string"
           },
-          "needProduct": {
-            "type": "integer"
-          },
-          "needCategory": {
-            "type": "string"
-          },
-          "supplyWeight": {
-            "type": "number"
-          },
-          "isBuilding": {
-            "type": "boolean"
-          },
-          "needAttributes": {
-            "type": "object",
-            "properties": {
-              "Population": {
-                "type": "integer"
-              },
-              "Money": {
-                "type": "integer"
-              },
-              "Happiness": {
-                "type": "integer"
-              },
-              "Health": {
-                "type": "integer"
-              },
-              "FireSafety": {
-                "type": "integer"
-              },
-              "Belief": {
-                "type": "integer"
-              },
-              "Knowledge": {
-                "type": "integer"
-              },
-              "Prestige": {
-                "type": "integer"
-              }
-            },
-            "required": [
-              "Population",
-              "Money",
-              "Happiness",
-              "Health",
-              "FireSafety",
-              "Belief",
-              "Knowledge",
-              "Prestige"
-            ]
-          },
           "locaText": {
             "type": "object",
             "properties": {
@@ -727,6 +676,57 @@
               "traditional_chinese"
             ]
           },
+          "needProduct": {
+            "type": "integer"
+          },
+          "needCategory": {
+            "type": "string"
+          },
+          "supplyWeight": {
+            "type": "number"
+          },
+          "isBuilding": {
+            "type": "boolean"
+          },
+          "needAttributes": {
+            "type": "object",
+            "properties": {
+              "Population": {
+                "type": "integer"
+              },
+              "Money": {
+                "type": "integer"
+              },
+              "Happiness": {
+                "type": "integer"
+              },
+              "Health": {
+                "type": "integer"
+              },
+              "FireSafety": {
+                "type": "integer"
+              },
+              "Belief": {
+                "type": "integer"
+              },
+              "Knowledge": {
+                "type": "integer"
+              },
+              "Prestige": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "Population",
+              "Money",
+              "Happiness",
+              "Health",
+              "FireSafety",
+              "Belief",
+              "Knowledge",
+              "Prestige"
+            ]
+          },
           "dlcUnlocks": {
             "type": "array",
             "items": {
@@ -738,6 +738,7 @@
           "guid",
           "name",
           "iconPath",
+          "locaText",
           "needProduct",
           "needCategory",
           "supplyWeight",
@@ -929,6 +930,9 @@
                 },
                 "needConsumptionRate": {
                   "type": "number"
+                },
+                "requiresItem": {
+                  "type": "integer"
                 }
               },
               "required": [
@@ -1700,7 +1704,7 @@
             "type": "number"
           },
           "productivityUpgrade": {
-            "type": "number"
+            "type": "integer"
           },
           "fuelDurationPercent": {
             "type": "number"
@@ -1731,6 +1735,39 @@
           },
           "population": {
             "type": "number"
+          },
+          "consumptionModifierInPercent": {
+            "type": "number"
+          },
+          "goodConsumptionUpgrade": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product": {
+                  "type": "integer"
+                },
+                "amountInPercent": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "product",
+                "amountInPercent"
+              ]
+            }
+          },
+          "providedNeedUpgrade": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "additionalNeedsDemand": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
           },
           "additionalOutputs": {
             "type": "array",
@@ -1764,12 +1801,6 @@
               "type": "integer"
             }
           },
-          "dlcUnlocks": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
-          },
           "replaceInputs": {
             "type": "array",
             "items": {
@@ -1787,6 +1818,12 @@
                 "oldInput"
               ]
             }
+          },
+          "dlcUnlocks": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
           }
         },
         "required": [
@@ -1802,7 +1839,8 @@
           "fertilityPercent",
           "replaceWorkforce",
           "workforceMaintenanceFactorUpgrade",
-          "population"
+          "population",
+          "consumptionModifierInPercent"
         ]
       },
       "title": "BuildingBuff",
@@ -1992,6 +2030,12 @@
           "source": {
             "type": "string"
           },
+          "boostBuffs": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
           "dlcUnlocks": {
             "type": "array",
             "items": {
@@ -2003,7 +2047,6 @@
           "guid",
           "name",
           "iconPath",
-          "locaText",
           "buffs",
           "targetsIsAllProduction",
           "excludeEffectSourceGUID",
@@ -2379,13 +2422,21 @@
             "items": {
               "type": "integer"
             }
+          },
+          "boostBuffs": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
           }
         },
         "required": [
           "guid",
           "name",
           "iconPath",
+          "locaText",
           "buffs",
+          "targets",
           "effectScope",
           "excludeEffectSourceGUID",
           "rarity"

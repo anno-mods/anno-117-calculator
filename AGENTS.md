@@ -50,6 +50,14 @@ npm run build
 - Most assets are created for each island. Only some (regions, seesions, buffs, need categories) only exist once globally.
 - Avoid to use `as any` casts when generating code. Do not use them to fix typescript errors.
 
+### All-Islands Aggregation (`aggregateAllIslands` setting)
+Opt-in `calculatorSettings` option, default off. When it is on **and** the selected island `isAllIslands()`, presenters sum values across `view.islands().filter(i => !i.isAllIslands())` instead of reading the All-Islands pseudo-island's own (usually empty) storage. Off, or on a real island, behaves exactly as before.
+
+Three invariants; everything else is in `src/AGENTS.md` -> "Aggregate mode (`src/aggregate.ts`)":
+- **Branch inside existing computed properties; never swap the array a bootstrap `foreach` iterates.** `CategoryPresenter.productPresenters`, `ProductPresenter.factoryPresenters` and `window.view.template.populationGroups` must keep the same array reference forever - swapping forces Knockout to rebuild the whole tile grid (~2s). Arrays iterated inside modal dialogs are exempt; they re-render on open.
+- **Read-only aggregate rows are a data contract, not a template convention.** `AggregateBuildingsCalc` (`src/aggregate.ts`) is a `BuildingsCalc` of read-only cross-island sums (`readOnly === true`, setters are logged no-ops). Presenters return it from `buildings()`, and shared components branch on `buildings().readOnly`. Prefer this over a template-level condition.
+- **Gate genuinely-disappearing blocks with `<!-- ko ifEditable: true -->` / `<!-- ko ifAggregated: true -->`, never `visible:`** - `visible:` still evaluates a hidden control's `enable:`/`click:` bindings against read-only aggregate data, which throws because the aggregate objects deliberately implement no mutators.
+
 ### Initialization Order (world.ts:518)
 **MUST follow this sequence:**
 1. Create objects (factories, products, consumers)
@@ -58,11 +66,14 @@ npm run build
 4. `persistBuildings()` - Load saved configurations
 
 ### Key Constraints
+- `dist/calculator.bundle.js` must only be committed when a new version is released (otherwise it bloats the repository)
 - `types.config.ts` is auto-generated - never edit
 - Use `npm run generate-types` to generate `types.config.ts` from params.schema.json
+- If you find an error in params.js write a handoff document and store it in ../asset-extractor/docs
 - Circular imports resolved: production.ts → buffs.ts ← factories.ts
 - Most assets per-island; regions/sessions/buffs are global
 - Observable arrays: Call `.buffs()` not `.buffs` for array access
+- You must not run all tests concurrently. This crashes the computer.
 
 **Storage Class** (src/world.ts:34-152):
 - Each Storage instance manages one top-level localStorage key

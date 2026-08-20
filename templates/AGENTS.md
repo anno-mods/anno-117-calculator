@@ -1,6 +1,6 @@
 # Template Design Guidelines for Anno Calculator
 
-## UI Design Patterns (IMPLEMENTED)
+## UI Design Patterns
 - **Dark mode support**: All product-tile classes have `.bg-dark .product-tile` variants in style.css
 
 ### Residents Display Guidelines
@@ -22,7 +22,7 @@ When displaying resident counts in templates, follow these patterns:
 - Use `table-striped table-fixed` classes for consistent styling
 - Implement icon-based column identification instead of text headers
 
-### Layout Classes (UPDATED)
+### Layout Classes
 
 **Use Project-Specific Classes**:
 - `inline-list-centered`: For horizontally aligned content with icons and text
@@ -33,7 +33,7 @@ When displaying resident counts in templates, follow these patterns:
 **Patron Effect Styling**:
 - **Visual Offset**: Patron effects (Veneration/Ritual) should use `padding-left: 24px` to align visually with their interactive checkbox counterparts.
 
-### Template Structure Patterns (UPDATED)
+### Template Structure Patterns
 
 **Collapsible Section**:
 ```html
@@ -165,7 +165,15 @@ When displaying resident counts in templates, follow these patterns:
 3. **Consistent across all component types**: Custom elements and data-bind component syntax
 4. **Observable unwrapping**: Components should handle observable unwrapping internally if needed
 
-## Debug Binding Usage (IMPLEMENTED)
+## Read-only gating for derived/aggregate rows (All-Islands Aggregation feature)
+- **Prefer the data contract over a template condition.** A control with a sensible read-only rendering should receive the aggregate object and branch internally on `buildings().readOnly` (see `constructed-buildings-input` in `src/components.ts`); `FactoryPresenter.buildings()` / `ResidenceRow.buildings()` already return an `AggregateBuildingsCalc` while aggregating, so the call site passes one object and needs no condition of its own.
+- For blocks that must genuinely disappear (supplier pickers, item equip sections), use the `<!-- ko ifEditable: true -->` / `<!-- ko ifAggregated: true -->` virtual bindings, never `visible:` - `visible:` still evaluates the hidden control's `enable:`/`click:` bindings, which throws if the bound object doesn't implement the mutator methods. Sites gating on a *presenter's own* mode rather than the global one (`population-level-config-dialog.html`, `population-tile.html`) use `if:`/`ifnot:` on that presenter's `editable()` / `isAggregateMode()` instead - the dialog can be open on an aggregate row while a real island is selected.
+- **Pitfall discovered**: replacing several duplicated inline conditions (e.g. `$root.island().isAllIslands() && $root.settings.aggregateAllIslands.checked()`, repeated across `product-tile.html`/`factory-config-section.html`/`product-config-dialog.html`) with a single shared `ko.pureComputed` on `window.view` caused a real reactivity glitch: switching islands via `<!-- ko with: $data.someComputed() --></* nested */>` could momentarily rebind the `ifnot:` block against a stale `$data` from before the switch, throwing on a method the new state's object doesn't have. The duplicated *inline* per-binding-site expression did not have this issue (each binding's own internal computed subscribes independently and stays in sync with its own `with:` context). Prefer the duplicated inline expression over a shared computed when the condition gates a block nested inside a `with:`/`foreach:` whose bound value itself changes with the same underlying observable. The `ifEditable`/`ifAggregated` binding handlers that replaced those inline expressions are safe for exactly the same reason the inline expression was: they delegate to KO's own `if` binding, which creates a per-site computed, so no shared memoized node is introduced.
+- **`.product-tile-attribute-group` (style.css) has a fixed `height: 2rem`**, flex-column + `space-between`, sized for the compact buildings-count row (`.product-tile-count`) alone. It does not grow with content and has no `overflow` set. In `product-tile.html` the t/min production row (`.product-tile-amount`, under the "Total Production" comment) is a **sibling** of `.product-tile-attribute-group`, not nested inside it - it was nested at one point during the All-Islands Aggregation work, which forced both rows into the fixed 2rem box, overflowed it, and clipped the t/min line against the tile border with no bottom padding (also misaligning t/min's height across tiles that do vs don't render a count row). Keep `.product-tile-amount`'s wrapper as a sibling if this markup is touched again. Regression test: `tests/binding/product-tile-layout.spec.ts`.
+- Any change to what `product-tile-count`'s `with:`-bound computed (`ProductPresenter.factoryPresenterIfDefaultSupplier()`) returns must preserve `null` for rows that previously rendered nothing (import-only products, or every real island's `defaultSupplier` being non-factory while aggregating) - a non-null return where the non-aggregate branch would be `null` makes the row start rendering unexpectedly, same overflow symptom as above. Exception: with zero real islands, the aggregate branch intentionally still returns a synthetic all-zero object (see `src/AGENTS.md`).
+- **Bootstrap checkbox styling pitfall on read-only rows**: Removing the `<input type="checkbox">` while leaving container elements with Bootstrap form classes like `.custom-control.custom-checkbox` or `.custom-control-label` will still cause the browser to render empty checkbox shapes/borders. These styling classes must be removed entirely from the text labels on read-only rows to prevent empty boxes.
+
+## Debug Binding Usage
 
 All 15 templates now include debug bindings for troubleshooting Knockout binding issues.
 
@@ -226,7 +234,7 @@ When enabled, debug bindings log to console with `[DebugKO]` prefix:
 - **update callback**: Fires on observable changes (requires `debug.verboseMode` = true)
 - No performance impact when debug mode is disabled (observable check returns false immediately)
 
-## External Link Component (IMPLEMENTED)
+## External Link Component
 
 **Purpose**: Language-aware links to annolayouts.de (https://annolayouts.de/117/{lang}/{subpage})
 
@@ -247,6 +255,7 @@ When enabled, debug bindings log to console with `[DebugKO]` prefix:
 - `notes-section` - Notes textarea with toggle
 - `lock-toggle` - Lock/unlock toggle button
 - `icon-checkbox` - Checkbox with icon label
+- `tri-state-toggle` - Item equip control Off/Base/Boosted (see below)
 - `constructed-buildings-input` - Building count input
 
 **Asset Display**:
@@ -270,3 +279,20 @@ When enabled, debug bindings log to console with `[DebugKO]` prefix:
 **Layout**:
 - `collapsible` - Collapsible section with optional external link
 - `external-link` - Language-aware external links
+
+## buff-display component (effects & patron dialogs)
+
+- `buff-display` (`params: {buffs: ...}`) iterates **raw `Buff` objects** (`Effect.buffs`, `wonder.buffs`) — bind `Buff` fields directly (`$data.productivityUpgrade`, `$data.goodConsumptionUpgrade`, `$data.additionalNeeds`), not `AppliedBuff` fields.
+- Consumption-reduction rows: flat `consumptionModifierInPercent != 0` → `±X %` + `icons/icon_marketplace_2d_light.png` (affects all needs); `goodConsumptionUpgrade` foreach → `±X %` + each `$data.product.icon` (per good).
+- Additional-need row: `additionalNeeds.length` → `icons/icon_2d_extra_demand.png` (title `additionalNeed`) + each need's product icon.
+
+## effects-dialog.html target column
+
+- `foreach: $data.targets` renders one icon per target. For residence targets use the **population-level icon** (`$data.populationLevel ? $data.populationLevel.icon : $data.icon`) — all residences share one building icon, so population icons distinguish tiers.
+- The `<thead>` is intentionally left unclosed before `<tbody data-bind="foreach: $root.filteredEffects">`; leave it as-is.
+## tri-state-toggle component (item equip: Off / Base / Boosted)
+
+- Replaces `icon-checkbox` for equipped **factory items** in `factory-config-section.html` and `consumer-config-dialog.html` (the item rows under `foreach: $data.availableItems`, where each `$data` is a base `AppliedBuff`).
+- Params (colon syntax): `asset: $data.parent` (Item, for the icon), `state: $data.parent.slotStates.get($data.target)` (the KO observable 0/1/2), `hasBoost: $data.parent.boostEquipments.length > 0`, `id: ...`. Click cycles `0→1→2→0` (or `0→1→0` when `hasBoost` is false — behaves exactly like the old equip checkbox).
+- **Bind item-row buff fields via `$data.activeBuff().*`, not `$data.buff.*`** — `activeBuff()` returns the boost buff at state 2, else the base buff, so the single row shows the active variant's numbers. (`extraGoods`/`replacementArray`/`replacingWorkforce` stay on `$data` — they are `AppliedBuff` fields, not buff fields.)
+- Visuals in `style.css` (`.tri` driven by `data-state`): Off = white box, Base = blue check, Boosted = gold star. Dark mode keyed off `body.bg-dark`.

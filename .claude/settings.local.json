@@ -37,7 +37,8 @@
       "Bash(python -c ':*)",
       "WebFetch(domain:)",
       "Bash(python:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(awk '/\"guid\": 166475,/{f=1} f&&/\"iconPath\"/{print; exit}' js/params.js)"
     ],
     "deny": []
   },

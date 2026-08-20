@@ -87,6 +87,16 @@ export class ResidenceBuilding extends NamedElement implements Constructible{
         config.needsList.forEach(needConfig => {
             let need = new ResidenceNeed(needConfig, this, assetsMap);
 
+            // Defensive dedup: params.js now emits a single entry per need GUID per residence (a need
+            // is either genuine base consumption, ungated, OR a conditional additionalNeedsDemand need
+            // gated behind a `requiresItem` effect - never both on the same residence). Should a stray
+            // duplicate ever reappear, an ungated occurrence (real needConsumptionRate, no requiresItem)
+            // must win over a gated one so genuine base consumption stays available: never let a gated
+            // entry overwrite an existing ungated entry, and always let an ungated entry replace a gated.
+            const existing = this.needsMap.get(need.need.guid);
+            if (existing && existing.requiresItem === undefined && need.requiresItem !== undefined) {
+                return; // keep the ungated entry already in the map
+            }
             this.needsMap.set(need.need.guid, need);
         });
 
@@ -238,6 +248,16 @@ export class ResidenceBuilding extends NamedElement implements Constructible{
         }
 
         this.buffs.push(appliedBuff);
+    }
+
+    /**
+     * Gets the extended name including region information.
+     * Mirrors Consumer.getRegionExtendedName so residences can be rendered as effect targets
+     * (e.g. mythical-item effects) with the same target-icon binding used for production buildings.
+     */
+    getRegionExtendedName(): string {
+        const region = this.associatedRegions[0];
+        return region ? `${this.name()} (${region.name() || 'Unknown Region'})` : this.name();
     }
 
     /**

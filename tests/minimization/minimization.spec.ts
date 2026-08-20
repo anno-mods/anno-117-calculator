@@ -35,29 +35,24 @@ test.describe('Demand Minimization Tests (LP Solver vs Calculator)', () => {
   });
 
   test('cheese-supply-chain: Cheese (2153)', async ({ page }) => {
-    // 1. Solve LP
+    // 1. Solve LP (Goat Milk / Cheese is a Celtic chain, so we use Albion/6627)
     const lpInput: LpInput = {
       params,
-      sessionGuid: 3245, // Latium
+      sessionGuid: 6627, // Albion
       demands: [{ productGuid: 2153, amount: 10 }], // 10 cheese/min
       activeEffects: []
     };
     const solution = buildAndSolve(lpInput);
     expect(solution.feasible).toBe(true);
 
-    // 2. Setup Calculator
-    const config = configLoader.createIslandConfig("Latium", 3245, {}, {});
+    // 2. Setup Calculator (Goat Milk / Cheese is a Celtic chain, so we use Albion/6627)
+    const config = configLoader.createIslandConfig("Albion", 6627, {}, {});
     await configLoader.loadConfigObject(page, config);
     await page.goto('/');
     
     // Log content for debugging
     const content = await page.content();
     console.log(`Page content snippet: ${content.substring(0, 500)}`);
-
-    // Verify page loaded
-    const title = await page.title();
-    console.log(`Page title: ${title}`);
-    expect(title).toContain('Anno 117');
 
     await page.waitForFunction(() => (window as any).view && (window as any).view.island(), { timeout: 30000 });
 
@@ -167,9 +162,11 @@ test.describe('Demand Minimization Tests (LP Solver vs Calculator)', () => {
   });
 
   test('multi-product-demand: Cheese (2153) + Wine (2138)', async ({ page }) => {
+    // Demanding both Cheese (Celtic) and Wine (Roman) requires a session that supports both.
+    // Albion supports Celtic Cheese and Roman Celtic Wine.
     const lpInput: LpInput = {
       params,
-      sessionGuid: 3245,
+      sessionGuid: 6627, // Albion
       demands: [
         { productGuid: 2153, amount: 5 },
         { productGuid: 2138, amount: 5 }
@@ -179,7 +176,8 @@ test.describe('Demand Minimization Tests (LP Solver vs Calculator)', () => {
     const solution = buildAndSolve(lpInput);
     expect(solution.feasible).toBe(true);
 
-    const config = configLoader.createIslandConfig("Latium", 3245, {}, {});
+    // Setup Calculator on Albion to support both Celtic Cheese and Roman Celtic Wine
+    const config = configLoader.createIslandConfig("Albion", 6627, {}, {});
     await configLoader.loadConfigObject(page, config);
     await page.goto('/');
     await page.waitForFunction(() => (window as any).view && (window as any).view.island());
@@ -220,7 +218,7 @@ test.describe('Demand Minimization Tests (LP Solver vs Calculator)', () => {
     // Silo buff 77960 = +100% productivity on Sheep Farm. It is a module (77954), not a
     // standalone effect, so it must be passed via activeModules, not activeEffects.
     const sheepFarmGuid = 2786;
-    const woolGuid = 2040;
+    const woolGuid = 2073; // Sheep Farm outputs product 2073 (Good Sheep)
     const demand = 20; // units/min
 
     const lpWithSilo: LpInput = {

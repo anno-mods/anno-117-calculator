@@ -37,9 +37,9 @@ place or update it in the `AGENTS.md` file within that subdirectory.
 
 When specific information belongs to a particular subcomponent, ensure you place it in the CLAUDE file for that component.
 For example:
-* Information A belongs exclusively to writing html code with knockout bindings → put it in `templates/CLAUDE.md`
-* Information B belongs exclusively to programming in typescript → put it in `src/CLAUDE.md`
-* Information C belongs exclusively to testing -> ptu it in `tests/CLAUDE.md`
+* Information A belongs exclusively to writing html code with knockout bindings → put it in `templates/AGENTS.md`
+* Information B belongs exclusively to programming in typescript → put it in `src/AGENTS.md`
+* Information C belongs exclusively to testing -> put it in `tests/AGENTS.md`. If you wrote a new test, add new GUIDs to the list of frequently used GUIDs.
 
 If you added a new command that developpers need to run / test / debug the application → update `README.md`
 

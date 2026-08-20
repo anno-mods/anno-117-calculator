@@ -1,12 +1,13 @@
-import { ACCURACY, BuildingsCalc, formatNumber, ko, NamedElement } from './util';
-import { PopulationGroup, PopulationLevel, ResidenceBuilding, Workforce } from './population';
+import { ACCURACY, BuildingsCalc, formatNumber, ko } from './util';
+import { PopulationLevel, ResidenceBuilding } from './population';
 import { ResidenceEffectCoverage, ResidenceEffect, ResidenceNeed, NeedCategory, Need, PopulationLevelNeed } from './consumption';
-import { ProductCategory, Product, Demand, Effect } from './production';
+import { Product, Effect } from './production';
 import { AppliedBuff } from './buffs';
 import { Consumer, Factory, Module } from './factories';
 import { TradeRoute } from './trade';
 import { ExtraGoodSupplier, PassiveTradeSupplier } from './suppliers';
-import { Session } from './world';
+import { Session, Island } from './world';
+import { AggregateBuildingsCalc, isAggregating, sumAcrossRealIslands, sumBuildingsAcrossRealIslands } from './aggregate';
 
 
 declare const $: any;
@@ -93,7 +94,7 @@ export class ViewMode {
     start(): void {
         view.settings.missingBuildingsHighlight.checked(true);
         view.islandManager.activateAllNeeds.checked(false);
-        //view.settings.needUnlockConditions.checked(true);
+        view.settings.aggregateAllIslands.checked(true);
 
         setTimeout(() => $('#island-management-dialog').modal('show'), 250);
     }
@@ -124,8 +125,6 @@ export class ViewMode {
         for (var option of view.settings.options)
             option.checked(true);
 
-        //view.settings.hideProductionBoost.checked(false);
-
         for (var dlc of view.dlcs.values()) {
             dlc.checked(true);
         }
@@ -147,106 +146,6 @@ export class ViewMode {
     }
 }
 
-/**
- * Template system for creating hierarchical data structures
- * Manages parent-child relationships between assets and their instances
- */
-export class Template {
-    public attributeName: string;
-    public index: number;
-    public name: string;
-    public recipeName: string;
-    public guid: number;
-    public getRegionExtendedName: any;
-    public editable: boolean;
-    public region: string;
-    public hotkey: string;
-    public templates: Template[];
-    public parentInstance: any;
-    public instance: KnockoutObservable<NamedElement>;
-    [key: string]: any; // Index signature for dynamic properties
-
-    /**
-     * Creates a new Template instance
-     * @param asset - The asset to create a template for
-     * @param parentInstance - The parent instance
-     * @param attributeName - The name of the attribute in the parent
-     * @param index - The index of this template in the parent's array
-     */
-    constructor(asset: any, parentInstance: any, attributeName: string, index: number) {
-        // Validate required parameters
-        if (!asset) {
-            throw new Error('Template asset is required');
-        }
-        if (!parentInstance) {
-            throw new Error('Template parentInstance is required');
-        }
-        if (!attributeName) {
-            throw new Error('Template attributeName is required');
-        }
-        if (typeof index !== 'number') {
-            throw new Error('Template index is required and must be a number');
-        }
-
-        // Explicit assignments
-        this.attributeName = attributeName;
-        this.index = index;
-
-        this.name = asset.name;
-        this.recipeName = asset.recipeName;
-        this.guid = asset.guid;
-        this.getRegionExtendedName = asset.getRegionExtendedName;
-        this.editable = asset.editable;
-        this.region = asset.region;
-        this.hotkey = asset.hotkey;
-
-        this.templates = [];
-        this.parentInstance = ko.observable(parentInstance);
-
-        this.instance = ko.computed(() => {
-            var p = this.parentInstance();
-
-            var inst = p[this.attributeName][this.index];
-
-            this.templates.forEach(t => t.parentInstance(inst));
-
-            return inst;
-        });
-
-        for (var attr in asset) {
-            var val = asset[attr];
-
-            if (val instanceof Array) {
-                this[attr] = val.map((a: any, index: number) => {
-                    if (Template.applicable(asset)) {
-                        var t = new Template(a, this.instance(), attr, index);
-                        this.templates.push(t);
-                        return t;
-                    } else
-                        return a;
-                });
-            }
-            else if (!ko.isObservable(val) && !ko.isComputed(val) && asset.hasOwnProperty(attr))
-                this[attr] = val;
-
-        }
-    }
-
-    /**
-     * Checks if an asset type is applicable for templating
-     * @param asset - The asset to check
-     * @returns True if the asset can be templated
-     */
-    static applicable(asset: any): boolean {
-        return asset instanceof PopulationGroup ||
-            asset instanceof PopulationLevel ||
-            asset instanceof ResidenceBuilding ||
-            asset instanceof Workforce ||
-            asset instanceof ProductCategory ||
-            asset instanceof Product ||
-            asset instanceof Demand;
-    }
-}
 
 /**
  * Manages the display of production chains
@@ -667,7 +566,33 @@ export class CollapsibleStates {
         this.collapsibles.push(newCollapsible);
         return newCollapsible;
     }
-} 
+}
+
+/**
+ * Looks up the PopulationLevel with the given guid on a specific island, if present.
+ * Mirrors the equivalent helper in population-presenters.ts - kept as a local copy here
+ * rather than exported/shared, since it is a one-line lookup and this file already avoids
+ * further coupling to population-presenters.ts beyond the shared sumAcrossRealIslands helper.
+ */
+function findPopulationLevelOnIsland(island: Island, guid: number): PopulationLevel | undefined {
+    return island.assetsMap.get(guid) as PopulationLevel | undefined;
+}
+
+/**
+ * Sums a single PopulationLevelNeed's selected value (amount/residents) across the user's
+ * real islands, for the need matching `needGuid` under the population level matching
+ * `populationLevelGuid`. Used by PopulationLevelNeedPresenter's aggregate-mode branch
+ * (ResidencePresenter.updateAggregate) - see AGENTS.md / plan KTD2.
+ */
+function sumPopulationLevelNeedAcrossRealIslands(populationLevelGuid: number, needGuid: number, selector: (need: PopulationLevelNeed) => number): number {
+    return sumAcrossRealIslands(island => {
+        const level = findPopulationLevelOnIsland(island, populationLevelGuid);
+        if (!level) return 0;
+        const need = level.needsMap.get(needGuid);
+        if (!need) return 0;
+        return selector(need);
+    });
+}
 
 class PopulationLevelNeedPresenter {
     public parent: NeedCategoryPresenter;
@@ -690,15 +615,35 @@ class PopulationLevelNeedPresenter {
         this.residentsPerResidence = need.residents;
         this.instance = ko.observable();
         this.name = ko.pureComputed(() => need.product.name());
-        this.visible =  ko.pureComputed(() => this.instance()?.available() ?? false);
+        // A need is shown only when available AND not hidden. hidden() gates conditional
+        // (mythical-item / monument) needs behind their granting effect - see PopulationLevelNeed.hidden.
+        this.visible =  ko.pureComputed(() => {
+            const inst = this.instance();
+            return inst ? inst.available() && !inst.hidden() : false;
+        });
         this.product = ko.pureComputed(() => need.product);
         this.amount = ko.pureComputed(() => {
+            // Aggregate mode (see ResidencePresenter.isAggregateMode): sum this need's amount
+            // across every real island that has the target population level, rather than
+            // reading the single repointed instance() (which is only one representative island).
+            if (this.parent.parent.isAggregateMode()) {
+                const populationLevelGuid = this.parent.parent.instance()?.guid;
+                if (populationLevelGuid == null)
+                    return 0;
+                return sumPopulationLevelNeedAcrossRealIslands(populationLevelGuid, this.guid, n => n.amount());
+            }
+
             let inst = this.instance();
             if(inst == null)
                 return 0;
 
             return inst.amount();
         });
+        // checked has no coherent single value across real islands in aggregate mode (different
+        // islands can have different checked states for the same need) - left reading the
+        // representative instance() unchanged. This is safe because R14 structurally removes the
+        // checkbox bound to it in aggregate mode (population-level-config-dialog.html), so the
+        // value is never surfaced to the user while aggregating.
         this.checked = ko.pureComputed({
             read: () => this.instance()?.checked() ?? false,
             write: (checked: boolean) => {
@@ -707,6 +652,13 @@ class PopulationLevelNeedPresenter {
         });
         this.isInactive =  ko.pureComputed(() => false);
         this.residents = ko.pureComputed(() => {
+            if (this.parent.parent.isAggregateMode()) {
+                const populationLevelGuid = this.parent.parent.instance()?.guid;
+                if (populationLevelGuid == null)
+                    return 0;
+                return sumPopulationLevelNeedAcrossRealIslands(populationLevelGuid, this.guid, n => n.residents());
+            }
+
             let inst = this.instance();
             if(inst == null)
                 return 0;
@@ -795,10 +747,32 @@ export class RangeEffect {
     }
 }
 
+/**
+ * One row of the residence table in population-level-config-dialog.html. Every cell comes from an
+ * aggregate-aware source, so the row cannot show one island's value underneath an aggregate total.
+ */
+export interface ResidenceRow {
+    guid: number;
+    name(): string;
+    /** Aggregate sum while aggregating, this residence's own value otherwise. */
+    residents(): number;
+    /**
+     * AggregateBuildingsCalc while aggregating, the residence's own BuildingsCalc otherwise.
+     *
+     * A KO computed rather than a plain function: it is handed to constructed-buildings-input as a
+     * param, and that component resolves params with `ko.unwrap`, which returns a plain function
+     * untouched instead of calling it.
+     */
+    buildings: KnockoutComputed<BuildingsCalc>;
+    effectCoverage(): ResidenceEffectCoverage[];
+    prepareResidenceEffectView(): void;
+}
+
 export class ResidencePresenter{
     public instance: KnockoutObservable<PopulationLevel>;
     public residence: KnockoutObservable<ResidenceBuilding>;
     public buildings: KnockoutComputed<BuildingsCalc | null>;
+    public residenceRows: KnockoutComputed<ResidenceRow[]>;
     public name: KnockoutObservable<string>;
     public residents: KnockoutObservable<string>;
     private populationLevelNeeds: PopulationLevelNeedPresenter[];
@@ -809,14 +783,111 @@ export class ResidencePresenter{
     public populationBuffsId: string;
     public populationBuffsVisible: KnockoutComputed<boolean>;
 
+    /**
+     * True while this presenter is showing a read-only sum across the user's real islands
+     * (opened via updateAggregate() from an aggregate population tile) rather than a single
+     * real island's own PopulationLevel (opened via update()). Set false by update(), true by
+     * updateAggregate() - see AGENTS.md / plan KTD2 for the rationale (this presenter instance
+     * is shared and mutated in place, never wrapped/replaced, so existing .update() call sites
+     * keep working unchanged).
+     */
+    private aggregateMode: KnockoutObservable<boolean>;
 
     constructor(needCategories: NeedCategory[], populationLevel: PopulationLevel){
+        this.aggregateMode = ko.observable(false);
+
         // As long as we only have one residence per population level, we can use the first one
         this.instance = ko.observable(populationLevel);
         this.residence = ko.pureComputed(() => this.instance() ? this.instance().residences[0] : null);
         this.name = ko.pureComputed(() => this.instance() ? this.instance().name() : "");
-        this.residents = ko.pureComputed(() => this.instance() ? formatNumber(this.instance().residents()) : "0");
-        this.buildings = ko.pureComputed(() => this.instance() ? this.instance().residences[0].buildings : null);
+        this.residents = ko.pureComputed(() => {
+            if (this.aggregateMode()) {
+                const guid = this.instance()?.guid;
+                if (guid == null) return "0";
+                return formatNumber(sumAcrossRealIslands(island => {
+                    const level = findPopulationLevelOnIsland(island, guid);
+                    return level ? level.residents() : 0;
+                }));
+            }
+
+            return this.instance() ? formatNumber(this.instance().residents()) : "0";
+        });
+        // In aggregate mode this feeds RangeEffect.totalPopulation (see populationBuffs below) a
+        // summed constructed-count across real islands, so a buff's *magnitude* reflects the whole
+        // aggregate. Known limitation: populationBuffs itself still iterates only the representative
+        // island's own residence.buffs(), so a buff active on a non-representative real island but
+        // not on the representative one won't appear in the aggregate dialog at all (not just be
+        // under-counted). Fully unioning the buff catalog across real islands is out of scope here.
+        // Also read directly by population-level-config-dialog.html's read-only buildings-count
+        // replacement for the residence-row table (which otherwise binds each row's *own*,
+        // single-island ResidenceBuilding.buildings) - relies on the documented "one residence
+        // per population level" assumption already made elsewhere in this class.
+        this.buildings = ko.pureComputed(() => {
+            if (this.aggregateMode()) {
+                const guid = this.instance()?.guid;
+                const constructed = guid == null ? 0 : sumAcrossRealIslands(island => {
+                    const level = findPopulationLevelOnIsland(island, guid);
+                    return level ? level.residences[0].buildings.constructed() : 0;
+                });
+                // Read-only aggregate BuildingsCalc: only .constructed() is ever read (by
+                // RangeEffect.totalPopulation); required has no meaning for a summed residence
+                // count, and utilized simply mirrors constructed.
+                return new AggregateBuildingsCalc({
+                    constructed: () => constructed,
+                    required: () => 0,
+                    utilized: () => constructed,
+                });
+            }
+
+            return this.instance() ? this.instance().residences[0].buildings : null;
+        });
+
+        /**
+         * Rows for the residence table in population-level-config-dialog.html. Built here rather
+         * than iterating instance().allResidences() directly so every cell in the row comes from
+         * the same aggregate-aware source as the dialog header - binding the raw ResidenceBuilding
+         * made the row show one island's residents underneath an aggregate total, and gated the
+         * effect-coverage cell on that one island's constructed count (so the coverage icons
+         * vanished entirely whenever the representative island happened to have 0 constructed).
+         *
+         * Swapping this array is safe (unlike the bootstrap tile-grid arrays the Global Constraints
+         * protect): the dialog is re-rendered when it opens.
+         */
+        this.residenceRows = ko.pureComputed(() => {
+            const level = this.instance();
+            if (!level) return [];
+
+            const aggregate = this.aggregateMode();
+
+            return level.allResidences().map((residence: ResidenceBuilding): ResidenceRow => {
+                const residents = aggregate
+                    ? () => sumAcrossRealIslands(island => {
+                        const other = island.assetsMap.get(residence.guid) as ResidenceBuilding | undefined;
+                        return other ? other.residents() : 0;
+                    })
+                    : () => residence.residents();
+
+                // planned is deliberately left to AggregateBuildingsCalc's default - residence rows
+                // never displayed a planned count and summing one here would change what they show.
+                const sums = sumBuildingsAcrossRealIslands(residence.guid);
+                const buildings = ko.pureComputed(() => aggregate
+                    ? new AggregateBuildingsCalc({
+                        constructed: sums.constructed,
+                        required: sums.required,
+                        utilized: sums.utilized,
+                    })
+                    : residence.buildings);
+
+                return {
+                    guid: residence.guid,
+                    name: () => residence.name(),
+                    residents,
+                    buildings,
+                    effectCoverage: () => ko.unwrap(residence.effectCoverage),
+                    prepareResidenceEffectView: () => residence.prepareResidenceEffectView()
+                };
+            });
+        });
         this.populationLevelNeeds = [];
         this.needCategories = [];
         this.effectCoverage = ko.pureComputed(() => this.residence() ? this.residence().effectCoverage() : []);
@@ -867,7 +938,88 @@ export class ResidencePresenter{
     }
 
     update(populationLevel: PopulationLevel){
+        this.aggregateMode(false);
         this.instance(populationLevel);
+    }
+
+    /**
+     * Single entry point for opening this dialog on a population level. Decides between the
+     * editable single-island view and the read-only aggregate view itself, so no call site can
+     * accidentally drop out of aggregate mode - which previously let a user edit one arbitrary
+     * island's needs and building counts while All-Islands was selected.
+     */
+    open(populationLevel: PopulationLevel): void {
+        if (isAggregating())
+            this.updateAggregate(populationLevel.guid);
+        else
+            this.update(populationLevel);
+    }
+
+    /**
+     * Repoints this shared presenter at a read-only, summed-across-real-islands view of the
+     * population level matching `populationLevelGuid`, instead of a single real island's own
+     * instance. Called from the aggregate population tile's sliders button
+     * (templates/population-tile.html) when PopulationLevelPresenter.isAggregateMode() is true.
+     *
+     * `instance()` is still repointed to a genuine PopulationLevel (the first real island that
+     * has this guid, falling back to the currently-selected island's own instance if none do -
+     * both are structurally always present per the union-display convention, see
+     * population-presenters.ts) so read-only template bindings that call instance().name/.guid/
+     * etc. keep working. The actual aggregated numbers (residents/needs/population buffs) come
+     * from the aggregateMode-branched computed properties above and on the nested
+     * NeedCategoryPresenter/PopulationLevelNeedPresenter objects, not from instance() directly.
+     */
+    updateAggregate(populationLevelGuid: number): void {
+        this.aggregateMode(true);
+
+        const representative = this.findRepresentativePopulationLevel(populationLevelGuid);
+        if (representative) {
+            this.instance(representative);
+        }
+    }
+
+    /**
+     * True when this presenter is currently showing an aggregate (summed-across-real-islands)
+     * view rather than a single real island's own data. Bound by
+     * templates/population-level-config-dialog.html to structurally gate mutating controls
+     * (need-activation checkboxes, population-buff checkboxes, the buildings-constructed input)
+     * per R14/KTD4 - if:/ifnot:, not visible:, so their bound methods are never evaluated
+     * against aggregate data.
+     */
+    isAggregateMode(): boolean {
+        return !this.editable();
+    }
+
+    /**
+     * False while this presenter shows read-only aggregate values. A plain method, not a computed -
+     * see the note on isAggregateModeFor in src/aggregate.ts.
+     *
+     * Note this reads the presenter's OWN mode, not the global one: the dialog can be open on an
+     * aggregate row while a real island is selected, so template sites that gate on this must not
+     * be swapped for the global `ifEditable`/`ifAggregated` bindings.
+     */
+    editable(): boolean {
+        return !this.aggregateMode();
+    }
+
+    /**
+     * Finds a genuine PopulationLevel instance to point `instance()` at while in aggregate mode:
+     * the first real island (in view.islands() order) that has this population level guid, or -
+     * if no real island has it (e.g. zero real islands) - the currently-selected island's own
+     * instance as a last-resort fallback (the All-Islands pseudo-island carries every
+     * factory/product/population-level type in the union catalog, per the existing "Meta/
+     * All-Islands shows everything unfiltered" convention, world.ts:898).
+     */
+    private findRepresentativePopulationLevel(populationLevelGuid: number): PopulationLevel | undefined {
+        const islands: Island[] = window.view.islands ? window.view.islands() : [];
+        for (const island of islands) {
+            if (island.isAllIslands()) continue;
+            const level = findPopulationLevelOnIsland(island, populationLevelGuid);
+            if (level) return level;
+        }
+
+        const current: Island | undefined = window.view.island ? window.view.island() : undefined;
+        return current ? findPopulationLevelOnIsland(current, populationLevelGuid) : undefined;
     }
 
     /**

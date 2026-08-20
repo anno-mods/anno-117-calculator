@@ -2,7 +2,7 @@
 
 ## Class Architecture and Interface Patterns
 
-### IslandManager Settings Pattern (IMPLEMENTED)
+### IslandManager Settings Pattern
 
 **Purpose**: Manages island creation settings (world.ts:254-273)
 
@@ -60,7 +60,7 @@ When encountering "missing" properties that exist at runtime:
 - Add them as properly typed optional properties: `public property?: Type`
 - Common example: `ResidenceBuilding` needs `upgradedBuildingGuid?: string` and `upgradedBuilding?: ResidenceBuilding`
 
-## Module Integration Architecture (IMPLEMENTED)
+## Module Integration Architecture
 - **Module Creation**: Modules are created in Factory constructor when `config.additionalModule` exists
 - **AppliedBuff Creation**: Modules call `applyBuffs()` from Factory.initDemands() - creates AppliedBuff instances with `useParentScaling=false`
 - **Buff Scaling**: Module `checked` observable controls buff scaling (0 = inactive, 1 = active)
@@ -94,6 +94,18 @@ When encountering "missing" properties that exist at runtime:
 - Correct: `appliedBuff.buff.guid`
 - Wrong: `appliedBuff.effect.guid`
 
+## Item Tri-State Boost (Off / Base / Boosted)
+Factory items with a boosted variant (`ItemConfig.boostBuffs`, extracted for `ItemWithBoost` + legendary/mythic production items) use one tri-state control per `(item, factory)` slot: `0 = Off`, `1 = Base`, `2 = Boosted`. Data fact: every boostable item carries exactly **one** base buff and **one** boost buff, so base↔boost pairing is by target factory.
+
+- **State lives in `Item.slotStates: Map<Constructible, ko.observable(number)>`** (production.ts) — one observable per factory in `this.factories`. This is the single writable source of truth; buff scalings are derived from it.
+- **`AppliedBuff` scaling is externally supplied** via the `scalingOverride` constructor param (buffs.ts). Base equipment scaling = writable computed `{read: state()===1?1:0, write: v => state(v?1:0)}` — **writable is required** so legacy call sites/tests doing `equip.scaling(1)` (= equip at Base) still work. Boost equipment scaling = `pureComputed(state()===2?1:0)` and is flagged `isBoostBuff=true`.
+- **Row list vs calc**: `Consumer.addBuff` pushes every item AppliedBuff to `buffs()` (so the boost math sums it) but only non-`isBoostBuff` ones to `items` (so `availableItems()` shows one row per slot). Boost math (factories.ts:~188) sums `buffs()` without checking `available()`, relying on scaling being 0 for inactive variants.
+- **`Item.checked`** reads/writes `slotStates` (all slots >=1 → checked; write sets Off/Base only, never Boosted).
+- **Active-variant display**: each base `AppliedBuff.activeBuff` is a computed returning the boost buff at state 2, else the base buff. Templates bind item-row buff fields via `activeBuff()`, not `buff`.
+- **DLC invariant**: each slot state is registered with the item's DLC via `lockDLCIfSet(state)` in the Item constructor. Any slot at state >=1 makes `DLC.used()` true (disables the un-check UI); loading a slot to a non-zero state auto-checks the DLC (`used` → `checked(true)`), self-healing an inconsistent "state 2 + DLC off" save. So `state !== 0` implies the DLC is on — scaling computeds need no `available()` gate.
+- **Persistence** (world.ts `initItems`): `persistInt({state: slotStates.get(f)}, "state", `${f.guid}[${i.guid}].scaling`)` — reuses the old equip `.scaling` key as raw int 0/1/2 (old float 0/1 saves load cleanly via `parseInt`). Boost equipments are derived, never persisted. Stored in the **per-island Storage JSON** (Island ctor's `localStorage` param is a `Storage` instance, not global `window.localStorage`), so the raw value in that JSON is a number, not a string.
+- **UI**: `tri-state-toggle` component (components.ts) + `.tri`/`.tri-state-toggle` CSS (style.css). Replaces `icon-checkbox` wherever an equipped item's `scaling` was rendered.
+
 ### Object Lookup Best Practices
 1. Always validate `_assetsMap.get(id)` results before using
 2. Use descriptive error messages with GUID and context
@@ -109,7 +121,7 @@ Avoid: `(() => {...})` or `((val as boolean) => {...})`
 - **Module**: Extends Consumer (provides conditional buffs with multiplicative bonuses)
 - **PublicConsumerBuilding**: Extends Consumer (services, no production)
 
-## Productivity Bonus System (IMPLEMENTED)
+## Productivity Bonus System
 
 ### Two-Stage Productivity Calculation
 The productivity boost calculation uses a two-stage approach with `baseProductivityUpgrade` and `productivityUpgrade`:
@@ -164,7 +176,7 @@ See the implementation in `src/factories.ts:177-202` in the `Consumer.initDemand
 - **Usage**: Used for fuel consumption demands where factor changes based on buff calculations
 - **Factor Removal**: Base Demand class no longer has static factor property - moved to BuildingDemand observable
 
-## Effects Persistence Architecture (IMPLEMENTED)
+## Effects Persistence Architecture
 
 ### Three-Tier Effect Persistence System
 **Global Effects** (main.ts:369-384):
@@ -202,7 +214,7 @@ island.effect.${effectGuid}.scaling          // Island effects (via persistFloat
 - Global objects (regions, sessions, effects) now have persistence for their scaling states
 - Island-level persistence happens in Island constructor using persistBuildings() flow
 
-## Effect Source Types and Display (IMPLEMENTED)
+## Effect Source Types and Display
 
 ### Effect Source Property
 **Purpose**: Identifies the origin/type of an effect for UI display
@@ -241,7 +253,7 @@ public effectDuration?: number; // Duration in seconds (for events)
 
 **Important**: Always use params.js translations (accessed via `window.view.texts`), not i18n.ts translations, for game-related text.
 
-### Effect Filtering by Session (IMPLEMENTED)
+### Effect Filtering by Session
 
 **Location**: Island.availableEffects computed observable (world.ts:818-843)
 
@@ -274,7 +286,7 @@ const hasTargetsInSession = e.targets.some(target => {
 - Binding: `data-bind="text: $data.getSourceText()"`
 - Shows source type with duration in brackets when applicable
 
-## Population-Level Need Management (IMPLEMENTED)
+## Population-Level Need Management
 
 ### Architecture Transformation
 **Before**: Individual residence-level need activation (ResidenceNeed.checked observable per building)
@@ -301,7 +313,7 @@ const hasTargetsInSession = e.targets.some(target => {
 **Storage Pattern**: Changed from `${residenceGuid}[${needGuid}].checked` to `${populationLevelGuid}[${needGuid}].checked`
 **Location**: Island constructor persistence (world.ts:961-967) now iterates PopulationLevel.needs instead of ResidenceBuilding.needsMap
 
-### UI Architecture (IMPLEMENTED)
+### UI Architecture
 **ResidencePresenter** (views.ts:747-793):
 - Added populationNeedCategories computed observable
 - Creates need categories from population-level needs with aggregated totalResidents() and totalAmount()
@@ -321,7 +333,7 @@ const hasTargetsInSession = e.targets.some(target => {
 
 ## Need Categorization Architecture 
 
-### Storage Architecture (UPDATED)
+### Storage Architecture
 
 **SubStorage Pattern** (world.ts:34-152):
 - `calculatorSettings` - Settings JSON (e.g., `settings.showAllProducts`)
@@ -333,7 +345,7 @@ const hasTargetsInSession = e.targets.some(target => {
 - `persistInt` and `persistFloat` helper functions MUST save raw numeric values to `localStorage` (not `.toString()`).
 - This ensures `JSON.stringify` in `Storage.save()` preserves numbers as numeric types in the final JSON, preventing "1" vs 1 type mismatch in tests.
 
-### RangeEffect and Residence Buffs (NEW)
+### RangeEffect and Residence Buffs
 
 **RangeEffect Class** (src/views.ts):
 - Encapsulates population buff logic: `appliedBuff`, `isPatronEffect`.
@@ -404,7 +416,7 @@ populationLevelNeed.prepareResidenceEffectView = prepareResidenceEffectView;
 - Global function calls: `formatNumber()`, `formatPercentage()` without $root prefix
 - Correct data context navigation: `$data.need.product` for asset properties
 
-## Knockout Debug System (IMPLEMENTED)
+## Knockout Debug System
 
 **Debug Utilities** (src/util.ts:542-772):
 - `window.debugKO.inspect(selector)`, `.type(obj)`, `.log(obj, label)`, `.context(element)`
@@ -436,7 +448,7 @@ populationLevelNeed.prepareResidenceEffectView = prepareResidenceEffectView;
 
 **Common Errors**: Using `chinese` instead of `simplified_chinese`/`traditional_chinese`, missing languages, special character escaping
 
-## Presenter Pattern Architecture (IMPLEMENTED)
+## Presenter Pattern Architecture
 
 ### CategoryPresenter Implementation
 
@@ -653,3 +665,145 @@ interface Supplier {
 **Patterns**: Strategy (Supplier interface), Presenter (UI separation), Delegation (Demand→Product→Supplier)
 
 **Pitfalls**: Circular dependencies (use separate suppliers.ts file), Observable method preservation (never use spread operator), Init order (suppliers after factories register, selection before demands)
+
+## Mythical-item / Monument Effect Display
+
+### Effect targets for residences
+- `Effect.targets` is populated during the **first** `applyBuffs` pass, which runs **before** residences exist (world.ts init order). Effects whose targets are only residence GUIDs therefore keep an empty `targets` and never appear in `Island.availableEffects()`.
+- Fix: `Effect.applyBuffsToResidences` (production.ts) also appends resolved residence targets to `this.targets` (deduped; skips the `targetsIsAllResidences` case to avoid flooding). This makes the effect surface in `availableEffects()` and renders target icons.
+
+### getRegionExtendedName is part of Constructible
+- The effects-dialog target-icon binding calls `$data.getRegionExtendedName()` for **every** target. `Constructible` (world.ts) declares `getRegionExtendedName(): string`; both `Consumer` and `ResidenceBuilding` implement it. A missing implementation throws inside the `foreach` and **halts the whole effects table** (only rows before the offending one render) — a silent, easy-to-miss failure mode.
+
+### Buff display fields (buff-display iterates raw `Buff`, not `AppliedBuff`)
+- `Buff.additionalNeeds: Product[]` is resolved in the constructor from `config.additionalNeedsDemand` (Need GUIDs → `Need.product`); the raw GUID list is not stored (no other consumer). Duck-type the lookup (`asset instanceof Product` or `asset.product instanceof Product`) — do not import `Need` (production↔consumption cycle).
+- Consumption reduction has two independent shapes: flat `consumptionModifierInPercent` (all needs, shown with the marketplace icon) and per-good `goodConsumptionUpgrade: {product, amountInPercent}[]` (shown with each product icon).
+
+### Additional-need gating semantic (data-owner decision, 2026-07-13; calculator follow-up shipped 2026-07-18)
+- A need referenced by an effect's `additionalNeedsDemand` is **conditional**: consumed only while the effect is active, gated via the residence `needsList` entry's `requiresItem`. It is **not** a base need.
+- `params.js` now emits these as a **single gated** `needsList` entry (real rate + `requiresItem`, no ungated sibling). The old "ungated wins" workaround in `PopulationLevelNeed.hidden` was removed.
+- **Gating is enforced in three places, all keyed off `ResidenceNeed.requiresItem`:**
+  1. `ResidenceNeed.amount()` / `.residents()` return 0 while the gating effect is inactive (`gatingEffectInactive`, consumption.ts) — this is what makes the *demand* 0 until the effect is on.
+  2. `PopulationLevelNeed.hidden` hides the need in need lists (`getVisibleNeeds`). It reads the same `ResidenceNeed.gatingEffect` observable (not a fresh `assetsMap` lookup).
+  3. `PopulationLevelNeedPresenter.visible` (views.ts) — the UI presenter path — must AND in `!hidden()`, not just `available()`, or gated needs render anyway.
+- **Init-order trap:** the gating effect is resolved into the observable `ResidenceNeed.gatingEffect` during `initDemands` (local `assetsMap` is populated by then). It is NOT looked up inside the `amount()`/`residents()`/`hidden` computeds, because those can be evaluated eagerly during island construction — before `island.assetsMap` exists (would throw) and before the effect ref could bind reactively.
+- **`checked` is user-controlled — never write it from gating.** `(un)gating` toggles freely and reversibly, so subscribing `hidden` → `checked` resets the user's choice on every effect toggle (flakiness) and, because `hidden` can wake during construction, also crashes. A need's initial `checked` comes from saved storage, else the DLC `available` path / `IslandManager.activateAllNeeds` bulk apply (world.ts `Island.activateAllNeeds`, `persistNeedChecked`). After that only the user changes it. A gated need therefore stays 0-demand until the user opts in, independent of the effect.
+- **Cross-tier mixed case is real:** the same need GUID can be genuine ungated base consumption for one tier and a gated conditional need for another (e.g. Bread 2689: ungated for Plebeians/Equites, monument-gated for Liberti). Guards keyed on "need GUID is base-defined" are wrong; key on per-residence ungated consumption (see `tests/computed/base-needs-not-locked.spec.ts`).
+- Extractor fix spec: `C:\dev\asset-extractor\docs\plans\2026-07-13-fix-additional-need-should-gate-not-be-base.md`; calculator follow-up: `docs/superpowers/plans/2026-07-18-handoff-gated-needs-calculator-followup.md`.
+
+## Product demand/production reactivity (production.ts, presenters.ts)
+
+- The product tile binds to `ProductPresenter.totalProduction` = `product.totalDemand() + product.excessProduction()` (= `max(demand, currentProduction)`; shows the demand target even when under-producing).
+- `Product.excessProduction` is a **`pureComputed`**: `max(0, totalCurrentProduction() - totalDemand())`. Do NOT turn it back into an observable written inside `demandCalculationSubscription`: that `ko.computed` reads `totalCurrentProduction` to set supplier demands, and (per its own note, production.ts) can read a **stale** production value and not re-run afterwards — which left `excessProduction`/the tile stuck at the pre-toggle value when demand dropped to 0 (e.g. toggling a gated need's effect back off: model demand → 0 but tile stayed at ~0.5). A pureComputed tracks both inputs and always reconverges.
+- General rule: a `ko.computed` that both **reads** production/demand observables and **writes** observables feeding back into them is glitch-prone. Prefer a `pureComputed` for any derived display value; keep the side-effecting subscription (`setDemand`) minimal.
+
+## Aggregate mode (`src/aggregate.ts`)
+
+Single home for the All-Islands aggregation contract. Imported by `presenters.ts`,
+`public-building-presenters.ts`, `population-presenters.ts`, `views.ts`, `components.ts` and
+`main.ts`. It uses structural parameter types (`{ isAllIslands(): boolean }`) so it never imports
+`world.ts`, which would be a cycle risk through `util.ts`.
+
+- **Every helper here is a plain function, never a `ko.pureComputed`.** `isAggregateModeFor(island)`,
+  `isAggregating()`, `sumAcrossRealIslands(selector)`, `compareAggregateDemands(...)`. A shared
+  memoized computed is a single node that notifies every binding at once, which produced a real
+  stale-`$data` glitch inside `with:` blocks (see `templates/AGENTS.md`). Called as a function, the
+  dependencies register in the *calling* binding's own computed, which is semantically identical to
+  writing the expression inline at each site.
+- **`AggregateBuildingsCalc` guarantees three things** the two hand-rolled synthetic objects it
+  replaced did not: `readOnly === true` so UI components can render a display instead of an editable
+  control with no template-level condition; setters are explicit, logged no-ops instead of silent
+  writes to a throwaway object discarded on the next recompute (which is what made
+  `incConstructedBuildings()` lose edits with no signal); and `utilized` is the sum of each island's
+  own `utilized()`, not a value re-derived from a summed `required` under one global
+  `fullyUtilizeConstructed` flag - that flag is a per-island choice.
+- A fresh instance is allocated on every recompute of the owning `pureComputed`. Only that
+  computed's bound VALUE changes, never the presenter arrays templates iterate, so it cannot trigger
+  a tile-grid rebuild.
+- **Feed `AggregateBuildingsCalc` from `sumBuildingsAcrossRealIslands(guid)`, not from one
+  `sumAcrossRealIslands` closure per metric.** `constructed`, `required` and `utilized` are read
+  together on nearly every visible row (`capacityUtilisation` alone reads two), so per-metric
+  closures walked `view.islands()` and repeated the `assetsMap` lookup three or four times per
+  recompute. The helper does one walk behind a shared `pureComputed`. It is the only exception to
+  the plain-function rule above and a safe one: the computed is private to a single owner's
+  metrics, never shared across bindings. Build it once per owner (the guid never changes) so the
+  memo survives recomputes; it is lazy, so it costs nothing outside aggregate mode. It returns all
+  four metrics - hand `AggregateBuildingsCalc` only the ones that row actually displays and let it
+  default the rest (residence rows omit `planned` deliberately).
+- **`FactoryPresenter.buildings()` returns the right object in both modes**, so template code must
+  never reach through to `.instance().buildings`. Same for `ResidenceRow.buildings()`. One
+  deliberate exception: inside `product-tile.html`'s `with: factoryPresenterIfDefaultSupplier()`
+  block, whose aggregate branch returns a synthetic stand-in that intentionally exposes
+  `instance().buildings` and no `buildings()` at all - do not "fix" that call site. Anything
+  handed to a component as a param must be a KO observable/computed, not a plain function -
+  components resolve params with `ko.unwrap`, which returns a plain function untouched instead of
+  calling it.
+- `window.view.isAggregating` and `window.view.compareAggregateDemands` are exposed in `main.ts` for
+  template bindings and tests that have no presenter in scope. `window.ko` is exposed there too, so
+  binding tests can assert which binding handlers are registered.
+
+### Which properties are aggregate-branched
+
+`src/presenters.ts`: `FactoryPresenter.buildings`/`.boost`/`.outputAmount`/`.workforceAmount`/
+`.isDefaultSupplier`/`.representativeInstance`/`.editable`, and `ProductPresenter.totalDemandNoRoutes`/
+`.totalProduction`/`.extraGoodProduction`/`.factoryPresenterIfDefaultSupplier`/`.isHighlightedAsMissing`/
+`.availableExtraGoodSuppliers`/`.consumerViewVisible`/`.showTradeRouteTab`/`.editable`.
+`src/views.ts`: `ResidencePresenter.residents`/`.buildings`/`.residenceRows`/`.editable`/`.open` plus the
+nested need presenters. `src/public-building-presenters.ts` and `src/population-presenters.ts` carry their
+own branches. `src/components.ts`'s `consumer-view` aggregates and orders the demand list.
+
+### Per-property contracts worth knowing before you touch one
+
+- `FactoryPresenter.buildings()` (presenter-level computed) is aggregate-branched;
+  `FactoryPresenter.instance().buildings` (the raw per-island `Factory`'s own property) is NOT.
+- `FactoryPresenter.workforceAmount` sums `factory.workforceDemand.amount()` for that one factory type
+  across real islands. `factory-config-section.html`'s "Required Workforce" row binds to it
+  (`$parent.workforceAmount()`), not `$data.instance().workforceDemand.amount()`, which only ever
+  reflected the pseudo-island's always-empty demand.
+- `ProductPresenter.showTradeRouteTab()` must stay the exact complement of "some visible factory reports
+  `isDefaultSupplier()`", or `product-config-dialog.html` gives two panes `show active` at once and they
+  render stacked. At bootstrap the pseudo-island happens to resolve a factory supplier for every product,
+  so a divergence only appears once it carries a non-factory supplier of its own (e.g. passive trade
+  chosen with aggregation off, then switched on).
+- `FactoryPresenter.representativeInstance` backs the production chain while aggregating: the real island
+  with the highest `currentProduction()`. A summed chain is not well-defined, because islands can pick
+  different suppliers for the same input. The chain's t/min come from the aggregate `outputAmount` while
+  its per-node building counts divide by that one island's boost, so those counts are not aggregate-
+  consistent when islands differ in productivity - a known, deliberate trade-off.
+- `ResidencePresenter.open(populationLevel)` is the only supported way to open the population dialog: it
+  chooses `update()` vs `updateAggregate()` itself, so no call site can silently drop out of aggregate
+  mode into an editable single-island view. `ResidencePresenter.residenceRows` (not
+  `instance().allResidences()`) backs the dialog's residence table so every cell aggregates consistently
+  with the header. `ResidencePresenter.editable()` reflects the presenter's OWN mode, not the global
+  condition - the dialog can be open on an aggregate row while a real island is selected - so its
+  template sites must use `if:`/`ifnot:` on `editable()`, never `ifEditable`/`ifAggregated`.
+- `ProductPresenter.isHighlightedAsMissing` sums `required`/`constructed` via the same building counts as
+  `factoryPresenterIfDefaultSupplier()`, gated on `settings.missingBuildingsHighlight`. It used to read
+  the pseudo-island's own Product, which never has real demand, so the tile could never turn red.
+- `ProductPresenter.availableExtraGoodSuppliers` groups suppliers by factory GUID across real islands,
+  includes a factory type if it `canSupply()` on at least one, and sums `currentProduction()` per type.
+  Some buffs (e.g. "Arboreal Rhizome") apply the same buff to several sibling factory types; only the
+  entry where `factory.product === the extra good` is self-effecting (folds into that factory's own
+  `outputAmount`, no tab row). Covered by `tests/computed/all-islands-aggregation-extra-goods.spec.ts`.
+- **Null parity.** Any aggregate branch that conditionally returns `null` vs a synthetic object must
+  return `null` for a product/factory with zero visible instances, exactly matching the non-aggregate
+  branch - a non-null placeholder for an otherwise-absent row breaks `with:` templates (see
+  `templates/AGENTS.md` for the layout bug this caused). `factoryPresenterIfDefaultSupplier()` also
+  returns `null` when no real island's `defaultSupplier().type === 'factory'`, **except** with zero real
+  islands, where it still returns the synthetic all-zero object (a deliberately different bootstrap-edge
+  contract, covered by `tests/computed/all-islands-aggregation-products.spec.ts`).
+
+### Known gaps
+
+- `ResidencePresenter.populationBuffs` sources its buff *catalog* from one representative real island, so
+  a buff active only on a non-representative island does not appear at all; only the summed magnitude of
+  buffs that do appear is fully aggregate-derived.
+- `PublicServicePresenter`/`PublicRecipeBuildingPresenter` still return a plain writable `BuildingsCalc`
+  (`readOnly === false`) while aggregating, so they must not be pointed at `constructed-buildings-input`.
+  Inert today: those call sites are gated with `ifEditable`/`ifAggregated`, and the public-buildings
+  pipeline is commented out in `world.ts`.
+- No persistent "aggregation active" UI indicator exists; the navbar badge originally added for it was
+  removed per user feedback - the tile grid's own read-only gating was judged sufficient.
+
+## Population Presenters (population-presenters.ts)
+`PopulationGroupPresenter`/`PopulationLevelPresenter` mirror `CategoryPresenter`/`ProductPresenter`'s shape (built once at bootstrap from the All-Islands reference island's catalog, share the single `window.view.island` observable, resolve the current island's own instance via `island().assetsMap.get(guid)`) and replace the generic `Template` class for the `populationGroups` tile surface only - `Template` is unchanged for `consumers`/`publicServices`/`publicRecipeBuildings`. `sumAcrossRealIslands(selector)` (exported from this file) sums a selector across `view.islands()` minus the All-Islands pseudo-island; reused by `src/views.ts`'s `ResidencePresenter` aggregate branches via import.

@@ -35,7 +35,7 @@ export class Product extends NamedElement {
     public totalDemandNoRoutes: KnockoutComputed<number>; // Total demand from all consumers
     public totalCurrentProduction: KnockoutComputed<number>; // Production from all suppliers
     private totalProductionWithoutDefaultSupplier: KnockoutComputed<number>; // Production from all suppliers except the default one
-    public excessProduction: KnockoutObservable<number>; // Excess when non-default suppliers exceed demand
+    public excessProduction: KnockoutComputed<number>; // Excess when current production exceeds demand (derived, see initSuppliers)
     public demandCalculationSubscription!: KnockoutComputed<void>; // Updates supplier demands based on total demand
 
     // === SUPPLIER MANAGEMENT ===
@@ -90,7 +90,7 @@ export class Product extends NamedElement {
 
         // Initialize demand tracking
         this.demands = ko.observableArray([]);
-        this.excessProduction = ko.observable(0);
+        this.excessProduction = dummyComputed("product.excessProduction"); // real definition in initSuppliers
 
         // Will be initialized properly in initSuppliers after suppliers are created
         this.totalDemand = dummyComputed("product.totalDemand");
@@ -274,13 +274,18 @@ export class Product extends NamedElement {
             return sum;
         });
 
+        // Excess production over demand. Derived as a pureComputed rather than written inside
+        // demandCalculationSubscription: that computed reads totalCurrentProduction to set supplier
+        // demands and, per the note above, can read a stale production value and not re-run afterwards -
+        // which left excessProduction (and the product tile's totalProduction) stuck at the pre-toggle
+        // value when demand dropped (e.g. un-gating a conditional need back off). As a pureComputed it
+        // tracks both inputs and always reconverges.
+        this.excessProduction = ko.pureComputed(() => Math.max(0, this.totalCurrentProduction() - this.totalDemand()));
+
         // Update supplier demands when total demand or supplier production changes
         this.demandCalculationSubscription = ko.computed(() => {
             const demand = this.totalDemand();
-            const prod = this.totalCurrentProduction();
             const defaultSupp = this.defaultSupplier();
-            
-            this.excessProduction(Math.max(0, prod - demand));
 
             if (defaultSupp != null) {
                 const remaining = Math.max(0, demand - this.totalProductionWithoutDefaultSupplier());
@@ -519,7 +524,7 @@ export class Buff extends NamedElement {
     public fuelDurationPercent: number;
     public replaceInputs: {
         oldInput: Product;
-        newInput: Product;
+        newInput?: Product | undefined;
     }[];
     public replaceWorkforce?: {
         newWorkforce: Workforce;
@@ -536,6 +541,13 @@ export class Buff extends NamedElement {
     public addedFertility?: Fertility;
     public fertilityPercent: number;
     public population: number;
+    public additionalNeeds: Product[]; // products of the needs a mythical item adds (resolved for display)
+    public providedNeedUpgrade: number[];
+    public consumptionModifierInPercent: number;
+    public goodConsumptionUpgrade: {
+        product: Product;
+        amountInPercent: number;
+    }[];
 
     /**
      * Creates a new Buff instance
@@ -561,6 +573,35 @@ export class Buff extends NamedElement {
         this.workforceMaintenanceFactorUpgrade = config.workforceMaintenanceFactorUpgrade;
         this.fertilityPercent = config.fertilityPercent ?? 0;
         this.population = config.population ?? 0;
+        // Resolve the added-need GUIDs to their consumed products so the UI can show a product icon.
+        // config.additionalNeedsDemand holds Need GUIDs; each Need exposes a `.product`. Some entries
+        // may reference a product directly or a GUID that isn't a resolvable need (data gaps) - skip
+        // those. Only the resolved products are kept; the raw GUID list has no other consumer.
+        this.additionalNeeds = (config.additionalNeedsDemand || [])
+            .map((needGuid) => {
+                const asset = _assetsMap.get(needGuid);
+                if (asset instanceof Product) return asset;
+                const product = (asset as { product?: Product } | undefined)?.product;
+                return product instanceof Product ? product : undefined;
+            })
+            .filter((p): p is Product => p !== undefined);
+        this.providedNeedUpgrade = config.providedNeedUpgrade || [];
+        this.consumptionModifierInPercent = config.consumptionModifierInPercent ?? 0;
+        this.goodConsumptionUpgrade = (config.goodConsumptionUpgrade || [])
+            .map((entry) => {
+                const product = _assetsMap.get(entry.product);
+                if (!product) {
+                    // Some source data entries reference a GUID of 0 (unset, e.g. buff
+                    // 156713) or a product that doesn't exist in the current products
+                    // catalog (data gap, e.g. guid 141632 referenced by buff 89265).
+                    // Silently skip instead of throwing: this loop runs unconditionally for
+                    // every Buff on every Island (world.ts), so throwing would crash app
+                    // init everywhere, and warning would print on every test that boots.
+                    return undefined;
+                }
+                return { product: product as Product, amountInPercent: entry.amountInPercent };
+            })
+            .filter((entry): entry is { product: Product; amountInPercent: number } => entry !== undefined);
 
         if (config.addedFertility) {
             const fertility = _assetsMap.get(config.addedFertility);
@@ -585,23 +626,21 @@ export class Buff extends NamedElement {
             };
         }
         
-        this.replaceInputs = []
-        if (config.replaceInputs) {
-            config.replaceInputs.map((output) => {
-                const oldInput = _assetsMap.get(output.oldInput);
-                if (!oldInput) {
-                    throw new Error(`Product with GUID ${output.oldInput} not found in assetsMap`);
-                }
-                const newInput = _assetsMap.get(output.newInput);
-                if (!newInput) {
+        this.replaceInputs = config.replaceInputs ? config.replaceInputs.map((output) => {
+            const oldInput = _assetsMap.get(output.oldInput);
+            if (!oldInput) {
+                throw new Error(`Product with GUID ${output.oldInput} not found in assetsMap`);
+            }
+            let newInput: Product | undefined = undefined;
+            if (output.newInput) {
+                const found = _assetsMap.get(output.newInput);
+                if (!found) {
                     throw new Error(`Product with GUID ${output.newInput} not found in assetsMap`);
                 }
-                return {
-                    oldInput: oldInput,
-                    newInput: newInput
-                };
-            });
-        }
+                newInput = found as Product;
+            }
+            return { oldInput: oldInput as Product, newInput };
+        }) : [];
 
         // Look up products for additionalOutputs
         this.additionalOutputs = [];
@@ -631,6 +670,30 @@ export class Buff extends NamedElement {
             });
         }
     }
+
+    /**
+     * True when this buff would render nothing in the effects-dialog buff-display
+     * component - used to hide effects made up entirely of such buffs, which would
+     * otherwise show up as an empty row. `population`, `providedNeedUpgrade`,
+     * `workforceModifierInPercent` and `additionalWorkforces` are tracked on the Buff but
+     * never shown by buff-display, so they're deliberately excluded from this check;
+     * `fertilityPercent` defaults to 100 on every buff regardless of relevance, so only
+     * `addedFertility` (which gates whether buff-display shows the fertility row at all)
+     * is checked, not the percentage itself.
+     */
+    hasNoDisplayableEffect(): boolean {
+        return this.baseProductivityUpgrade === 0
+            && this.productivityUpgrade === 0
+            && this.fuelDurationPercent === 0
+            && this.workforceMaintenanceFactorUpgrade === 0
+            && this.consumptionModifierInPercent === 0
+            && !this.addedFertility
+            && !this.replaceWorkforce
+            && this.additionalNeeds.length === 0
+            && this.goodConsumptionUpgrade.length === 0
+            && this.additionalOutputs.length === 0
+            && this.replaceInputs.length === 0;
+    }
 }
 
 /**
@@ -650,6 +713,7 @@ export class AreaBuff extends Buff {
             workforceModifierInPercent: 0,
             productivityUpgrade: 0,
             fuelDurationPercent: 0,
+            consumptionModifierInPercent: 0,
             replaceWorkforce: { newWorkforce: 0, oldWorkforce: 0 },
             workforceMaintenanceFactorUpgrade: 0,
             fertilityPercent: config.fertilityPercent,
@@ -692,6 +756,7 @@ export class LocalPatronEffect {
     public milestones: any[];
     public title: KnockoutComputed<string>;
     public isPopulationBuff: boolean;
+    public isConsumptionModifier: boolean;
 
     constructor(config: { effect: number; milestones: any[]; title: Record<string, any> }, assetsMap: AssetsMap) {
         const effect = assetsMap.get(config.effect);
@@ -701,6 +766,7 @@ export class LocalPatronEffect {
         this.effect = effect as Effect;
         this.milestones = config.milestones;
         this.isPopulationBuff = this.effect.buffs.some(b => b.population > 0);
+        this.isConsumptionModifier = this.effect.buffs.some(b => b.consumptionModifierInPercent !== 0);
         const locaText = config.title || {};
         this.title = ko.computed(() => {
             const view = window.view;
@@ -838,7 +904,8 @@ export class Effect extends NamedElement {
             'veneration-effect': 'venerationEffects',
             'session-event': 'sessionEvent',
             'island-event': 'islandEvent',
-            'building': 'building'
+            'building': 'building',
+            'mythical-item': 'heroicSpecialist'
         };
 
         const translationKey = sourceKeyMap[this.source];
@@ -905,6 +972,17 @@ export class Effect extends NamedElement {
 
         if (targets.length === 0) return;
 
+        // Surface residence targets in `this.targets` so they render as target icons in the effects
+        // dialog. Residences are created after the initial applyBuffs pass, so specific-residence
+        // effects (e.g. mythical-item "villa" effects) would otherwise keep an empty targets list and
+        // never appear in Island.availableEffects(). Skip the targetsIsAllResidences case: appending
+        // every residence would flood the icon list. Dedupe because this runs once per island.
+        if (!this.targetsIsAllResidences) {
+            for (const target of targets)
+                if (isConstructible(target) && this.targets.indexOf(target) === -1)
+                    this.targets.push(target);
+        }
+
         const buffs = this.buffGuids.map(buffId => {
             const buff = assetsMap.get(buffId);
             if (!buff) throw new Error(`Buff with GUID ${buffId} not found in assetsMap`);
@@ -925,13 +1003,16 @@ export class Effect extends NamedElement {
 export class Item extends NamedElement {
     public guid: number;
     public additionalOutputs: Map<Product, number>;
-    public replacements?: Map<Product, Product>;
-    public replacementArray?: {old: Product, new: Product}[];
+    public replacements?: Map<Product, Product | undefined>;
+    public replacementArray?: {old: Product, new?: Product | undefined}[];
     public factories: Constructible[];
     public extraGoods?: Product[];
     public availableExtraGoods?: KnockoutComputed<Product[]>;
     public replacingWorkforce?: Workforce;
     public equipments: AppliedBuff[];
+    public boostEquipments: AppliedBuff[];
+    // Tri-state per (item, factory) slot: 0 = Off, 1 = Base, 2 = Boosted
+    public slotStates: Map<Constructible, KnockoutObservable<number>>;
     public availableEquipments: KnockoutObservableArray<AppliedBuff>;
     public checked: KnockoutComputed<boolean>;
     public visible: KnockoutComputed<boolean>;
@@ -963,6 +1044,15 @@ export class Item extends NamedElement {
 
         this.factories = (config.targets || []).map((f: number) => _assetsMap.get(f)).filter((f: any) => isConstructible(f)); // ignore not considered buildings, e.g. warehouse
 
+        // One tri-state observable per (item, factory) slot. Registered with the item's DLC so an
+        // applied item locks its DLC (see AGENTS.md / task_tristate_boost_toggle.md DLC invariant).
+        this.slotStates = new Map<Constructible, KnockoutObservable<number>>();
+        for (const f of this.factories){
+            const state = ko.observable(0);
+            this.slotStates.set(f, state);
+            this.lockDLCIfSet(state); // no-op unless the item has exactly one dlcUnlocks
+        }
+
         this.equipments = [];
         for (const b of config.buffs){
             const buff = _assetsMap.get(b);
@@ -971,22 +1061,57 @@ export class Item extends NamedElement {
             }
 
             for (const f of this.factories){
-                this.equipments.push(new AppliedBuff(this, buff, f, _assetsMap, false));
+                const state = this.slotStates.get(f)!;
+                // base buff is active only in state 1 (Base). Writable for backward compatibility:
+                // scaling(1) equips at Base, scaling(0) turns the slot Off (matches the old equip toggle).
+                this.equipments.push(new AppliedBuff(this, buff, f, _assetsMap, false,
+                    ko.pureComputed({
+                        read: () => state() === 1 ? 1 : 0,
+                        write: (v: number) => state(v ? 1 : 0),
+                    })));
             }
 
         }
+
+        this.boostEquipments = [];
+        for (const b of (config.boostBuffs || [])){
+            const buff = _assetsMap.get(b);
+            if (!buff) {
+                throw new Error(`Boost buff with GUID ${b} not found in assetsMap for item ${this.name()} ${this.guid}`);
+            }
+
+            for (const f of this.factories){
+                const state = this.slotStates.get(f)!;
+                // boost buff is active only in state 2 (Boosted)
+                this.boostEquipments.push(new AppliedBuff(this, buff, f, _assetsMap, false,
+                    ko.pureComputed(() => state() === 2 ? 1 : 0), true));
+            }
+        }
+
+        // Pair each base equipment with its boost equipment on the same factory so the single displayed
+        // row shows the boosted numbers while the slot is Boosted. All boostable items have exactly one
+        // base and one boost buff, so the pairing is by target factory.
+        for (const base of this.equipments){
+            const state = this.slotStates.get(base.target)!;
+            const boost = this.boostEquipments.find(e => e.target === base.target);
+            base.activeBuff = boost
+                ? ko.pureComputed(() => state() === 2 ? boost.buff : base.buff)
+                : ko.pureComputed(() => base.buff);
+        }
+
         this.availableEquipments = ko.pureComputed(() => this.equipments.filter((e: AppliedBuff) => e.available()));
 
+        // "Equip" semantics: reads Off vs. applied, writes Off/Base only (never Boosted).
         this.checked = ko.pureComputed({
             read: () => {
-                for (var eq of this.equipments)
-                    if (!eq.scaling())
+                for (var f of this.factories)
+                    if (!this.slotStates.get(f)!())
                         return false;
 
                 return true;
             },
             write: (checked: boolean) => {
-                this.equipments.forEach(e => e.scaling(checked ? 1 : 0));
+                this.factories.forEach(f => this.slotStates.get(f)!(checked ? 1 : 0));
             }
         });
 

@@ -170,6 +170,25 @@ export class Consumer extends NamedElement{
         }
 
         this.availableItems = ko.pureComputed(() => this.items.filter(i => i.available()));
+
+        const parentAvailable = this.available;
+        this.available = ko.pureComputed(() => {
+            if (!parentAvailable()) {
+                return false;
+            }
+            if (this.associatedRegions.length > 0) {
+                if (this.island.region.id === 'Meta') {
+                    if (this.availableRegions().length === 0) {
+                        return false;
+                    }
+                } else {
+                    if (this.associatedRegions.indexOf(this.island.region) === -1 || !this.island.region.available()) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        });
     }
 
 
@@ -254,7 +273,10 @@ export class Consumer extends NamedElement{
                 }
             }
 
-            // Note: Demand-factory relationship removed - demands now resolved through Product.defaultSupplier
+            // Remove stale demands (products no longer in inputs) from their product's demand list
+            for (const [, demand] of this.inputDemandsMap) {
+                demand.product.removeDemand(demand);
+            }
 
             this.inputDemandsMap = map;
             this.inputDemands.removeAll();
@@ -345,7 +367,9 @@ export class Consumer extends NamedElement{
     addBuff(appliedBuff: AppliedBuff){
         this.buffs.push(appliedBuff)
 
-        if(appliedBuff.parent instanceof Item)
+        // Boost equipments feed the calculation via buffs but must not appear as a second item row;
+        // one row per (item, factory) is the base equipment only.
+        if(appliedBuff.parent instanceof Item && !appliedBuff.isBoostBuff)
             this.items.push(appliedBuff);
     }
 

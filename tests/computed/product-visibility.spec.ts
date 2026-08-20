@@ -17,7 +17,7 @@ test.describe('Product Visibility Logic', () => {
     config["debug.enabled"] = "true";
 
     await configLoader.loadConfigObject(page, config);
-    await page.goto('http://localhost:8080/index.html');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     // Get a product that is not a construction material and has no demand/production
@@ -60,7 +60,7 @@ test.describe('Product Visibility Logic', () => {
     config["debug.enabled"] = "true";
 
     await configLoader.loadConfigObject(page, config);
-    await page.goto('http://localhost:8080/index.html');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     // Find a construction material product with available factories
@@ -106,7 +106,7 @@ test.describe('Product Visibility Logic', () => {
     config["debug.enabled"] = "true";
 
     await configLoader.loadConfigObject(page, config);
-    await page.goto('http://localhost:8080/index.html');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     // Create demand by enabling a population need that consumes a product
@@ -167,7 +167,7 @@ test.describe('Product Visibility Logic', () => {
     config["debug.enabled"] = "true";
 
     await configLoader.loadConfigObject(page, config);
-    await page.goto('http://localhost:8080/index.html');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     // Test the visibility logic by examining different product scenarios
@@ -227,7 +227,7 @@ test.describe('Product Visibility Logic', () => {
     config["debug.enabled"] = "true";
 
     await configLoader.loadConfigObject(page, config);
-    await page.goto('http://localhost:8080/index.html');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     // Find a product that should not be visible
@@ -288,7 +288,7 @@ test.describe('Product Visibility Logic', () => {
     config["debug.enabled"] = "true";
 
     await configLoader.loadConfigObject(page, config);
-    await page.goto('http://localhost:8080/index.html');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     // Check that construction materials without demand/production are NOT visible
