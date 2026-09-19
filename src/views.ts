@@ -125,6 +125,8 @@ export class ViewMode {
         for (var option of view.settings.options)
             option.checked(true);
 
+        view.settings.aggregateAllIslands.checked(false);
+
         for (var dlc of view.dlcs.values()) {
             dlc.checked(true);
         }

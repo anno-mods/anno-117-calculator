@@ -74,6 +74,7 @@ Three invariants; everything else is in `src/AGENTS.md` -> "Aggregate mode (`src
 - Most assets per-island; regions/sessions/buffs are global
 - Observable arrays: Call `.buffs()` not `.buffs` for array access
 - You must not run all tests concurrently. This crashes the computer.
+- Releases: only `scripts/publish.sh` may push to `anno-mods/main`, and only via the `release` branch (never local `main` directly) - local `main`'s dev history contains NDA playtest data. See `scripts/AGENTS.md` -> "Release Publishing".
 
 **Storage Class** (src/world.ts:34-152):
 - Each Storage instance manages one top-level localStorage key

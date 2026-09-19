@@ -1,6 +1,6 @@
 import { NamedElement, ACCURACY, EPSILON, ko, BuildingsCalc } from './util';
 import { Workforce, WorkforceDemand } from './population';
-import { Demand, Product, AqueductBuff, Item, Buff, ExtraGoodProduction, Fertility } from './production';
+import { Demand, Product, AqueductBuff, Item, Effect, Buff, ExtraGoodProduction, Fertility } from './production';
 import { AppliedBuff } from './buffs';
 import {
     ConsumerConfig,
@@ -368,8 +368,11 @@ export class Consumer extends NamedElement{
         this.buffs.push(appliedBuff)
 
         // Boost equipments feed the calculation via buffs but must not appear as a second item row;
-        // one row per (item, factory) is the base equipment only.
-        if(appliedBuff.parent instanceof Item && !appliedBuff.isBoostBuff)
+        // one row per (item, factory) is the base equipment only. A qualifying 'building'-sourced Effect
+        // (populated slotStates) gets a row here too, alongside regular Items - see Effect.applyBuffs.
+        const parent = appliedBuff.parent;
+        const isSlotted = parent instanceof Item || (parent instanceof Effect && parent.slotStates != null);
+        if(isSlotted && !appliedBuff.isBoostBuff)
             this.items.push(appliedBuff);
     }
 

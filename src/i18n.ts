@@ -822,18 +822,7 @@ export const texts: Record<string, Record<string, string>> = {
         korean: "새로운  117 계산기 버전이 제공됩니다. 다운로드 버튼을 클릭하십시오."
     },
     newFeature: {
-        english: "DLC02. Island-wide heroic item effects. Show a combined summary in the \"Global - All Islands\" view.",
-        french: "DLC02. Effets d'objets héroïques à l'échelle de l'île. Afficher un récapitulatif global dans la vue « Global - Toutes les îles ».",
-        polish: "DLC02. Efekty heroicznych przedmiotów na całej wyspie. Pokaż zbiorcze podsumowanie w widoku „Globalny - Wszystkie wyspy”.",
-        spanish: "DLC02. Efectos de objetos heroicos en toda la isla. Mostrar un resumen conjunto en la vista «Global - Todas las islas».",
-        italian: "DLC02. Effetti degli oggetti eroici su tutta l'isola. Mostra un riepilogo complessivo nella vista «Globale - Tutte le isole».",
-        german: "DLC02. Inselweite heldenhafte Item-Effekte. Gesamtübersicht in der Ansicht „Global - Alle Inseln“ anzeigen.",
-        brazilian: "DLC02. Efeitos de itens heroicos em toda a ilha. Mostrar um resumo consolidado na visão “Global - Todas as ilhas”.",
-        russian: "DLC02. Эффекты героических предметов по всему острову. Показывать сводку по всем островам в представлении «Глобально - Все острова».",
-        simplified_chinese: "DLC02。全岛英雄物品效果。在“全局 - 所有岛屿”视图中显示汇总概览。",
-        traditional_chinese: "DLC02。全島英雄物品效果。在「全域 - 所有島嶼」檢視中顯示彙總概覽。",
-        japanese: "DLC02。島全体のヒロイックアイテム効果。「グローバル - すべての島」ビューで全体の集計を表示。",
-        korean: "DLC02. 섬 전역의 영웅 아이템 효과. “글로벌 - 모든 섬” 보기에서 전체 요약 표시.",
+        english: "GU 2.1."
     },
     helpContent: {
         brazilian: `<h5>Uso e Estrutura</h5>

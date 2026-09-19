@@ -824,6 +824,22 @@ export class Patron extends NamedElement {
 }
 
 /**
+ * True when a buff actually modifies factory production, not just residence/population attributes
+ * (Happiness, Money, Belief, etc.). Used to decide whether a 'building'-sourced Effect qualifies for a
+ * per-target toggle in each target's "Items Equipped" list instead of the global Effects dialog.
+ */
+function isProductionRelevantBuff(buff: Buff): boolean {
+    return buff.productivityUpgrade !== 0
+        || buff.workforceModifierInPercent !== 0
+        || buff.additionalOutputs.length > 0
+        || (!!buff.addedFertility && buff.addedFertility.guid !== 0)
+        || buff.fuelDurationPercent !== 0
+        || buff.replaceInputs.length > 0
+        || buff.workforceMaintenanceFactorUpgrade !== 0
+        || (!!buff.replaceWorkforce && buff.replaceWorkforce.oldWorkforce.guid !== 0);
+}
+
+/**
  * Represents an effect that can be applied to buildings
  * Manages effect-specific buffs and targeting
  */
@@ -843,6 +859,14 @@ export class Effect extends NamedElement {
     public source?: string; // source type: 'module', 'tech', 'festival', 'veneration-effect', 'session-event', 'island-event'
 
     public scaling: KnockoutObservable<number>;
+    // Per-target tri-state slot for a qualifying 'building'-sourced effect (see isProductionRelevantBuff),
+    // mirroring Item.slotStates. Populated by applyBuffs() only when the effect qualifies; stays undefined
+    // for every other effect, which is the structural signal Consumer.addBuff uses to admit the row into
+    // "Items Equipped".
+    public slotStates?: Map<Constructible, KnockoutObservable<number>>;
+    // Effects have no boosted variant, but the "Items Equipped" template unconditionally reads
+    // boostEquipments.length on the row's parent - must be an empty array, not undefined.
+    public boostEquipments: AppliedBuff[] = [];
 
     /**
      * Creates a new Effect instance
@@ -904,7 +928,7 @@ export class Effect extends NamedElement {
             'veneration-effect': 'venerationEffects',
             'session-event': 'sessionEvent',
             'island-event': 'islandEvent',
-            'building': 'building',
+            'building': 'buildings',
             'mythical-item': 'heroicSpecialist'
         };
 
@@ -952,9 +976,40 @@ export class Effect extends NamedElement {
         if (this.targets.length == 0)
             this.targets = targets;
 
-        for (const target of targets)
-            for (const buff of buffs)
-                new AppliedBuff(this, buff, target, assetsMap) // constructor stores created object in target
+        // A 'building'-sourced effect whose buffs actually move a factory-relevant field (e.g. Chariot and
+        // Crew's productivityUpgrade) gets an independent per-target toggle instead of one shared scaling.
+        const perTarget = this.source === 'building' && buffs.some(isProductionRelevantBuff);
+
+        if (perTarget) {
+            if (!this.slotStates) {
+                this.slotStates = new Map<Constructible, KnockoutObservable<number>>();
+                for (const target of targets) {
+                    const state = ko.observable(0);
+                    this.slotStates.set(target, state);
+                    this.lockDLCIfSet(state); // no-op unless the effect has exactly one dlcUnlocks
+                }
+            }
+
+            for (const target of targets)
+                for (const buff of buffs) {
+                    const state = this.slotStates.get(target)!;
+                    // Clamp to exactly {0, 1} like Item's own non-boost equipments do (state() === 1 ? 1 : 0)
+                    // - state is user/persistence-writable, and an out-of-range stray value (e.g. a corrupted
+                    // save) must not silently multiply the buff instead of just not applying.
+                    const scaling = ko.pureComputed({
+                        read: () => state() === 1 ? 1 : 0,
+                        write: (v: number) => state(v ? 1 : 0),
+                    });
+                    // constructor stores created object in target; no boost variant, so activeBuff is
+                    // always the applied buff itself (mirrors Item's no-boost-pair fallback).
+                    const appliedBuff = new AppliedBuff(this, buff, target, assetsMap, false, scaling);
+                    appliedBuff.activeBuff = ko.pureComputed(() => appliedBuff.buff);
+                }
+        } else {
+            for (const target of targets)
+                for (const buff of buffs)
+                    new AppliedBuff(this, buff, target, assetsMap) // constructor stores created object in target
+        }
     }
 
     /**

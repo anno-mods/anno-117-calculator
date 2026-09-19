@@ -910,6 +910,11 @@ export class Island {
             }
         }
         this.availableEffects = ko.pureComputed(() => {
+            // 'building'-sourced effects are excluded here because the calculator has no spatial/placement
+            // simulation to know whether their actual source building (e.g. a Hippodrome) exists near a
+            // target. A 'building'-sourced effect that actually modifies factory production instead gets a
+            // per-target toggle in each target's "Items Equipped" list - see Effect.applyBuffs / slotStates.
+
             // For meta session (All Islands) or meta region islands, show all effects
             if (this.isAllIslands() || this.region.id === 'Meta') {
                 return this.allEffects.filter(e => e.source != 'building' && e.available() && this.patronEffects.indexOf(e) == -1);
@@ -936,11 +941,26 @@ export class Island {
             });
         });
 
-        // Set up persistence for island effects
+        // Set up persistence for island effects. A qualifying effect's shared `.scaling` is unused (its
+        // AppliedBuffs read/write per-target slotStates instead - see Effect.applyBuffs), so skip it here;
+        // persisting it would silently restore a stale value on reload without affecting anything.
         for (const effect of this.allEffects) {
+            if (effect.slotStates)
+                continue;
             persistFloat(effect, "scaling", `island.effect.${effect.guid}.scaling`);
         }
-        
+
+        // Per-target persistence for a qualifying effect's slot states - same key scheme and persistInt
+        // helper as Item.slotStates, so a slot's raw stored value is always the integer 0/1.
+        for (const effect of this.allEffects) {
+            if (!effect.slotStates)
+                continue;
+            for (const target of effect.slotStates.keys()) {
+                const state = effect.slotStates.get(target)!;
+                persistInt({ state }, "state", `${target.guid}[${effect.guid}].scaling`);
+            }
+        }
+
         // Set up patrons
         this.patronEffects = [];
         for (let patron of (params.patrons || [])) {

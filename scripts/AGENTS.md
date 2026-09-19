@@ -33,6 +33,18 @@ const LANGUAGES = ['en', 'de', 'fr', 'es', 'it', 'pl', 'pt-BR', 'ru', 'zh-CN', '
 
 **Important**: Never hardcode dates in sitemap.xml manually. Always use this script to ensure current dates.
 
+## Release Publishing (publish.sh / publish.bat)
+
+Bumps version, builds, and publishes a release. `publish.bat` (Windows) wraps `publish.sh` (Git Bash). Usage: `scripts/publish.bat [tag]`.
+
+**Flow**: bump version in package.json/util.ts → draft changelog from commits since the last "Merge branch 'release'" (edit `RELEASE_NOTES_DRAFT.md`) → build → bare version-bump commit on `main` → squash-merge `main` into `release` (one commit per release) → push `release` to `anno-mods` as both `release` and `release:main` → `.github/workflows/auto-release.yml` tags/creates the GitHub Release on push to `main` when the commit's first line matches `^Release \d+\.\d+` → merge `release` back into local `main` for bookkeeping only (never pushed).
+
+**Constraint**: `anno-mods/main` (the public repo, backs the releases page) must only ever receive the linear release-branch history, never local `main` directly - local `main`'s granular dev history includes NDA playtest data. Other remotes (`github`, `byWulf`, `hypergonial`) are dev/collaborator forks and are out of scope for this constraint unless told otherwise.
+
+**Pitfall (fixed 2026-08-20)**: an earlier version of the script pushed local `main` (not `release`) to trigger the tag, and did so before merging `release` back in - so the public tag/release ended up pointing at the bare version-bump commit (no changelog body), and ~230 granular dev commits (including NDA content) became reachable from `anno-mods/main`. If a publish run looks off, diff `anno-mods/main` against local `release`'s tip before trusting it.
+
+**Recovery from a bad push**: `git push anno-mods release:main --force-with-lease`, move the tag to the same commit, manually edit the GitHub Release notes (no `gh` CLI available in this environment). Dangling commits stay fetchable by exact SHA until GitHub's server-side gc runs - there is no user-triggerable "gc now". For genuinely sensitive exposures, GitHub Support can purge specific commits on request.
+
 ## Translation Scripts
 
 ### analyze-demand-graph.ts

@@ -16,8 +16,27 @@ fi
 
 echo -e "${GREEN}✓ On main branch${NC}"
 
-# Display latest tag
-LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "none")
+# Display GitHub's current latest release, independent of local commit topology.
+latest_release_tag() {
+    local api_tag
+
+    if api_tag=$(curl --fail --silent --location \
+        -H "Accept: application/vnd.github+json" \
+        "https://api.github.com/repos/anno-mods/anno-117-calculator/releases/latest" \
+        | node -e 'process.stdout.write(JSON.parse(require("fs").readFileSync(0, "utf8")).tag_name)' \
+        2>/dev/null); then
+        printf '%s\n' "$api_tag"
+        return
+    fi
+
+    git ls-remote --tags --refs anno-mods \
+        | awk '{ print $2 }' \
+        | sed 's#refs/tags/##' \
+        | sort --version-sort --reverse \
+        | sed -n '1p'
+}
+
+LATEST_TAG=$(latest_release_tag || echo "none")
 echo -e "Latest release tag: ${YELLOW}${LATEST_TAG}${NC}"
 echo ""
 
@@ -101,7 +120,7 @@ fi
 
 # Step 6.5: Build with new version before committing
 echo "Building project with new version..."
-npm run build
+powershell.exe -NoProfile -Command "npm.cmd run build"
 
 echo -e "${GREEN}✓ Build complete${NC}"
 
@@ -130,13 +149,26 @@ git commit -m "$COMMIT_MESSAGE"
 
 echo -e "${GREEN}✓ Squash merged main into release${NC}"
 
-# Step 9: Push to GitHub
+# Step 9: Push the release branch to GitHub
 echo "Pushing release branch to GitHub..."
-git push anno-mods main
+git push anno-mods release
 
-echo -e "${GREEN}✓ Pushed to GitHub${NC}"
+echo -e "${GREEN}✓ Pushed release branch to GitHub${NC}"
 
-# Step 10: Wait for tag to be created
+# Step 10: Push the release branch's squashed tip directly onto anno-mods' public
+# main ref. NEVER push local 'main' here - it carries the full granular dev
+# history as ancestry, which must stay private. Pushing 'release' (a linear
+# chain of one squash commit per release) keeps anno-mods/main's history clean,
+# and this is also what triggers auto-release.yml with the right commit/message.
+echo "Pushing release branch to anno-mods' main..."
+git push anno-mods release:main
+
+echo -e "${GREEN}✓ Pushed to anno-mods main${NC}"
+
+# Step 11: Wait for the tag to be created BEFORE touching local main, so we only
+# record the "release published" bookkeeping commit once the remote side is
+# confirmed. If this times out, local main is left untouched for investigation
+# instead of gaining a misleading "Merge branch 'release'" anchor.
 echo "Waiting for GitHub Actions to create tag $TAG..."
 MAX_WAIT=60
 ELAPSED=0
@@ -168,11 +200,13 @@ echo ""
 echo "Fetching tags from remote..."
 git fetch --tags
 
-# Step 11: Merge release into main
+# Step 12: Merge release into LOCAL main only, for bookkeeping (so the next run's
+# "commits since last merge from release" detection has an anchor). This commit
+# is never pushed anywhere.
 echo "Switching back to main..."
 git checkout main
 
-echo "Merging release into main..."
+echo "Merging release into local main (not pushed)..."
 git merge release --no-edit
 
 echo ""
@@ -183,6 +217,7 @@ echo ""
 echo "Summary:"
 echo "  - Version updated in package.json and util.ts"
 echo "  - Release branch updated and pushed"
-echo "  - Tag $TAG created (or pending)"
-echo "  - Main branch updated and pushed"
+echo "  - anno-mods/main fast-forwarded to the release branch's squashed commit"
+echo "  - Tag $TAG created (or pending) on that squashed commit"
+echo "  - Local main merged with release for bookkeeping (not pushed - dev history stays private)"
 echo ""

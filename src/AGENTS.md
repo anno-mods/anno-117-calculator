@@ -668,6 +668,8 @@ interface Supplier {
 
 ## Mythical-item / Monument Effect Display
 
+**Naming**: internal/dev code, tests, and docs call these "mythical" or "villa-allocation" items (matches `docs/superpowers/specs/2026-07-06-mythical-items-design.md`, `tests/computed/mythical-item-*.spec.ts`). The player-facing name (i18n strings, in-app UI text) is **"Heroic"** (DLC02) - do not write "mythical" into user-visible text.
+
 ### Effect targets for residences
 - `Effect.targets` is populated during the **first** `applyBuffs` pass, which runs **before** residences exist (world.ts init order). Effects whose targets are only residence GUIDs therefore keep an empty `targets` and never appear in `Island.availableEffects()`.
 - Fix: `Effect.applyBuffsToResidences` (production.ts) also appends resolved residence targets to `this.targets` (deduped; skips the `targetsIsAllResidences` case to avoid flooding). This makes the effect surface in `availableEffects()` and renders target icons.

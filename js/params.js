@@ -10154,7 +10154,7 @@ if(window.params == null)window.params={
           "additionalOutputCycle": 2,
           "amount": 1,
           "forceProductSameAsFactoryOutput": false,
-          "product": 2180
+          "product": 2124
         }
       ],
       "additionalWorkforces": [],
@@ -10185,7 +10185,12 @@ if(window.params == null)window.params={
       "population": 0.0,
       "productivityUpgrade": 35.0,
       "providedNeedUpgrade": [],
-      "replaceInputs": [],
+      "replaceInputs": [
+        {
+          "newInput": 2124,
+          "oldInput": 2180
+        }
+      ],
       "replaceWorkforce": {
         "newWorkforce": 0,
         "oldWorkforce": 0
@@ -16996,6 +17001,7 @@ if(window.params == null)window.params={
         2698,
         2699,
         2800,
+        8579,
         23723,
         31764
       ],
@@ -18770,6 +18776,7 @@ if(window.params == null)window.params={
         2694,
         2698,
         2699,
+        8579,
         2200,
         2669,
         2693,
@@ -28245,6 +28252,7 @@ if(window.params == null)window.params={
         2698,
         2699,
         2800,
+        8579,
         23723,
         31764
       ]
@@ -28565,6 +28573,7 @@ if(window.params == null)window.params={
       "rarity": "Common",
       "targets": [
         2793,
+        2957,
         2994,
         3190
       ]
@@ -28626,8 +28635,7 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity C TorcsChain",
       "rarity": "Common",
       "targets": [
-        5291,
-        5470,
+        5290,
         5606
       ]
     },
@@ -28786,7 +28794,8 @@ if(window.params == null)window.params={
       "rarity": "Common",
       "targets": [
         2786,
-        3188
+        3188,
+        5973
       ]
     },
     {
@@ -28936,6 +28945,7 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity R TrousersChain",
       "rarity": "Rare",
       "targets": [
+        2786,
         2800,
         5608,
         5973
@@ -28970,6 +28980,7 @@ if(window.params == null)window.params={
         2878,
         5611,
         5616,
+        5849,
         5975,
         5976
       ]
@@ -29100,8 +29111,12 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity R WigsChain",
       "rarity": "Rare",
       "targets": [
+        2669,
+        2794,
         5971,
         15514,
+        31752,
+        31761,
         31766,
         31769
       ]
@@ -29167,6 +29182,7 @@ if(window.params == null)window.params={
       "rarity": "Rare",
       "targets": [
         2800,
+        5290,
         5291,
         5470,
         31773
@@ -29441,6 +29457,7 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity E SausagesChain",
       "rarity": "Epic",
       "targets": [
+        2793,
         5959,
         5974,
         31764
@@ -31376,6 +31393,7 @@ if(window.params == null)window.params={
         2698,
         2699,
         2800,
+        8579,
         23723,
         31764
       ]
@@ -32105,7 +32123,6 @@ if(window.params == null)window.params={
         2880,
         5976,
         5977,
-        8579,
         31752,
         31761
       ]
@@ -32293,6 +32310,7 @@ if(window.params == null)window.params={
         2698,
         2699,
         2800,
+        8579,
         23723,
         31764
       ]
@@ -32934,16 +32952,13 @@ if(window.params == null)window.params={
       "name": "Specialist Mythic 28",
       "rarity": "Mythic",
       "targets": [
-        2958,
-        2970,
-        5848,
-        10929,
-        31753,
         2916,
         2920,
         2954,
         5295,
-        5978
+        5978,
+        2970,
+        31753
       ]
     },
     {
