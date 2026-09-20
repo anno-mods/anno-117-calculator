@@ -1,0 +1,223 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="DuxVitae">
+
+    <title>Anno 117 Calculator - Live Statistics</title>
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="./favicon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="./apple-touch-icon.png">
+    <link rel="shortcut icon" href="./favicon.png">
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css" />
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript" src="js/params.js"></script>
+    <script type="text/javascript" src="./dist/statistics.bundle.js"></script>
+</head>
+<body>
+    <div id="statistics-root" class="container-fluid py-3">
+
+        <!-- Header: island name + (optional) session icon/name + connection controls (U5) -->
+        <div class="d-flex align-items-center flex-wrap mb-3">
+            <h3 class="mb-0 mr-3" data-bind="text: areaName"></h3>
+            <!-- ko if: sessionInfo() -->
+            <div class="d-flex align-items-center mr-3" data-bind="with: sessionInfo">
+                <img class="icon-sm mr-2" data-bind="attr: {src: icon}, visible: icon">
+                <span class="text-muted" data-bind="text: name"></span>
+            </div>
+            <!-- /ko -->
+
+            <!-- KTD1: connect() is only ever invoked from this explicit click - a plain click:
+                 binding is correct here (a genuine user action, not a Bootstrap-tab-owned toggle
+                 like the category tabs above). The button stays visible/clickable even once live
+                 (connect() is idempotent) rather than hiding, so the viewer always has a visible
+                 "am I trying to connect" affordance and reconnecting after Offline never needs a
+                 page reload. -->
+            <button type="button" class="btn btn-sm btn-primary mr-2" data-bind="click: connect">
+                Connect to running game
+            </button>
+
+            <!-- Compact Live/Reconnecting/Offline indicator (R12). css: swaps Bootstrap 4.5.2's
+                 badge-{success,warning,secondary} variant classes based on feed.connectionState();
+                 text comes from the same state via connectionStateLabel so the two never disagree. -->
+            <span class="badge" data-bind="text: connectionStateLabel, css: {
+                'badge-success': connectionState() === 'live',
+                'badge-warning': connectionState() === 'reconnecting',
+                'badge-secondary': connectionState() === 'offline'
+            }"></span>
+        </div>
+
+        <div class="row">
+            <!-- U5/R4: two-tier Collections/Islands sidebar, replacing the old single-island
+                 <select> dropdown. Each row's checkbox is bound per the plan's "no-op-write
+                 computed + separate click: handler" pattern (see isIslandChecked/
+                 isCollectionChecked/isAllIslandsChecked/isSessionGroupChecked in
+                 src/statistics.ts) - the checked: binding only reflects live view-model state,
+                 the click: handler owns the actual mutation and computes the ctrl-equivalent
+                 boolean from the real event where relevant. "All Islands" (isAllIslands: true)
+                 branches onto isAllIslandsChecked/onAllIslandsToggle instead of
+                 isCollectionChecked/onCollectionCheck/onCollectionUncheck (KTD2, session-grouping
+                 plan) - it is no longer part of the single-active-collection model. -->
+            <div class="col-12 col-md-3 mb-3" id="statistics-sidebar">
+                <div class="mb-3">
+                    <h6 class="text-muted">Collections</h6>
+                    <ul class="list-unstyled mb-0" data-bind="foreach: collectionsForDisplay" id="statistics-collections-list">
+                        <li class="d-flex align-items-center mb-1">
+                            <!-- ko if: $data.isAllIslands -->
+                            <input type="checkbox" class="mr-2"
+                                   data-bind="checked: $root.isAllIslandsChecked(),
+                                              click: function(c, e) { $root.onAllIslandsToggle(); return true; }" />
+                            <!-- /ko -->
+                            <!-- ko ifnot: $data.isAllIslands -->
+                            <input type="checkbox" class="mr-2"
+                                   data-bind="checked: $root.isCollectionChecked($data.id),
+                                              click: function(c, e) {
+                                                  if ($root.activeCollectionId() === c.id) {
+                                                      $root.onCollectionUncheck(c.id);
+                                                  } else {
+                                                      $root.onCollectionCheck(c.id);
+                                                  }
+                                                  return true;
+                                              }" />
+                            <!-- /ko -->
+                            <span class="flex-grow-1" data-bind="text: $data.name"></span>
+                            <!-- ko if: $data.deletable -->
+                            <button type="button" class="btn btn-sm btn-link text-danger p-0 ml-1"
+                                    title="Delete collection"
+                                    data-bind="click: function(c, e) { $root.deleteCollection(c.id); }">&times;</button>
+                            <!-- /ko -->
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- U4/R4/R6 (session-grouping plan): Islands list grouped by session heading
+                     (checkbox toggles the whole group, KTD3/isSessionGroupChecked/
+                     onSessionGroupToggle), member rows indented per KTD5 with name only (no
+                     session-name prefix - the heading already carries it). Islands with no
+                     resolved session (R3) render in a flat, unindented tail (R5/KD5). -->
+                <div class="mb-3">
+                    <h6 class="text-muted">Islands</h6>
+                    <ul class="list-unstyled mb-0" id="statistics-islands-list">
+                        <!-- ko foreach: sessionGroups -->
+                        <li class="d-flex align-items-center mb-1">
+                            <input type="checkbox" class="mr-2"
+                                   data-bind="checked: $root.isSessionGroupChecked($data.sessionGuid),
+                                              click: function(g, e) { $root.onSessionGroupToggle(g.sessionGuid); return true; }" />
+                            <img class="icon-sm mr-2" data-bind="attr: {src: $data.icon}, visible: $data.icon">
+                            <span class="flex-grow-1 font-weight-bold" data-bind="text: $data.name"></span>
+                        </li>
+                        <!-- ko foreach: $data.islands -->
+                        <li class="d-flex align-items-center mb-1 pl-4">
+                            <input type="checkbox" class="mr-2"
+                                   data-bind="checked: $root.isIslandChecked({sessionGuid: $data.sessionIdentity(), islandId: $data.islandId(), areaIndex: $data.areaIndex()}),
+                                              click: function(island, e) {
+                                                  var ctrl = e.ctrlKey || e.metaKey || e.detail === 0;
+                                                  $root.onIslandClick({sessionGuid: island.sessionIdentity(), islandId: island.islandId(), areaIndex: island.areaIndex()}, ctrl);
+                                                  return true;
+                                              }" />
+                            <span data-bind="text: $data.areaName"></span>
+                        </li>
+                        <!-- /ko -->
+                        <!-- /ko -->
+                        <!-- ko foreach: ungroupedIslands -->
+                        <li class="d-flex align-items-center mb-1">
+                            <input type="checkbox" class="mr-2"
+                                   data-bind="checked: $root.isIslandChecked({sessionGuid: $data.sessionIdentity(), islandId: $data.islandId(), areaIndex: $data.areaIndex()}),
+                                              click: function(island, e) {
+                                                  var ctrl = e.ctrlKey || e.metaKey || e.detail === 0;
+                                                  $root.onIslandClick({sessionGuid: island.sessionIdentity(), islandId: island.islandId(), areaIndex: island.areaIndex()}, ctrl);
+                                                  return true;
+                                              }" />
+                            <span data-bind="text: $data.areaName"></span>
+                        </li>
+                        <!-- /ko -->
+                    </ul>
+                </div>
+
+                <!-- R14: enabled only while something is checked AND the trimmed name is non-empty. -->
+                <div class="form-inline" id="statistics-create-collection">
+                    <input type="text" class="form-control form-control-sm mr-2 mb-1" placeholder="Collection name"
+                           data-bind="value: newCollectionName, valueUpdate: 'input'" />
+                    <button type="button" class="btn btn-sm btn-outline-primary mb-1"
+                            data-bind="click: submitCreateCollection, enable: checkedKeys().length > 0 && newCollectionName().trim().length > 0">
+                        Create collection
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-9">
+                <!-- Category tabs. Bootstrap owns the click -> show/active DOM behavior; the
+                     "shown.bs.tab" listener wired in src/statistics.ts syncs selectedCategory so
+                     filteredRows stays correct. No manual click: binding here (see templates/AGENTS.md). -->
+                <ul class="nav nav-tabs" role="tablist" id="statistics-category-tabs">
+                    <!-- ko foreach: categories -->
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" type="button" role="tab" data-toggle="tab"
+                                data-target="#statistics-table-pane"
+                                data-bind="attr: {'data-category': $data, 'aria-selected': $root.selectedCategory() === $data},
+                                           css: {active: $root.selectedCategory() === $data},
+                                           text: $data"></button>
+                    </li>
+                    <!-- /ko -->
+                </ul>
+
+                <!-- Single tab-content pane; the table inside is reactively filtered by
+                     filteredRows (KTD8), so there is only ever one row list, not one per category. -->
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="statistics-table-pane" role="tabpanel">
+                        <table class="table table-sm table-striped table-fixed mb-0 mt-2">
+                            <tbody data-bind="foreach: filteredRows">
+                                <tr>
+                                    <td style="width: 2.5rem;" class="align-middle">
+                                        <img class="icon-sm" data-bind="attr: {src: identity.icon}, visible: identity.icon">
+                                    </td>
+                                    <td data-bind="text: identity.name" class="align-middle"></td>
+                                    <td class="align-middle">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <img class="icon-sm mr-2" src="icons/icon_2d_productivity_0.webp" title="Production" />
+                                            <div class="stats-bar-track flex-grow-1 mr-2">
+                                                <div class="stats-bar-fill stats-bar-fill-production" data-bind="style: {width: $root.barWidthPercent(generation(), Math.max(perfectGeneration(), perfectConsumption())) + '%'}"></div>
+                                            </div>
+                                            <span class="text-right font-weight-bold" style="width: 4rem; font-size: 0.85rem;" data-bind="text: formatNumber(generation())"></span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <img class="icon-sm mr-2" src="icons/icon_marketplace_2d_light.png" title="Consumption" />
+                                            <div class="stats-bar-track flex-grow-1 mr-2">
+                                                <div class="stats-bar-fill stats-bar-fill-consumption" data-bind="style: {width: $root.barWidthPercent(consumption(), Math.max(perfectGeneration(), perfectConsumption())) + '%'}"></div>
+                                            </div>
+                                            <span class="text-right text-muted" style="width: 4rem; font-size: 0.85rem;" data-bind="text: formatNumber(consumption())"></span>
+                                        </div>
+                                    </td>
+                                    <td style="width: 5rem;" class="align-middle text-right">
+                                        <div class="d-flex align-items-center justify-content-end">
+                                            <img class="icon-sm mr-2" src="icons/icon_house_white.png" title="Factories" />
+                                            <span data-bind="text: buildings()"></span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -45,6 +45,7 @@ export class FactoryPresenter {
     public isDefaultSupplier: KnockoutComputed<boolean>;
     public representativeInstance: KnockoutComputed<Factory | null>;
     public productionChain: ProductionChainView;
+    public syncedAverageProductivity: KnockoutComputed<number | null>;
     
 
     /**
@@ -145,6 +146,7 @@ export class FactoryPresenter {
         });
         this.modules = ko.pureComputed(() => this.instance()?.modules || []);
         this.items = ko.pureComputed(() => this.instance()?.availableItems() || []);
+        this.syncedAverageProductivity = ko.pureComputed(() => this.instance()?.syncedAverageProductivity() ?? null);
 
         // Sums this one factory type's required workforce across every real island (mirrors
         // .buildings above) - the All-Islands pseudo-island's own workforceDemand.amount() is

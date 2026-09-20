@@ -1,5 +1,5 @@
 import { ACCURACY, formatNumber, formatPercentage, versionCalculator, Option, ko, dummyObservable, NeedConsumptionSetting, NamedElement, debugBindingContext, logAssetInfo, inspectElement, getAssetType } from './util';
-import { languageCodes, texts as locaTexts, options } from './i18n';
+import { detectBrowserLanguage, texts as locaTexts, options } from './i18n';
 import { registerComponents } from './components';
 
 // Import params from the js directory - this is a legacy import that needs to be loaded
@@ -148,11 +148,9 @@ window.view.debug.logBindings.subscribe((value: boolean) => {
 });
 
 // Set default language based on browser locale
-for (const code in languageCodes) {
-    if (navigator.language.startsWith(code)) {
-        window.view.settings.language(languageCodes[code]);
-        break;
-    }
+const detectedLanguage = detectBrowserLanguage();
+if (detectedLanguage) {
+    window.view.settings.language(detectedLanguage);
 }
 
 /**
@@ -605,6 +603,23 @@ function init(_isFirstRun: boolean, configVersion: string | null): void {
     (window as any).PublicConsumerBuilding = require('./factories').PublicConsumerBuilding;
     (window as any).RecipeList = require('./consumption').RecipeList;
     (window as any).Product = require('./production').Product;
+
+    // Game Connector (U7): instantiated after every island (including persistBuildings()) is
+    // fully constructed - same relative position the statistics page's own independent feed uses.
+    // Never auto-connects (KTD1-equivalent) - only the navbar control (U5) calls connect().
+    const { GameConnector } = require('./game-connector');
+    window.view.gameConnector = new GameConnector();
+    window.view.gameConnectorDismissedDuplicateNamesKey = ko.observable('');
+    window.view.gameConnectorStateLabel = ko.pureComputed(() => {
+        switch (window.view.gameConnector.state()) {
+            case 'connecting': return window.view.texts.gameConnectorConnecting.name();
+            case 'connected': return window.view.texts.gameConnectorConnected.name();
+            case 'reconnecting': return window.view.texts.gameConnectorReconnecting.name();
+            case 'offline': return window.view.texts.gameConnectorOffline.name();
+            default: return window.view.texts.gameConnectorDisconnected.name();
+        }
+    });
+    (window as any).GameConnector = GameConnector;
 
     // Apply Knockout bindings
     ko.applyBindings(window.view, $(document.body)[0]);

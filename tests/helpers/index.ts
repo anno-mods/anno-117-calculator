@@ -7,3 +7,4 @@ export { ConfigLoader } from './config-loader';
 export { BindingErrorDetector } from './binding-detector';
 export { ComputedValueAsserter } from './computed-asserter';
 export { FixtureManager, type FixtureParams } from './fixture-manager';
+export { installMockEventSource } from './mock-event-source';

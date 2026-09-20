@@ -101,6 +101,14 @@ Three invariants; everything else is in `src/AGENTS.md` -> "Aggregate mode (`src
 - Contains nested JSON with session, building counts, etc.
 - See tests/CLAUDE.md for complete structure
 
+### Live Statistics Page
+- **Separate Webpack Entry**: `statistics.html` loads `statistics.bundle.js` compiled from a second entry point.
+- **Island Selection**: Dropdown selector is populated by `feed.islands()`, sorted by resolved session index and `areaName` localeCompare. Sticky selection persists selected island across messages.
+- **Category Tabs Order**: Tabs follow the predefined order of category filters inside `window.params.productFilters`, with "All" always first.
+- **Product Row Sorting**: Rows (`filteredRows`) are sorted by category index and product index in `window.params.productFilters`, with unmapped products sorted last under "Other".
+- **Stacked Progress Bars**: Production (green) and consumption (white) bars in each row scale relative to `Math.max(perfectGeneration(), perfectConsumption())` to ensure direct visual comparability.
+- **Row Locators in Tests**: Locate the product icon using `row.locator('img').first()` since each row contains multiple `img` elements.
+
 ### ALL_ISLANDS Constant
 - Defined in src/util.ts:51 as `"All Islands"`
 - Used as storage key for the special all-islands view

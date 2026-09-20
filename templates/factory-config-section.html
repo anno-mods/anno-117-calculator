@@ -49,6 +49,9 @@
                 </td>
                 <td>
                     <div data-bind="text: formatNumber(100 * $data.boost()) + '%', attr: {title: $root.texts.productivity.name()}"></div>
+                    <!-- ko if: $data.syncedAverageProductivity() !== null -->
+                    <span class="text-muted" data-bind="text: '(' + formatNumber($data.syncedAverageProductivity()) + '%)', attr: {title: $root.texts.gameConnectorSyncedProductivity.name()}"></span>
+                    <!-- /ko -->
                 </td>
                 <td>
                     <!-- ko ifEditable: true -->

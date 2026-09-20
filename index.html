@@ -132,6 +132,21 @@
                 <button type="button" class="btn" data-bind="disable: $root.isAggregating()">
                     <img data-toggle="modal" data-target="#patron-selection-dialog" class="icon-navbar" src="./icons/icon_2d_religion_belief_0.webp" />
                 </button>
+                <button type="button" class="btn" id="game-connector-toggle" data-bind="click: () => $root.gameConnector.toggle(), attr: {title: $root.gameConnectorStateLabel()}, css: {
+                    'text-success': $root.gameConnector.state() === 'connected',
+                    'text-warning': $root.gameConnector.state() === 'connecting' || $root.gameConnector.state() === 'reconnecting',
+                    'text-danger': $root.gameConnector.state() === 'offline',
+                    'text-light': $root.gameConnector.state() === 'disconnected'
+                }">
+                    <span class="fa fa-plug"></span>
+                </button>
+            </div>
+            <div class="alert alert-warning alert-dismissible py-1 px-2 mb-0" role="alert" data-bind="visible: $root.gameConnector.duplicateNames().length > 0 && $root.gameConnector.duplicateNames().slice().sort().join('|') !== $root.gameConnectorDismissedDuplicateNamesKey()">
+                <span data-bind="text: $root.texts.gameConnectorDuplicateNameWarning.name()"></span>
+                <span data-bind="text: ' ' + $root.gameConnector.duplicateNames().join(', ')"></span>
+                <button type="button" class="close" style="font-size: 1rem;" data-bind="click: () => $root.gameConnectorDismissedDuplicateNamesKey($root.gameConnector.duplicateNames().slice().sort().join('|'))">
+                    <span>&times;</span>
+                </button>
             </div>
             <div class="input-group input-group-sm" data-bind="visible: $root.islands().length > 1" style="width: unset;">
 

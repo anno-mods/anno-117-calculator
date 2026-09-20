@@ -18,6 +18,16 @@ export const languageCodes: Record<string, string> = {
     'pl': 'polish'
 }
 
+/** Matches `navigator.language` against `languageCodes` (first match wins). `undefined` if none match. */
+export function detectBrowserLanguage(): string | undefined {
+    for (const code in languageCodes) {
+        if (navigator.language.startsWith(code)) {
+            return languageCodes[code];
+        }
+    }
+    return undefined;
+}
+
 export const texts: Record<string, Record<string, string>> = {
 
     fertility: {
@@ -1646,6 +1656,105 @@ export const texts: Record<string, Record<string, string>> = {
 
 <h5>Errores y Mejoras</h5>
 <span>Si encuentras algún error o inconveniente o si quieres sugerir mejoras, únete al servidor de Discord (ver enlace arriba) o abre un Issue en GitHub (</span><a href="https://github.com/anno-mods/anno-117-calculator/issues">https://github.com/anno-mods/anno-117-calculator/issues</a><span>)</span>`
+    },
+
+    gameConnectorDisconnected: {
+        english: "Disconnected",
+        french: "Déconnecté",
+        polish: "Rozłączono",
+        spanish: "Desconectado",
+        italian: "Disconnesso",
+        german: "Getrennt",
+        brazilian: "Desconectado",
+        russian: "Отключено",
+        simplified_chinese: "已断开",
+        traditional_chinese: "已斷開",
+        japanese: "切断済み",
+        korean: "연결 끊김"
+    },
+    gameConnectorConnecting: {
+        english: "Connecting…",
+        french: "Connexion…",
+        polish: "Łączenie…",
+        spanish: "Conectando…",
+        italian: "Connessione…",
+        german: "Verbinde…",
+        brazilian: "Conectando…",
+        russian: "Подключение…",
+        simplified_chinese: "正在连接…",
+        traditional_chinese: "正在連線…",
+        japanese: "接続中…",
+        korean: "연결 중…"
+    },
+    gameConnectorConnected: {
+        english: "Connected",
+        french: "Connecté",
+        polish: "Połączono",
+        spanish: "Conectado",
+        italian: "Connesso",
+        german: "Verbunden",
+        brazilian: "Conectado",
+        russian: "Подключено",
+        simplified_chinese: "已连接",
+        traditional_chinese: "已連線",
+        japanese: "接続済み",
+        korean: "연결됨"
+    },
+    gameConnectorReconnecting: {
+        english: "Reconnecting…",
+        french: "Reconnexion…",
+        polish: "Ponowne łączenie…",
+        spanish: "Reconectando…",
+        italian: "Riconnessione…",
+        german: "Verbindung wird wiederhergestellt…",
+        brazilian: "Reconectando…",
+        russian: "Переподключение…",
+        simplified_chinese: "正在重新连接…",
+        traditional_chinese: "正在重新連線…",
+        japanese: "再接続中…",
+        korean: "재연결 중…"
+    },
+    gameConnectorOffline: {
+        english: "Offline",
+        french: "Hors ligne",
+        polish: "Offline",
+        spanish: "Sin conexión",
+        italian: "Offline",
+        german: "Offline",
+        brazilian: "Offline",
+        russian: "Офлайн",
+        simplified_chinese: "离线",
+        traditional_chinese: "離線",
+        japanese: "オフライン",
+        korean: "오프라인"
+    },
+    gameConnectorSyncedProductivity: {
+        english: "Live productivity from the game",
+        french: "Productivité en direct du jeu",
+        polish: "Wydajność na żywo z gry",
+        spanish: "Productividad en vivo del juego",
+        italian: "Produttività in tempo reale dal gioco",
+        german: "Live-Produktivität aus dem Spiel",
+        brazilian: "Produtividade ao vivo do jogo",
+        russian: "Актуальная производительность из игры",
+        simplified_chinese: "来自游戏的实时生产力",
+        traditional_chinese: "來自遊戲的即時生產力",
+        japanese: "ゲームからのライブ生産性",
+        korean: "게임의 실시간 생산성"
+    },
+    gameConnectorDuplicateNameWarning: {
+        english: "Duplicate island name reported by the game, not synced:",
+        french: "Nom d'île en double signalé par le jeu, non synchronisé :",
+        polish: "Zduplikowana nazwa wyspy zgłoszona przez grę, nie zsynchronizowano:",
+        spanish: "Nombre de isla duplicado informado por el juego, no sincronizado:",
+        italian: "Nome isola duplicato segnalato dal gioco, non sincronizzato:",
+        german: "Doppelter Inselname vom Spiel gemeldet, nicht synchronisiert:",
+        brazilian: "Nome de ilha duplicado reportado pelo jogo, não sincronizado:",
+        russian: "Повторяющееся имя острова, полученное из игры, не синхронизировано:",
+        simplified_chinese: "游戏报告的重复岛屿名称，未同步：",
+        traditional_chinese: "遊戲回報的重複島嶼名稱，未同步：",
+        japanese: "ゲームから報告された重複する島名、同期されていません：",
+        korean: "게임에서 보고된 중복 섬 이름, 동기화되지 않음:"
     },
 };
 

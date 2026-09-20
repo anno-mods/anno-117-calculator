@@ -549,6 +549,13 @@ export class Factory extends Consumer implements Supplier {
     public fertilityFactor: KnockoutComputed<number>;
 
     /**
+     * Game Connector (KTD5): the pipe's live `AverageProductivity` for this factory's product,
+     * shown bracketed next to the calculator's own computed productivity. Transient, live game
+     * state - never persisted, reset to `null` on disconnect (src/game-connector.ts).
+     */
+    public syncedAverageProductivity: KnockoutObservable<number | null>;
+
+    /**
      * Creates a new Factory instance
      * @param config - Configuration object for the factory
      * @param assetsMap - Map of all available assets
@@ -560,6 +567,7 @@ export class Factory extends Consumer implements Supplier {
         
         // Explicit assignments
         this.isFactory = true;
+        this.syncedAverageProductivity = ko.observable(null);
 
         if (config.neededFertility) {
             const fertility = assetsMap.get(config.neededFertility);

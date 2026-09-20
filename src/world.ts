@@ -26,6 +26,15 @@ declare const window: any;
 declare const params: any;
 declare const localStorage: any;
 
+/**
+ * Game Connector (KTD4): per-island Storage keys identifying which live game island this
+ * calculator Island is synced from. Set once on first match/create (see src/game-connector.ts),
+ * read on every subsequent matching pass. Defined here (not in game-connector.ts) so Island owns
+ * its own persistence, matching the existing pattern (e.g. this.storage.setItem("session", ...)).
+ */
+const GAME_CONNECTOR_ISLAND_ID_STORAGE_KEY = 'gameConnector.islandID';
+const GAME_CONNECTOR_AREA_INDEX_STORAGE_KEY = 'gameConnector.areaIndex';
+
 
 /**
  * Manages persistent storage for island data
@@ -1324,7 +1333,26 @@ export class Island {
     getVisibleIslandFertility(guid: number): IslandFertility | undefined {
         return this.visibleIslandFertilities.find(f => f.fertility.guid === guid);
     }
-} 
+
+    /**
+     * Game Connector identity (KTD4/R2): the live game island this calculator Island is synced
+     * from, if any. `null` when this island has never been matched/created by the connector.
+     */
+    getGameConnectorIdentity(): { islandID: number; areaIndex: number } | null {
+        const islandID = this.storage.getItem(GAME_CONNECTOR_ISLAND_ID_STORAGE_KEY);
+        const areaIndex = this.storage.getItem(GAME_CONNECTOR_AREA_INDEX_STORAGE_KEY);
+        if (typeof islandID !== 'number' || typeof areaIndex !== 'number')
+            return null;
+
+        return { islandID, areaIndex };
+    }
+
+    /** Written once on first match/create (KTD4); not overwritten on later syncs of the same island. */
+    setGameConnectorIdentity(islandID: number, areaIndex: number): void {
+        this.storage.setItem(GAME_CONNECTOR_ISLAND_ID_STORAGE_KEY, islandID);
+        this.storage.setItem(GAME_CONNECTOR_AREA_INDEX_STORAGE_KEY, areaIndex);
+    }
+}
 
 export interface Constructible extends NamedElement{
     associatedRegions: Region[];

@@ -1121,3 +1121,27 @@ right connector from last child*/
     background-color: #e0a800;
     border-color: #c69500;
 }
+
+/* Live statistics page (statistics.html) production/consumption bars. New classes only -
+   unrelated to .product-tile-amount/.product-tile-load, which size the main tile grid. */
+.stats-bar-track {
+    position: relative;
+    width: 100%;
+    height: 0.6rem;
+    background-color: rgba(0, 0, 0, 0.25);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.stats-bar-fill {
+    height: 100%;
+    border-radius: 3px 0 0 3px;
+}
+
+.stats-bar-fill-production {
+    background: green;
+}
+
+.stats-bar-fill-consumption {
+    background: white;
+}
