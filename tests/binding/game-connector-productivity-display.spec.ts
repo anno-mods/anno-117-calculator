@@ -50,7 +50,7 @@ test.describe('game-connector productivity bracket display (U4/R5)', () => {
         islandId: 1,
         areaIndex: 0,
         areaName: 'Latium',
-        entries: [{ productGuid: 2077, buildingsByGuid: { [guid]: 3 }, averageProductivity: 82 }]
+        entries: [{ productGuid: view.island().assetsMap.get(guid).product.guid, buildingsByGuid: { [guid]: 3 }, averageProductivity: 82 }]
       }]);
       instances[instances.length - 1].onmessage({ data: payload });
     }, TIMBER_FACTORY_GUID);

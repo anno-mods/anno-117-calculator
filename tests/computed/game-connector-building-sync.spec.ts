@@ -52,7 +52,7 @@ test.describe('game-connector building-count and productivity write path (U4/R4/
 
   test('a buildingsByGuid entry matching an existing Factory writes constructed and syncedAverageProductivity', async ({ page }) => {
     await sendTick(page, [{
-      productGuid: 2077,
+      productGuid: 2174,
       buildingsByGuid: { [TIMBER_FACTORY_GUID]: 4 },
       averageProductivity: 75
     }]);
@@ -69,8 +69,8 @@ test.describe('game-connector building-count and productivity write path (U4/R4/
 
   test('an unmatched buildingGuid is skipped without throwing and without affecting other entries', async ({ page }) => {
     await sendTick(page, [
-      { productGuid: 2077, buildingsByGuid: { [UNKNOWN_BUILDING_GUID]: 9 }, averageProductivity: 50 },
-      { productGuid: 2115, buildingsByGuid: { [LIMESTONE_QUARRY_GUID]: 2 }, averageProductivity: 90 }
+      { productGuid: 2174, buildingsByGuid: { [UNKNOWN_BUILDING_GUID]: 9 }, averageProductivity: 50 },
+      { productGuid: 2078, buildingsByGuid: { [LIMESTONE_QUARRY_GUID]: 2 }, averageProductivity: 90 }
     ]);
 
     const result = await page.evaluate((guid) => {
@@ -109,14 +109,14 @@ test.describe('game-connector building-count and productivity write path (U4/R4/
   });
 
   test('sync always wins: a manual edit between two ticks is overwritten by the next report', async ({ page }) => {
-    await sendTick(page, [{ productGuid: 2077, buildingsByGuid: { [TIMBER_FACTORY_GUID]: 4 }, averageProductivity: 50 }]);
+    await sendTick(page, [{ productGuid: 2174, buildingsByGuid: { [TIMBER_FACTORY_GUID]: 4 }, averageProductivity: 50 }]);
 
     await page.evaluate((guid) => {
       const island = (window as any).view.islands().find((i: any) => i.name() === 'Latium');
       island.assetsMap.get(guid).buildings.constructed(99); // user manually types something else
     }, TIMBER_FACTORY_GUID);
 
-    await sendTick(page, [{ productGuid: 2077, buildingsByGuid: { [TIMBER_FACTORY_GUID]: 7 }, averageProductivity: 50 }]);
+    await sendTick(page, [{ productGuid: 2174, buildingsByGuid: { [TIMBER_FACTORY_GUID]: 7 }, averageProductivity: 50 }]);
 
     const constructed = await page.evaluate((guid) => {
       const island = (window as any).view.islands().find((i: any) => i.name() === 'Latium');
@@ -126,8 +126,68 @@ test.describe('game-connector building-count and productivity write path (U4/R4/
     expect(constructed).toBe(7);
   });
 
+  test('a factory absent from the next report is reset to 0 instead of keeping its old count', async ({ page }) => {
+    await sendTick(page, [
+      { productGuid: 2174, buildingsByGuid: { [TIMBER_FACTORY_GUID]: 4 }, averageProductivity: 50 },
+      { productGuid: 2078, buildingsByGuid: { [LIMESTONE_QUARRY_GUID]: 2 }, averageProductivity: 90 }
+    ]);
+    await sendTick(page, [
+      { productGuid: 2078, buildingsByGuid: { [LIMESTONE_QUARRY_GUID]: 2 }, averageProductivity: 90 }
+    ]);
+
+    const result = await page.evaluate(({ timber, quarry }) => {
+      const island = (window as any).view.islands().find((i: any) => i.name() === 'Latium');
+      return {
+        timber: island.assetsMap.get(timber).buildings.constructed(),
+        timberProductivity: island.assetsMap.get(timber).syncedAverageProductivity(),
+        quarry: island.assetsMap.get(quarry).buildings.constructed()
+      };
+    }, { timber: TIMBER_FACTORY_GUID, quarry: LIMESTONE_QUARRY_GUID });
+
+    expect(result.timber).toBe(0);
+    expect(result.timberProductivity).toBeNull();
+    expect(result.quarry).toBe(2);
+  });
+
+  test('a building listed only under a different product entry does not override the factory of its own product', async ({ page }) => {
+    await sendTick(page, [
+      { productGuid: 2174, buildingsByGuid: { [TIMBER_FACTORY_GUID]: 4 }, averageProductivity: 50 },
+      { productGuid: 2078, buildingsByGuid: { [TIMBER_FACTORY_GUID]: 0 }, averageProductivity: 90 }
+    ]);
+
+    const constructed = await page.evaluate((guid) => {
+      const island = (window as any).view.islands().find((i: any) => i.name() === 'Latium');
+      return island.assetsMap.get(guid).buildings.constructed();
+    }, TIMBER_FACTORY_GUID);
+
+    expect(constructed).toBe(4);
+  });
+
+  // Issue #20: 20 goldsmiths, one of them in range of a Nearsighted Knapper. The report lists the
+  // goldsmith GUID twice - 20 under gold bars and 1 under the obsidian extra good - and the
+  // obsidian entry used to overwrite the gold bar count.
+  test('issue #20: goldsmith listed under its own product (20) and an extra good (1) keeps 20', async ({ page }) => {
+    const GOLDSMITH_GUID = 31755;
+    const GOLD_BARS = 31698;
+    const OBSIDIAN = 145102;
+
+    await sendTick(page, [
+      { productGuid: GOLD_BARS, buildingsByGuid: { [GOLDSMITH_GUID]: 20 }, averageProductivity: 85 },
+      { productGuid: OBSIDIAN, buildingsByGuid: { [GOLDSMITH_GUID]: 1 }, averageProductivity: 40 }
+    ]);
+
+    const result = await page.evaluate((guid) => {
+      const island = (window as any).view.islands().find((i: any) => i.name() === 'Latium');
+      const goldsmith = island.assetsMap.get(guid);
+      return { constructed: goldsmith.buildings.constructed(), productivity: goldsmith.syncedAverageProductivity() };
+    }, GOLDSMITH_GUID);
+
+    expect(result.constructed).toBe(20);
+    expect(result.productivity).toBe(85);
+  });
+
   test('disconnecting clears the bracket but leaves buildings.constructed() at its last synced value', async ({ page }) => {
-    await sendTick(page, [{ productGuid: 2077, buildingsByGuid: { [TIMBER_FACTORY_GUID]: 4 }, averageProductivity: 50 }]);
+    await sendTick(page, [{ productGuid: 2174, buildingsByGuid: { [TIMBER_FACTORY_GUID]: 4 }, averageProductivity: 50 }]);
 
     const result = await page.evaluate((guid) => {
       (window as any).view.gameConnector.disconnect();

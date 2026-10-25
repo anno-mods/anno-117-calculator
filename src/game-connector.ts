@@ -378,16 +378,19 @@ export class GameConnector {
             return;
         }
 
+        // Iterate the calculator's factories rather than the report's entries: a report that omits
+        // a factory (or its product) means zero constructed, and a building listed under several
+        // entries must not be overwritten by whichever entry happens to come last.
+        const entryByProduct = new Map<number, GameConnectorEntry>();
         for (const entry of report.entries) {
-            for (const [buildingGuid, count] of entry.buildingGuidToAmount) {
-                const asset = island.assetsMap.get(buildingGuid);
-                if (!(asset instanceof Factory)) {
-                    continue; // unknown/future building type - silently skipped (R4)
-                }
-                asset.buildings.constructed(count);
-                asset.syncedAverageProductivity(entry.averageProductivity);
-                this.touchedFactories.add(asset);
-            }
+            entryByProduct.set(entry.productGuid, entry);
+        }
+
+        for (const factory of island.factories) {
+            const entry = entryByProduct.get(factory.product.guid);
+            factory.buildings.constructed(entry?.buildingGuidToAmount.get(factory.guid) ?? 0);
+            factory.syncedAverageProductivity(entry?.averageProductivity ?? null);
+            this.touchedFactories.add(factory);
         }
     }
 }

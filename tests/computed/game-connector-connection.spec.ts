@@ -88,7 +88,7 @@ test.describe('game-connector connection state (U1)', () => {
         islandId: 1,
         areaIndex: 0,
         areaName: 'Latium',
-        entries: [{ productGuid: 2077, buildingsByGuid: { [factoryGuid]: 5 }, averageProductivity: 80 }]
+        entries: [{ productGuid: view.island().assetsMap.get(factoryGuid).product.guid, buildingsByGuid: { [factoryGuid]: 5 }, averageProductivity: 80 }]
       }]);
       instance.onmessage({ data: payload });
 
