@@ -801,12 +801,13 @@ export class ProductPresenter {
 
         const amount = this.tradeRouteAmount() || 0;
 
-        const route = new TradeRoute(
+        const route = TradeRoute.tryCreate(
             this.product.guid,
             this.island(),
             island,
             amount
         );
+        if (!route) return;
 
         route.fromIslandProduct.tradeList.routes.push(route);
         route.toIslandProduct.tradeList.routes.push(route);
@@ -827,12 +828,13 @@ export class ProductPresenter {
         if (!this.canCreateImportTradeRoute())
             return;
 
-        const route = new TradeRoute(
+        const route = TradeRoute.tryCreate(
             this.product.guid,
             island,
             this.island(),
             0
         );
+        if (!route) return;
 
         route.fromIslandProduct.tradeList.routes.push(route);
         route.toIslandProduct.tradeList.routes.push(route);

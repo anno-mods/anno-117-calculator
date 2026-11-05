@@ -145,6 +145,18 @@ export class ViewMode {
                     e.scaling(5) // fertile soil and obsidian gathering / mining
             }
         }
+
+        //Nile Flood
+        for (const session of (window.view.sessions as Session[])){
+            if (session.region.id != "Egyptian" && session.region.id != "Meta" )
+                continue;
+
+            for (const e of session.effects){
+                if (e.guid == 155616)
+                    e.scaling(1) 
+            }
+        }
+        
     }
 }
 

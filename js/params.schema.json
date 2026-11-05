@@ -265,6 +265,12 @@
           },
           "id": {
             "type": "string"
+          },
+          "dlcUnlocks": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
           }
         },
         "required": [
@@ -351,6 +357,12 @@
             "items": {
               "type": "string"
             }
+          },
+          "dlcUnlocks": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
           }
         },
         "required": [
@@ -435,6 +447,12 @@
               "simplified_chinese",
               "traditional_chinese"
             ]
+          },
+          "dlcUnlocks": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
           }
         },
         "required": [
@@ -738,7 +756,6 @@
           "guid",
           "name",
           "iconPath",
-          "locaText",
           "needProduct",
           "needCategory",
           "supplyWeight",
@@ -823,6 +840,15 @@
           },
           "region": {
             "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "dlcUnlocks": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
           }
         },
         "required": [
@@ -1034,6 +1060,12 @@
             "items": {
               "type": "string"
             }
+          },
+          "dlcUnlocks": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
           }
         },
         "required": [
@@ -1222,6 +1254,12 @@
             "type": "array",
             "items": {
               "type": "string"
+            }
+          },
+          "dlcUnlocks": {
+            "type": "array",
+            "items": {
+              "type": "integer"
             }
           }
         },
@@ -1606,6 +1644,12 @@
             "items": {
               "type": "integer"
             }
+          },
+          "dlcUnlocks": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
           }
         },
         "required": [
@@ -1801,6 +1845,12 @@
               "type": "integer"
             }
           },
+          "dlcUnlocks": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
           "replaceInputs": {
             "type": "array",
             "items": {
@@ -1817,12 +1867,6 @@
                 "newInput",
                 "oldInput"
               ]
-            }
-          },
-          "dlcUnlocks": {
-            "type": "array",
-            "items": {
-              "type": "integer"
             }
           }
         },
@@ -2135,6 +2179,12 @@
           },
           "isRepeatable": {
             "type": "boolean"
+          },
+          "dlcUnlocks": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
           }
         },
         "required": [
