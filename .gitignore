@@ -335,6 +335,7 @@ ASALocalRun/
 
 
 # Files to ignore
+/archive
 /mockups
 /wheel_input_raw.gif
 /build.cmd

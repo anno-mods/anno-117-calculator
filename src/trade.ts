@@ -39,6 +39,18 @@ export class TradeRoute implements Supplier {
     public readonly active: KnockoutObservable<boolean>; // when trade route is destructed, active makes canSupply return false and thus trigger unregistering as default supplier
 
     /**
+     * Creates a trade route, or returns null (and logs a warning) if the product
+     * does not exist on both islands.
+     */
+    static tryCreate(productGUID: number, from: Island, to: Island, userSetAmount: number = 0): TradeRoute | null {
+        if (!from?.assetsMap.get(productGUID) || !to?.assetsMap.get(productGUID)) {
+            console.warn(`TradeRoute not created: product ${productGUID} is missing on island "${from?.name()}" or "${to?.name()}"`);
+            return null;
+        }
+        return new TradeRoute(productGUID, from, to, userSetAmount);
+    }
+
+    /**
      * Creates a new TradeRoute instance
      * @param config - Configuration object for the trade route
      */
@@ -294,7 +306,9 @@ export class TradeManager {
                     continue;
 
 
-                var route = new TradeRoute(productGUID, from, to , userSetAmount);
+                var route = TradeRoute.tryCreate(productGUID, from, to, userSetAmount);
+                if (!route)
+                    continue;
                 this.routes.push(route);
                 route.fromIslandProduct.tradeList.routes.push(route);
                 route.toIslandProduct.tradeList.routes.push(route);

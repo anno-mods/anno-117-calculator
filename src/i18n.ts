@@ -822,7 +822,7 @@ export const texts: Record<string, Record<string, string>> = {
         korean: "새로운  117 계산기 버전이 제공됩니다. 다운로드 버튼을 클릭하십시오."
     },
     newFeature: {
-        english: "GU 2.1."
+        english: "DLC03."
     },
     helpContent: {
         brazilian: `<h5>Uso e Estrutura</h5>
