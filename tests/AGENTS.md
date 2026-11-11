@@ -181,6 +181,7 @@ Feature description: `docs/exchange-format.md`. The specs call the pure function
 - **Computed values compare by island name**: island ids are assigned on first export, so `summaryByName` keys `computeSummary()` by island name; `summaryDifferences(a, b)` returns the differing values.
 - **Observable values are not strictly boolean**: values restored from storage can be `0`/`1` (`need.checked()`, `buildings.fullyUtilizeConstructed()`, `DLC.checked()`); wrap with `Boolean(...)` before `toBe(true/false)`.
 - **Marcia 69 scenario** needs `Marcia 69 updated.json` of the repository `anno-117-savegame-exchange-format` (`data/processed/calculator_configs/`, a sibling folder of this repository, or the folder in `ANNO_EXCHANGE_REPO`); without it that one test is skipped.
+- **Cross-tool drivers** (`xt-driver.spec.ts`, `xt-diag.spec.ts`): skipped unless `XT_JOBS` (list of `{in, summary, export}`) or `XT_DIAG` (`file|island|product`) is set. They are driven by `tools/cross_tool` of the planner repository, which compares the planner's engine with the calculator on the same exchange files and round-trips them with edits. The summary adds `demand` (`product.totalDemand()` per product) to `computeSummary()`; build first.
 - **Test GUIDs**: sawmill 3089 (Wood 2077), Peasants residence 3087, Sardines 2088, DLC 3 factory Dates 152272 (session Aegyptus 149679), DLC 3 needs Wine 2690 and Soap 2770, DLC 3 mythical-item effect 185132, Goldsmith 152358 (Gold 31698).
 
 ## Test files: conditional-need gating (mythical-item / monument / DLC gating)
