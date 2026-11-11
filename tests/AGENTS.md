@@ -168,6 +168,21 @@ The Playwright `webServer` uses `http-server -p 8080`. On this machine port 8080
 - **Collapsible summary selector**: The ID parameter passed to a `<collapsible>` component (e.g. `product-config-consumption`) is assigned to the collapsible body `div.collapse` rather than the fieldset or legend. To query the summary text in the header of a collapsible, locate the legend element pointing to that target: `legend[data-target="#product-config-consumption"] .summary span.float-right span`.
 - **DLC03 / Olive Oil Gating**: Verifies Egyptian Olive Press (152729) is hidden in the Olive Oil (2149) config dialog on all islands when DLC03 (67904) is disabled, but becomes visible when DLC03 is active. Requires `Region.available` to check session availability and `Consumer.available` to check region availability.
 
+## Exchange format tests (`tests/exchange/`)
+
+Feature description: `docs/exchange-format.md`. The specs call the pure functions through `window.exchange` (installed by `src/exchange/index.ts`), so they run against `dist/calculator.bundle.js`: build first.
+
+- **Run serially**: `npm run build ; npx playwright test tests/exchange --reporter=list --workers=1`, one invocation at a time (see the concurrency pitfall above).
+- **Seed once, not per navigation**: `ConfigLoader.loadConfigObject` re-seeds localStorage on every navigation (`addInitScript`) and overwrites an imported state on `page.reload()`. Exchange specs use `tests/helpers/exchange.ts`: `seedOnce(page)` writes `versionCalculator` and an empty `islandNames` once per browser tab (the marker lives in `sessionStorage`, which survives a reload); `openApp(page)` = seed + goto + `appReady`.
+- **Import in a test**: `importText(page, text)` runs `planImport` + `applyImport(plan, { reload: false })`, then reloads the page so the app runs on the imported state. Wait for debounced storage writes with `settle(page)` before reading localStorage; `exportDoc(page)` does it.
+- **Old import path**: drive the real `#config-selector` input with `page.setInputFiles`; the old import clears localStorage, writes the dump and reloads (see `oldImport` in `roundtrip.spec.ts`, which waits for a window marker to disappear).
+- **Schema validation**: `validateSchema` (dev dependency `ajv`, `ajv/dist/2020`, `strict: false`) of the vendored schema; the bundle has no validator. `vendoredFixture('valid/<file>')` reads `vendor/anno117-exchange/fixtures/`; do not edit the vendored files.
+- **Conformance**: `conformance.spec.ts` iterates `fixtures/MANIFEST.json`; a vendored fixture missing from the manifest fails the first test.
+- **Computed values compare by island name**: island ids are assigned on first export, so `summaryByName` keys `computeSummary()` by island name; `summaryDifferences(a, b)` returns the differing values.
+- **Observable values are not strictly boolean**: values restored from storage can be `0`/`1` (`need.checked()`, `buildings.fullyUtilizeConstructed()`, `DLC.checked()`); wrap with `Boolean(...)` before `toBe(true/false)`.
+- **Marcia 69 scenario** needs `Marcia 69 updated.json` of the repository `anno-117-savegame-exchange-format` (`data/processed/calculator_configs/`, a sibling folder of this repository, or the folder in `ANNO_EXCHANGE_REPO`); without it that one test is skipped.
+- **Test GUIDs**: sawmill 3089 (Wood 2077), Peasants residence 3087, Sardines 2088, DLC 3 factory Dates 152272 (session Aegyptus 149679), DLC 3 needs Wine 2690 and Soap 2770, DLC 3 mythical-item effect 185132, Goldsmith 152358 (Gold 31698).
+
 ## Test files: conditional-need gating (mythical-item / monument / DLC gating)
 - `tests/binding/olive-oil-dlc-gating.spec.ts` — DLC03-gated Egyptian Olive Press tab visibility in the Olive Oil product config dialog.
 - `tests/computed/hippodrome-need-gating.spec.ts` — DLC-gated hippodrome horse need: demand on/off, tile-production reconvergence, `activateAllNeeds`/user-controlled `checked`.

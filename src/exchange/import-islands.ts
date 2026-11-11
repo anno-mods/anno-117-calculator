@@ -56,6 +56,8 @@ class Lookups {
     residenceByLevel = new Map<number, number>();
     residences = new Set<number>();
     buildings = new Set<number>();
+    // GUID of a building -> its single DLC (lockDLCIfSet: a count above 0 switches that DLC on at load)
+    buildingDlc = new Map<number, number>();
     factories = new Set<number>();
     modules = new Set<number>();
     effects = new Map<number, { source: string; dlcUnlocks: number[] }>();
@@ -78,10 +80,12 @@ class Lookups {
         for (const f of p.factories) {
             this.factories.add(f.guid);
             this.buildings.add(f.guid);
+            this.noteBuildingDlc(f.guid, f.dlcUnlocks);
         }
         for (const m of p.modules) {
             this.modules.add(m.guid);
             this.buildings.add(m.guid);
+            this.noteBuildingDlc(m.guid, m.dlcUnlocks);
         }
         for (const e of p.effects) {
             this.effects.set(e.guid, { source: e.source, dlcUnlocks: e.dlcUnlocks ?? [] });
@@ -94,6 +98,11 @@ class Lookups {
         for (const d of p.dlcs) this.dlcIds.set(d.guid, d.id);
         this.fertilities = p.fertilities.map((f) => ({ guid: f.guid, regions: f.regions }));
         this.defaultSession = p.sessions.length ? p.sessions[0].guid : undefined;
+    }
+
+    private noteBuildingDlc(guid: number, dlcUnlocks: number[] | undefined): void {
+        // Same rule as UnlockableElement.lockDLCIfSet: only a building tied to exactly one DLC switches it on.
+        if (dlcUnlocks && dlcUnlocks.length === 1) this.buildingDlc.set(guid, dlcUnlocks[0]);
     }
 
     regionIdOfSession(session: number | undefined): string | undefined {
@@ -116,7 +125,7 @@ class IslandPlanner {
     // Pointers of absent GUID entries; captured fields below them are not repeated.
     private absent: string[] = [];
     // DLC id -> things that switch it on at load
-    private dlcUse = new Map<string, { items: number[]; effects: number[] }>();
+    private dlcUse = new Map<string, { items: number[]; effects: number[]; buildings: number[] }>();
     settingsKeys: Record<string, string> = {};
 
     constructor(
@@ -146,12 +155,18 @@ class IslandPlanner {
         return guids.map((g) => this.lk.dlcIds.get(g)).filter((d): d is string => d !== undefined);
     }
 
-    private noteDlc(dlcUnlocks: number[], kind: "items" | "effects", guid: number): void {
+    private noteDlc(dlcUnlocks: number[], kind: "items" | "effects" | "buildings", guid: number): void {
         for (const id of this.dlcOf(dlcUnlocks)) {
             let u = this.dlcUse.get(id);
-            if (!u) this.dlcUse.set(id, (u = { items: [], effects: [] }));
+            if (!u) this.dlcUse.set(id, (u = { items: [], effects: [], buildings: [] }));
             u[kind].push(guid);
         }
+    }
+
+    // A count above 0 for a DLC-tied building switches the DLC on at load (DLC.used, lockDLCIfSet on `constructed`).
+    private noteBuildingDlcUse(guid: number, built: number | undefined): void {
+        const dlc = this.lk.buildingDlc.get(guid);
+        if (dlc !== undefined && built !== undefined && built > 0) this.noteDlc([dlc], "buildings", guid);
     }
 
     plan(): void {
@@ -196,6 +211,7 @@ class IslandPlanner {
                 continue;
             }
             if (e.built !== undefined) this.store[keys.buildingsConstructed(g)] = e.built;
+            this.noteBuildingDlcUse(g, e.built);
             if (e.planned !== undefined) this.store[keys.buildingsPlanned(g)] = e.planned;
             if (e.fullyUtilize !== undefined) this.store[keys.buildingsFullyUtilize(g)] = e.fullyUtilize ? "1" : "0";
         }
@@ -212,6 +228,7 @@ class IslandPlanner {
             const byLevel = levels[key];
             if (byBuilding === undefined) {
                 this.store[keys.buildingsConstructed(building)] = byLevel;
+                this.noteBuildingDlcUse(building, byLevel);
             } else if (byBuilding !== byLevel) {
                 this.add(
                     "approximated",
@@ -455,8 +472,8 @@ class IslandPlanner {
 
     private finishDlc(): void {
         for (const [dlc, use] of this.dlcUse) {
-            const what = [...use.items.map((g) => `item ${g}`), ...use.effects.map((g) => `effect ${g}`)].join(", ");
-            this.add("approximated", "dlc-enabled", `${dlc} is switched on because of ${what}.`, { dlc, items: use.items, effects: use.effects });
+            const what = [...use.items.map((g) => `item ${g}`), ...use.effects.map((g) => `effect ${g}`), ...use.buildings.map((g) => `building ${g}`)].join(", ");
+            this.add("approximated", "dlc-enabled", `${dlc} is switched on because of ${what}.`, { dlc, items: use.items, effects: use.effects, buildings: use.buildings });
         }
     }
 }

@@ -180,7 +180,7 @@ See the implementation in `src/factories.ts:177-202` in the `Consumer.initDemand
 
 ### Three-Tier Effect Persistence System
 **Global Effects** (main.ts:369-384):
-- Storage key pattern: `global.effect.${effectGuid}.scaling`
+- Storage key pattern: `${effectGuid}.scaling` inside the `globalEffects` SubStorage (top-level localStorage key `globalEffects`)
 - Persisted after creation during initialization
 - Uses direct localStorage.getItem/setItem with observable subscriptions
 
@@ -203,7 +203,7 @@ See the implementation in `src/factories.ts:177-202` in the `Consumer.initDemand
 
 ### Storage Key Structure
 ```
-global.effect.${effectGuid}.scaling          // Global effects
+${effectGuid}.scaling                        // Global effects (inside the globalEffects SubStorage)
 session.${sessionGuid}.effect.${effectGuid}.scaling  // Session effects  
 island.effect.${effectGuid}.scaling          // Island effects (via persistFloat)
 ```

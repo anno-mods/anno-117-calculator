@@ -178,6 +178,8 @@ class Exporter {
     private readonly effects = new Set<number>(this.params.effects.map((e) => e.guid));
     private readonly boostable = new Set<number>(this.params.items.filter((i) => (i.boostBuffs ?? []).length > 0).map((i) => i.guid));
     private readonly explicitFullyUtilize = new Set<number>();
+    // product -> factories that output it (the import states R51 for them when the island receives the product)
+    private readonly factoriesOf = new Map<number, number[]>();
     private readonly areaBuffs = new Set<number>(AREA_BUFF_GUIDS);
     private readonly defaultSession: number | undefined = this.params.sessions.length ? this.params.sessions[0].guid : undefined;
 
@@ -189,6 +191,9 @@ class Exporter {
             for (const region of Object.keys(m.endFactories)) this.explicitFullyUtilize.add(m.endFactories[region]);
         }
         for (const m of this.moduleGuids) this.explicitFullyUtilize.add(m);
+        for (const f of this.params.factories) {
+            for (const o of f.outputs) this.factoriesOf.set(o.product, [...(this.factoriesOf.get(o.product) ?? []), f.guid]);
+        }
     }
 
     private note(code: string, message: string, island?: string, detail?: Record<string, unknown>): void {
@@ -276,12 +281,13 @@ class Exporter {
         this.readDocumentExt();
         const routes = this.readRoutes();
         const defaultTargets = new Set<string>(routes.filter((r) => r.isDefault).map((r) => `${r.product}|${r.to}`));
+        const receivedTargets = new Set<string>(routes.map((r) => `${r.product}|${r.to}`));
 
         const built: BuiltIsland[] = [];
         for (const name of names) {
             const store = readJson(name);
             if (!isObj(store)) continue;
-            built.push(this.exportIsland(name, store, defaultTargets));
+            built.push(this.exportIsland(name, store, defaultTargets, receivedTargets));
         }
 
         const doc: ExchangeDocument = {
@@ -321,7 +327,7 @@ class Exporter {
 
     // ---- island scope ----
 
-    private exportIsland(name: string, store: Json, defaultTargets: Set<string>): BuiltIsland {
+    private exportIsland(name: string, store: Json, defaultTargets: Set<string>, receivedTargets: Set<string>): BuiltIsland {
         const ext = this.readIslandExt(store["exchange.ext"]);
         const id = String(store["exchange.islandId"]);
         const out: ExchangeIsland = { id, name };
@@ -478,6 +484,18 @@ class Exporter {
         for (const g of this.explicitFullyUtilize) {
             const entry = buildings[String(g)];
             if (entry && entry.fullyUtilize === undefined) entry.fullyUtilize = true;
+        }
+
+        // R51: the import of a received good fully utilizes a built local producer unless the file says otherwise, so a
+        // producer the user left partly utilized states fullyUtilize false; otherwise a round trip would switch it on.
+        for (const target of receivedTargets) {
+            const cut = target.indexOf("|"); // the product is numeric; the island name may contain a bar
+            if (target.slice(cut + 1) !== name) continue;
+            const product = target.slice(0, cut);
+            for (const f of this.factoriesOf.get(parseInt(product, 10)) ?? []) {
+                const entry = buildings[String(f)];
+                if (entry && typeof entry.built === "number" && entry.built > 0 && entry.fullyUtilize === undefined) entry.fullyUtilize = false;
+            }
         }
 
         for (const key of Object.keys(buildings)) {
