@@ -19,6 +19,8 @@ import { isAggregating, compareAggregateDemands } from './aggregate';
 import './exchange';
 import { ExchangeReportDialog } from './exchange/report-dialog';
 import type { ImportPlan, ReportEntry } from './exchange/types';
+import { compareHandOff, ComputedDifference } from './exchange/computed';
+import { COMPUTED_SESSION_KEY } from './exchange/writer';
 
 
 declare const $: any;
@@ -357,6 +359,30 @@ function exportExchange(): void {
         window.view.exchangeReport.showExport(report);
         showExchangeReportDialog();
     }
+}
+
+/**
+ * After the reload that follows an exchange import: compares the file's `computed` block (handed over in
+ * sessionStorage by applyImport) with the calculator's own results and lists the differences in the report dialog.
+ * Runs at the end of bootstrapping, when every island exists and its persisted state is loaded; pending Knockout
+ * tasks are flushed first. Informational only: nothing is blocked and the key is always consumed.
+ */
+function showComputedDifferences(): void {
+    let differences: ComputedDifference[] = [];
+    try {
+        if (!window.sessionStorage.getItem(COMPUTED_SESSION_KEY))
+            return;
+        ko.tasks.runEarly();
+        differences = compareHandOff(window.sessionStorage, COMPUTED_SESSION_KEY);
+    } catch (e) {
+        console.error('Comparison with the computed values of the file failed:', e);
+        return;
+    }
+    if (differences.length === 0)
+        return;
+
+    window.view.exchangeReport.showDifferences(differences);
+    $('#exchange-report-dialog').modal('show');
 }
 
 /**
@@ -832,4 +858,5 @@ $(document).ready(function () {
     // Install import config listener (must occur after template binding)
     installImportConfigListener();
     installImportExchangeListener();
+    showComputedDifferences();
 });

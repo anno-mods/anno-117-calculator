@@ -28,6 +28,29 @@
                 <!-- ko if: failed -->
                 <div id="exchange-failed-message" class="alert alert-danger" data-bind="text: $root.texts.exchangeFailed.name"></div>
                 <!-- /ko -->
+                <!-- ko if: differences().length -->
+                <div id="exchange-computed-differences">
+                    <h6 data-bind="text: $root.texts.exchangeComputedDifferences.name"></h6>
+                    <table class="table table-sm mb-3">
+                        <thead>
+                            <tr>
+                                <th data-bind="text: $root.texts.exchangeColIsland.name"></th>
+                                <th data-bind="text: $root.texts.exchangeColQuantity.name"></th>
+                                <th class="text-right" data-bind="text: $root.texts.exchangeColFileValue.name"></th>
+                                <th class="text-right" data-bind="text: $root.texts.exchangeColCalculatorValue.name"></th>
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: differences">
+                            <tr>
+                                <td data-bind="text: island"></td>
+                                <td><span data-bind="text: $root.texts[quantityKey].name"></span>: <span data-bind="text: label"></span></td>
+                                <td class="text-right" data-bind="text: fileValue"></td>
+                                <td class="text-right" data-bind="text: calculatorValue"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- /ko -->
                 <!-- ko foreach: sections -->
                 <div data-bind="attr: { id: id }">
                     <h6 data-bind="text: $root.texts[textKey].name"></h6>

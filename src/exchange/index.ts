@@ -8,6 +8,7 @@ import * as keys from "./keys";
 import { buildDiscoveries, buildSpecificEffects, buildWritableEffects } from "./discoveries";
 import { applyImport } from "./writer";
 import { buildDocument, exportDocument } from "./exporter";
+import { computeSummary } from "./computed";
 import { readExchange } from "./reader";
 import { buildMaterials, buildMythicalItemEffects, makeClassifier } from "./materials";
 
@@ -50,6 +51,7 @@ export const exchange: ExchangeApi = {
     applyImport,
     buildDocument,
     exportDocument,
+    computeSummary,
 };
 
 declare global {
