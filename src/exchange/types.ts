@@ -292,7 +292,57 @@ export interface ExchangeApi {
     parseFactoryScalingKey(key: string): FactoryScalingKey | null;
     classifyItemOrEffect(guid: Guid): "item" | "effect" | "unknown";
     tables(): ExchangeTables;
+    readExchange(text: string): ReadResult;
 }
+
+// Result of readExchange (U4).
+export type UnknownKind = "unknown" | "unmodelled";
+
+// A field the calculator keeps without modelling it. `unknown`: not in the catalog. `unmodelled`: a catalog
+// key the calculator does not model. `pointer` is the JSON Pointer of the original core location in the file,
+// `value` is the same object as in `doc`, `scope` is the island id or "document".
+export interface UnknownField {
+    pointer: string;
+    value: unknown;
+    scope: string;
+    kind: UnknownKind;
+}
+
+export type ReadProblemCode = "wrong-type" | "coerced" | "duplicate-instance" | "item-without-guid";
+
+export interface ReadProblem {
+    pointer: string;
+    code: ReadProblemCode;
+    message: string;
+}
+
+export interface ReadOk {
+    doc: ExchangeDocument;
+    unknown: UnknownField[];
+    problems: ReadProblem[];
+    // The file's `computed` block, kept for the comparison of U11; removed from `doc`.
+    computed?: Computed;
+}
+
+export type ReadErrorCode =
+    | "not-json"
+    | "not-object"
+    | "wrong-format"
+    | "missing-formatVersion"
+    | "invalid-formatVersion"
+    | "unsupported-major"
+    | "missing-generator-name"
+    | "missing-islands"
+    | "invalid-island"
+    | "missing-island-id"
+    | "duplicate-island-id";
+
+export interface ReadError {
+    error: string;
+    code: ReadErrorCode;
+}
+
+export type ReadResult = ReadOk | ReadError;
 
 // Storage key builders of src/exchange/keys.ts, as exposed on window.exchange.keys.
 export interface ExchangeKeys {

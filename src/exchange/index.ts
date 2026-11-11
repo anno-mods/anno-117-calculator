@@ -2,6 +2,7 @@ import { ExchangeApi, ExchangeTables } from "./types";
 import { reservedKeys, uniqueName } from "./names";
 import * as keys from "./keys";
 import { buildDiscoveries, buildSpecificEffects, buildWritableEffects } from "./discoveries";
+import { readExchange } from "./reader";
 import { buildMaterials, buildMythicalItemEffects, makeClassifier } from "./materials";
 
 // Tables are derived from window.params on demand; params.js is loaded before the bundle and never changes at runtime.
@@ -35,6 +36,7 @@ export const exchange: ExchangeApi = {
     parseFactoryScalingKey: (key: string) => keys.parseFactoryScalingKey(key, classifyItemOrEffect),
     classifyItemOrEffect,
     tables,
+    readExchange,
 };
 
 declare global {

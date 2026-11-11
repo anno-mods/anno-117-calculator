@@ -221,9 +221,10 @@
     {
       "file": "invalid/missing-generator-name.json",
       "valid": false,
-      "class": "schema",
+      "class": "envelope",
       "reason": "generator.name is required (R18)",
       "expect": {
+        "code": "missing-generator-name",
         "path": "/generator",
         "keyword": "required"
       }
@@ -231,9 +232,10 @@
     {
       "file": "invalid/island-without-id.json",
       "valid": false,
-      "class": "schema",
+      "class": "envelope",
       "reason": "islands[].id is required (R18)",
       "expect": {
+        "code": "missing-island-id",
         "path": "/islands/0",
         "keyword": "required"
       }
@@ -241,9 +243,10 @@
     {
       "file": "invalid/missing-islands.json",
       "valid": false,
-      "class": "schema",
+      "class": "envelope",
       "reason": "islands is required (R18)",
       "expect": {
+        "code": "missing-islands",
         "path": "/",
         "keyword": "required"
       }
