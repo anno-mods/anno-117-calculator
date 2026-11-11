@@ -296,6 +296,7 @@ export interface ExchangeApi {
     tables(): ExchangeTables;
     readExchange(text: string): ReadResult;
     planIslands(read: ReadOk): IslandsPlan;
+    planTrade(islands: IslandsPlan, read: ReadOk): TradePlan;
 }
 
 // Result of readExchange (U4).
@@ -482,9 +483,79 @@ export interface IslandsPlan {
     document: { account?: unknown; unlocatedItems?: unknown };
 }
 
+// ---- Import plan for trade and suppliers (U6) ----
+
+// A route entry as the app stores it in the top-level localStorage key `tradeRoutes` (src/trade.ts TradeRouteConfig).
+// `from` supplies `to`; both are final island store keys.
+export interface StoredTradeRoute {
+    productGUID: Guid;
+    from: string;
+    to: string;
+    userSetAmount: number;
+    isDefaultSupplier: boolean;
+}
+
+// Why an import entry is kept in the ext although routes may have been written for it.
+export type PreservedImportReason =
+    | "ambiguous-default"
+    | "cycle"
+    | "governor-supplier"
+    | "non-player-supplier"
+    | "self-supplier"
+    | "unknown-product"
+    | "receiver-unavailable";
+
+// What the import wrote for one receiving island and product (CD10): the exporter restores a preserved entry
+// only while the stored state still equals this.
+export interface TradeRestore {
+    // Receiving island store key, or the file island id when the receiver has no store.
+    island: string;
+    product: Guid;
+    // Routes written for (island, product), in tradeRoutes order, without `productGUID`.
+    routes: Omit<StoredTradeRoute, "productGUID">[];
+    // `<product>.defaultSupplier.type/.id` the import wrote for the product on the island; null when it wrote none.
+    defaultSupplier: { type: string; id: string } | null;
+    // Value the import relies on for the shared `passiveTrade.userSetAmount` key. The import never writes it; 0 means absent or 0.
+    passiveUserSetAmount: number;
+}
+
+export interface PreservedImport {
+    reasons: PreservedImportReason[];
+    // The original import entry of the file, whole.
+    entry: TradeImport;
+    // The suppliers of the entry that the import did not write as routes (governor, non-player, self).
+    preserved: Supplier[];
+    restore: TradeRestore;
+}
+
+export interface TradeIslandPlan {
+    // Store keys to add to the island store of IslandPlan.store.
+    store: Record<string, unknown>;
+    ext: {
+        preservedImports: PreservedImport[];
+        // `minimumStock` of the island record, unchanged.
+        minimumStock?: Record<GuidKey, number>;
+        // Product entries/producers params does not know, with their location in the island record (like IslandExt.guids).
+        guids: AbsentGuidEntry[];
+    };
+}
+
+export interface TradePlan {
+    tradeRoutes: StoredTradeRoute[];
+    // By island store key; one entry for every island of the IslandsPlan.
+    islands: Record<string, TradeIslandPlan>;
+    // Document-scope parts, preserved unchanged: trade.routes, visits, governorHarbours, and import entries whose
+    // receiving island has no store.
+    document: {
+        trade?: { routes?: TradeRoute[]; visits?: Record<string, unknown>[]; governorHarbours?: Record<string, unknown>[] };
+        preservedImports: PreservedImport[];
+    };
+    report: ReportEntry[];
+}
+
 export type ImportParams = Pick<
     ParamsConfig,
-    "sessions" | "regions" | "fertilities" | "patrons" | "dlcs" | "effects" | "items" | "factories" | "modules" | "residenceBuildings"
+    "sessions" | "regions" | "fertilities" | "patrons" | "dlcs" | "effects" | "items" | "factories" | "modules" | "residenceBuildings" | "products"
 >;
 
 export interface ImportContext {
