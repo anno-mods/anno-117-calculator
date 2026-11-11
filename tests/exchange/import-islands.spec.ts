@@ -55,7 +55,7 @@ interface Plan {
 
 async function ready(page: Page) {
     await page.goto('/');
-    await page.waitForFunction(() => (window as any).view && (window as any).view.island() && (window as any).exchange);
+    await page.waitForFunction(() => window.view && window.view.island() && window.exchange);
 }
 
 function doc(islands: Record<string, any>[], extra: Record<string, any> = {}): string {
@@ -70,7 +70,7 @@ function doc(islands: Record<string, any>[], extra: Record<string, any> = {}): s
 
 async function plan(page: Page, text: string): Promise<Plan> {
     return page.evaluate((t: string) => {
-        const ex = (window as any).exchange;
+        const ex = window.exchange;
         const r = ex.readExchange(t);
         if ('error' in r) throw new Error(r.error);
         return ex.planIslands(r);
@@ -345,7 +345,7 @@ test.describe('import plan: islands (U5)', () => {
         expect(i.store[`${SHEEP_FARM}.module[${SILO}].checked`]).toBe('1');
         expect(i.store[`${PIG_FARM}.module[${SILO}].checked`]).toBe('0');
         expect(keysMatching(i.store, new RegExp(`^${HORSE_BREEDER}\\.module`))).toEqual([]);
-        const kept = i.ext.captured.find((c: any) => c.pointer === '/moduleAttachments');
+        const kept = i.ext.captured.find((c: Record<string, any>) => c.pointer === '/moduleAttachments');
         expect(kept.value).toEqual([attachment]);
         expect(i.ext.moduleWritten).toEqual({
             [`${SHEEP_FARM}.module[${SILO}].checked`]: '1',
@@ -373,7 +373,7 @@ test.describe('import plan: islands (U5)', () => {
             factories: { 999008: { items: [{ item: 999009, boosted: true }] }, [SAWMILL]: { items: [{ item: 999010 }] } },
         });
         expect(keysMatching(i.store, /999/)).toEqual([]);
-        const byPointer = (ptr: string) => i.ext.guids.find((g: any) => g.pointer === ptr);
+        const byPointer = (ptr: string) => i.ext.guids.find((g: Record<string, any>) => g.pointer === ptr);
         expect(byPointer('/buildings/999002').value).toEqual({ built: 3, planned: 1 });
         expect(byPointer('/effects/999003').value).toBe(1);
         expect(byPointer('/fertilities/999007').value).toBe(true);
@@ -389,16 +389,16 @@ test.describe('import plan: islands (U5)', () => {
     test('unknown fields and unmodelled keys of an island go to exchange.ext with report lines', async ({ page }) => {
         const p = await plan(page, fixtureText('valid/unknown-fields-everywhere.json'));
         const isl = p.islands[0];
-        const pointers: string[] = isl.ext.captured.map((c: any) => c.pointer);
+        const pointers: string[] = isl.ext.captured.map((c: Record<string, any>) => c.pointer);
         expect(pointers.length).toBeGreaterThan(0);
         expect(pointers.every((q) => q.startsWith('/'))).toBe(true);
         expect(pointers.every((q) => !q.startsWith('/islands/'))).toBe(true);
         expect(codes(isl.report)).toContain('unknown-field');
         const j = await planOne(page, { population: { [LIBERTI]: 250 }, harbour: { x: 1 }, mystery: { a: 1 } });
-        const pop = j.ext.captured.find((c: any) => c.pointer === '/population');
+        const pop = j.ext.captured.find((c: Record<string, any>) => c.pointer === '/population');
         expect(pop.value).toEqual({ [LIBERTI]: 250 });
         expect(pop.kind).toBe('unmodelled');
-        expect(j.ext.captured.find((c: any) => c.pointer === '/mystery').kind).toBe('unknown');
+        expect(j.ext.captured.find((c: Record<string, any>) => c.pointer === '/mystery').kind).toBe('unknown');
         const e = j.report.filter((x) => x.code === 'unmodelled-key').map((x) => x.detail!.pointer);
         expect(e).toEqual(expect.arrayContaining(['/population', '/harbour']));
         expect(j.report.find((x) => x.code === 'unmodelled-key')!.kind).toBe('not-mapped');
@@ -407,8 +407,8 @@ test.describe('import plan: islands (U5)', () => {
     test('item records of every island place are preserved and counted per place (R56)', async ({ page }) => {
         const p = await plan(page, fixtureText('valid/item-locations.json'));
         const i = p.islands[0];
-        const holders = i.ext.captured.find((c: any) => c.pointer === '/itemHolders');
-        const storage = i.ext.captured.find((c: any) => c.pointer === '/itemStorage');
+        const holders = i.ext.captured.find((c: Record<string, any>) => c.pointer === '/itemHolders');
+        const storage = i.ext.captured.find((c: Record<string, any>) => c.pointer === '/itemStorage');
         expect(holders.value.length).toBe(3);
         expect(storage.value.length).toBe(5);
         expect(holders.value[0].items[0].ext['savegame-writer'].EffectID).toBe(77);
@@ -444,7 +444,7 @@ test.describe('import plan: islands (U5)', () => {
         // unrelated mythical effects the file does not mention get no key
         expect(i.store[`island.effect.${MYTH_DLC3}.scaling`]).toBeUndefined();
         // the item records stay verbatim
-        expect(i.ext.captured.find((c: any) => c.pointer === '/itemHolders').value[0].items.length).toBe(2);
+        expect(i.ext.captured.find((c: Record<string, any>) => c.pointer === '/itemHolders').value[0].items.length).toBe(2);
     });
 
     test('mythicEffect without boostConditionMet true is not applied', async ({ page }) => {
@@ -464,7 +464,7 @@ test.describe('import plan: islands (U5)', () => {
         const e = i.report.find((x) => x.code === 'mythic-ship-not-applied');
         expect(e?.kind).toBe('not-mapped');
         expect(e!.detail).toMatchObject({ effect: MYTH_A });
-        expect(i.ext.captured.find((c: any) => c.pointer === '/itemHolders').value[0].items[0].mythicEffect).toBe(MYTH_A);
+        expect(i.ext.captured.find((c: Record<string, any>) => c.pointer === '/itemHolders').value[0].items[0].mythicEffect).toBe(MYTH_A);
     });
 
     test('island effects[E] sets the same key and the larger value wins', async ({ page }) => {
@@ -512,7 +512,7 @@ test.describe('import plan: islands (U5)', () => {
         });
         expect(keysMatching(i.store, /999777/)).toEqual([]);
         expect(i.report.some((x) => x.code === 'unknown-guid' && x.detail?.guid === 999777)).toBe(true);
-        expect(i.ext.captured.find((c: any) => c.pointer === '/itemHolders').value[0].items[0].mythicEffect).toBe(999777);
+        expect(i.ext.captured.find((c: Record<string, any>) => c.pointer === '/itemHolders').value[0].items[0].mythicEffect).toBe(999777);
     });
 
     test('an item scaling on a DLC-gated item reports the DLC switched on at load', async ({ page }) => {

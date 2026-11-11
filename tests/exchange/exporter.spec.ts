@@ -48,7 +48,7 @@ async function open(page: Page): Promise<void> {
 async function load(page: Page, text: string): Promise<{ ok: boolean; error?: string; report?: Json }> {
     await settle(page);
     const res = await page.evaluate((t: string) => {
-        const ex = (window as any).exchange;
+        const ex = window.exchange;
         const plan = ex.planImport(t);
         if ('error' in plan) return { ok: false, error: plan.error };
         const r = ex.applyImport(plan, { reload: false });
@@ -63,7 +63,7 @@ async function load(page: Page, text: string): Promise<{ ok: boolean; error?: st
 
 async function exportDoc(page: Page): Promise<{ document: Json; report: Json[] }> {
     await settle(page);
-    return page.evaluate(() => (window as any).exchange.exportDocument());
+    return page.evaluate(() => window.exchange.exportDocument());
 }
 
 // Parsed-document equality of the plan: generator.version, source and computed excluded; island names are compared
@@ -88,7 +88,7 @@ async function roundTrip(page: Page, text: string): Promise<{ e1: Json; e2: Json
 
 async function readerAccepts(page: Page, doc: Json): Promise<{ error?: string; problems: Json[] }> {
     return page.evaluate((d: Json) => {
-        const r = (window as any).exchange.readExchange(JSON.stringify(d));
+        const r = window.exchange.readExchange(JSON.stringify(d));
         return 'error' in r ? { error: r.error, problems: [] } : { problems: r.problems };
     }, doc);
 }
@@ -111,7 +111,7 @@ test.describe('exporter (U9)', () => {
 
     test('buildDocument and exportDocument are registered; generator, source, no timestamp', async ({ page }) => {
         const r = await page.evaluate(() => {
-            const ex = (window as any).exchange;
+            const ex = window.exchange;
             return { build: typeof ex.buildDocument, exp: typeof ex.exportDocument, doc: ex.buildDocument() };
         });
         expect(r.build).toBe('function');
@@ -219,9 +219,9 @@ test.describe('exporter (U9)', () => {
     test('missing island ids are assigned and stay stable across two exports', async ({ page }) => {
         await settle(page);
         await page.evaluate(() => {
-            const view = (window as any).view;
+            const view = window.view;
             view.islandManager.showIslandOnCreation.checked(false);
-            const session = view.sessions.find((s: any) => s.region.id === 'Roman');
+            const session = view.sessions.find((s: Record<string, any>) => s.region.id === 'Roman');
             view.islandManager.create('Fresh One', session);
             view.islandManager.create('Fresh Two', session);
         });
@@ -271,8 +271,8 @@ test.describe('exporter (U9)', () => {
         await settle(page);
         // rename isl-a
         await page.evaluate(() => {
-            const view = (window as any).view;
-            const isl = view.islands().find((i: any) => i.name() === 'Latium 5');
+            const view = window.view;
+            const isl = view.islands().find((i: Record<string, any>) => i.name() === 'Latium 5');
             view.islandManager.islandNameInput('Latium Five');
             view.islandManager.rename(isl, 'Latium Five');
         });
@@ -286,8 +286,8 @@ test.describe('exporter (U9)', () => {
 
         // delete isl-b
         await page.evaluate(() => {
-            const view = (window as any).view;
-            const isl = view.islands().find((i: any) => i.name() === 'Albion 2');
+            const view = window.view;
+            const isl = view.islands().find((i: Record<string, any>) => i.name() === 'Albion 2');
             view.islandManager.delete(isl);
         });
         const { document } = await exportDoc(page);
@@ -346,8 +346,8 @@ test.describe('exporter (U9)', () => {
 
         // the user changes the default supplier of the non-player product to a factory
         await page.evaluate(() => {
-            const view = (window as any).view;
-            const isl = view.islands().find((i: any) => i.name() === 'Beta');
+            const view = window.view;
+            const isl = view.islands().find((i: Record<string, any>) => i.name() === 'Beta');
             const product = isl.assetsMap.get(2137);
             product.defaultSupplier(product.factories[0]);
         });
@@ -418,9 +418,9 @@ test.describe('exporter (U9)', () => {
 
         await page.evaluate(
             ([farm, mod]) => {
-                const view = (window as any).view;
-                const isl = view.islands().find((i: any) => i.name() === 'Alpha');
-                const m = isl.assetsMap.get(farm).modules.find((x: any) => x.guid === mod);
+                const view = window.view;
+                const isl = view.islands().find((i: Record<string, any>) => i.name() === 'Alpha');
+                const m = isl.assetsMap.get(farm).modules.find((x: Record<string, any>) => x.guid === mod);
                 m.checked(false);
             },
             [FARM, FARM_MODULE],
@@ -489,10 +489,10 @@ test.describe('exporter (U9)', () => {
         await settle(page);
         const doc = await page.evaluate(
             ([guid]) => {
-                const view = (window as any).view;
-                const isl = view.islands().find((i: any) => i.name() === 'Alpha');
+                const view = window.view;
+                const isl = view.islands().find((i: Record<string, any>) => i.name() === 'Alpha');
                 isl.assetsMap.get(guid).buildings.constructed(7); // saved debounced; exported in the same tick
-                return (window as any).exchange.buildDocument();
+                return window.exchange.buildDocument();
             },
             [SAWMILL],
         );
@@ -643,8 +643,8 @@ test.describe('exporter item records (U9, KTD16)', () => {
         await load(page, text);
         await settle(page);
         await page.evaluate((guid) => {
-            const view = (window as any).view;
-            const isl = view.islands().find((i: any) => i.name() === 'Alpha');
+            const view = window.view;
+            const isl = view.islands().find((i: Record<string, any>) => i.name() === 'Alpha');
             isl.assetsMap.get(guid).buildings.constructed(5);
         }, SAWMILL);
         const { document } = await exportDoc(page);
@@ -664,8 +664,8 @@ test.describe('exporter item records (U9, KTD16)', () => {
         await load(page, text);
         await settle(page);
         await page.evaluate(() => {
-            const view = (window as any).view;
-            view.islandManager.delete(view.islands().find((i: any) => i.name() === 'Alpha'));
+            const view = window.view;
+            view.islandManager.delete(view.islands().find((i: Record<string, any>) => i.name() === 'Alpha'));
         });
         const { document } = await exportDoc(page);
         const str = JSON.stringify(document.islands);

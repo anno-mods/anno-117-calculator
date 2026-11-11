@@ -3,6 +3,18 @@ import * as fs from 'fs';
 import * as path from 'path';
 import Ajv2020 from 'ajv/dist/2020';
 
+import type { ExchangeApi } from '../../src/exchange/types';
+
+declare global {
+    interface Window {
+        exchange: ExchangeApi;
+        view: any;
+        params: any;
+        $: any;
+        __beforeOldImport?: boolean;
+    }
+}
+
 export type Json = Record<string, any>;
 
 /** The vendored specification: schema, fixtures and manifest. */
@@ -57,7 +69,7 @@ export interface ImportOutcome {
 export async function importText(page: Page, text: string): Promise<ImportOutcome> {
     await settle(page);
     const res = await page.evaluate((t: string) => {
-        const ex = (window as any).exchange;
+        const ex = window.exchange;
         const plan = ex.planImport(t);
         if ('error' in plan) return { ok: false, error: plan.error as string };
         const r = ex.applyImport(plan, { reload: false });
@@ -79,14 +91,14 @@ export function reportEntries(plan: Json): Json[] {
 /** exportDocument() of the running app. */
 export async function exportDoc(page: Page): Promise<{ document: Json; report: Json[] }> {
     await settle(page);
-    return page.evaluate(() => (window as any).exchange.exportDocument());
+    return page.evaluate(() => window.exchange.exportDocument());
 }
 
 /** computeSummary() keyed by island name instead of island id, so two runs compare even when ids were assigned in between. */
 export async function summaryByName(page: Page): Promise<Json> {
     await settle(page);
     return page.evaluate(() => {
-        const w = window as any;
+        const w = window;
         const s = w.exchange.computeSummary();
         const out: Record<string, unknown> = {};
         for (const isl of w.view.islands()) {

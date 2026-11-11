@@ -26,7 +26,7 @@ async function openDownloadDialog(page: Page): Promise<void> {
     await page.locator('#download-selection-button').click();
     await expect(page.locator('#download-dialog')).toBeVisible();
     // Bootstrap ignores hide() while the fade-in runs; wait until the dialog is fully shown, as a user picking a file would.
-    await page.waitForFunction(() => { const m = (window as any).$('#download-dialog').data('bs.modal'); return !!m && m._isShown && !m._isTransitioning; });
+    await page.waitForFunction(() => { const m = window.$('#download-dialog').data('bs.modal'); return !!m && m._isShown && !m._isTransitioning; });
 }
 
 async function snapshot(page: Page): Promise<string> {
@@ -89,7 +89,7 @@ test.describe('exchange interface (U10)', () => {
         await expect(dialog.locator('#exchange-replace-warning')).toContainText(/preserved/i);
         await expect(dialog.locator('#exchange-replace-warning')).toContainText(/language/i);
         const expected = await page.evaluate((p) => {
-            const plan = (window as any).exchange.planImport(p);
+            const plan = window.exchange.planImport(p);
             return { islands: plan.report.counts.islands, carried: plan.report.carriedThrough.length, firstMessage: plan.report.carriedThrough[0]?.message };
         }, fs.readFileSync(path.join(VALID, 'item-locations.json'), 'utf-8'));
         await expect(dialog.locator('#exchange-count-islands')).toContainText(String(expected.islands));
@@ -115,7 +115,7 @@ test.describe('exchange interface (U10)', () => {
         await reloaded;
         await appReady(page);
         expect(await snapshot(page)).not.toBe(before);
-        const names = await page.evaluate(() => (window as any).view.islands().map((i: any) => i.name()));
+        const names = await page.evaluate(() => window.view.islands().map((i: Record<string, any>) => i.name()));
         expect(names.length).toBeGreaterThan(1);
     });
 
@@ -163,7 +163,7 @@ test.describe('exchange interface (U10)', () => {
         });
         await page.evaluate(() => new Promise<void>((r) => setTimeout(() => setTimeout(r, 30), 30)));
         const ok = await page.evaluate((t) => {
-            const ex = (window as any).exchange;
+            const ex = window.exchange;
             const plan = ex.planImport(t);
             return ex.applyImport(plan, { reload: false }).ok;
         }, text);
@@ -171,8 +171,8 @@ test.describe('exchange interface (U10)', () => {
         await page.reload();
         await appReady(page);
         await page.evaluate(([farm, mod]) => {
-            const isl = (window as any).view.islands().find((i: any) => i.name() === 'Alpha');
-            isl.assetsMap.get(farm).modules.find((x: any) => x.guid === mod).checked(false);
+            const isl = window.view.islands().find((i: Record<string, any>) => i.name() === 'Alpha');
+            isl.assetsMap.get(farm).modules.find((x: Record<string, any>) => x.guid === mod).checked(false);
         }, [FARM, FARM_MODULE]);
         await openDownloadDialog(page);
         const download = page.waitForEvent('download');
@@ -182,7 +182,7 @@ test.describe('exchange interface (U10)', () => {
         await expect(dialog).toBeVisible();
         await expect(dialog.locator('#exchange-confirm-button')).toHaveCount(0);
         const message = await page.evaluate(() => {
-            const r = (window as any).exchange.exportDocument().report.find((e: any) => e.code === 'module-attachments-dropped');
+            const r = window.exchange.exportDocument().report.find((e: Record<string, any>) => e.code === 'module-attachments-dropped');
             return r.message as string;
         });
         await expect(dialog).toContainText(message);

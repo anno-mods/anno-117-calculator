@@ -52,11 +52,11 @@ const MARCIA = path.resolve(
 /** Loads a config dump through the old import path (#config-selector) and waits for the reload. */
 async function oldImport(page: Page, file: string): Promise<void> {
     await page.evaluate(() => {
-        (window as any).__beforeOldImport = true;
+        window.__beforeOldImport = true;
     });
     await page.setInputFiles('#config-selector', file);
     await page.waitForFunction(() => {
-        const w = window as any;
+        const w = window;
         return !w.__beforeOldImport && w.view && w.view.island && w.view.island() && w.exchange;
     }, undefined, { timeout: 120000 });
 }
@@ -84,7 +84,7 @@ test.describe('integration: Cinis, trade floor, DLC and needs', () => {
         await settle(page);
         const v = await page.evaluate(
             ({ sawmill, wood }) => {
-                const isl = (window as any).view.islands().find((i: any) => i.name() === 'Cinis');
+                const isl = window.view.islands().find((i: Record<string, any>) => i.name() === 'Cinis');
                 const f = isl.assetsMap.get(sawmill);
                 return {
                     built: f.buildings.constructed(),
@@ -107,7 +107,7 @@ test.describe('integration: Cinis, trade floor, DLC and needs', () => {
         const entry = (suppliers: Json[], basis: string) => ({ imports: [{ island: 'b', product: SARDINES, basis, suppliers }] });
         const read = () =>
             page.evaluate((guid: number) => {
-                const isl = (window as any).view.islands().find((i: any) => i.name() === 'B');
+                const isl = window.view.islands().find((i: Record<string, any>) => i.name() === 'B');
                 const p = isl.assetsMap.get(guid);
                 return { demand: p.totalDemand(), imported: p.tradeList.outputAmount(), excess: p.excessProduction() };
             }, SARDINES);
@@ -165,8 +165,8 @@ test.describe('integration: Cinis, trade floor, DLC and needs', () => {
         // Find the population levels that carry the two DLC 3 needs.
         const levels = await page.evaluate(
             ({ wine, soap }) => {
-                const isl = (window as any).view.island();
-                const find = (g: number) => isl.populationLevels.find((l: any) => l.needs.some((n: any) => n.need.guid === g))?.guid as number | undefined;
+                const isl = window.view.island();
+                const find = (g: number) => isl.populationLevels.find((l: Record<string, any>) => l.needs.some((n: Record<string, any>) => n.need.guid === g))?.guid as number | undefined;
                 return { wine: find(wine), soap: find(soap) };
             },
             { wine: WINE_NEED, soap: SOAP_NEED },
@@ -183,11 +183,11 @@ test.describe('integration: Cinis, trade floor, DLC and needs', () => {
         const read = () =>
             page.evaluate(
                 ({ wine, soap, dlc }) => {
-                    const w = window as any;
-                    const isl = w.view.islands().find((i: any) => i.name() === 'Alpha');
+                    const w = window;
+                    const isl = w.view.islands().find((i: Record<string, any>) => i.name() === 'Alpha');
                     const need = (g: number) => {
                         for (const l of isl.populationLevels) {
-                            const n = l.needs.find((x: any) => x.need.guid === g);
+                            const n = l.needs.find((x: Record<string, any>) => x.need.guid === g);
                             if (n) return { available: Boolean(n.available()), checked: Boolean(n.checked()) };
                         }
                         return null;
@@ -201,7 +201,7 @@ test.describe('integration: Cinis, trade floor, DLC and needs', () => {
         expect(off.wine?.available).toBe(false);
 
         await page.evaluate((dlc: number) => {
-            (window as any).view.dlcsGuidMap.get(dlc).checked(true);
+            window.view.dlcsGuidMap.get(dlc).checked(true);
         }, DLC3_GUID);
         await settle(page);
         const on = await read();
@@ -216,7 +216,7 @@ test.describe('integration: Cinis, trade floor, DLC and needs', () => {
         expect(res.ok, res.error).toBe(true);
         expect(JSON.parse(res.plan!.keyMap['calculatorSettings'] ?? '{}')[DLC3]).toBeUndefined();
         await settle(page);
-        expect(await page.evaluate((d: number) => (window as any).view.dlcsGuidMap.get(d).checked(), DLC3_GUID)).toBe(true);
+        expect(await page.evaluate((d: number) => window.view.dlcsGuidMap.get(d).checked(), DLC3_GUID)).toBe(true);
         const named = reportEntries(res.plan!).find((e) => e.code === 'dlc-enabled' && e.detail?.dlc === DLC3);
         expect(named, 'the report names the DLC').toBeTruthy();
     });
@@ -238,8 +238,8 @@ test.describe('integration: Cinis, trade floor, DLC and needs', () => {
         await settle(page);
         const v = await page.evaluate(
             ({ dlcEffect, plainEffect, shipEffect, dlc }) => {
-                const w = window as any;
-                const isl = w.view.islands().find((i: any) => i.name() === 'Alpha');
+                const w = window;
+                const isl = w.view.islands().find((i: Record<string, any>) => i.name() === 'Alpha');
                 const store = JSON.parse(localStorage.getItem('Alpha') as string);
                 return {
                     dlcScaling: isl.assetsMap.get(dlcEffect).scaling(),
@@ -327,9 +327,9 @@ test.describe('integration: old dump', () => {
         const dump = JSON.parse(fs.readFileSync(OLD_DUMP, 'utf-8')) as Record<string, string>;
         const names = JSON.parse(dump['islandNames']) as string[];
         const state = await page.evaluate(() => {
-            const w = window as any;
+            const w = window;
             return {
-                islands: w.view.islands().map((i: any) => i.name()),
+                islands: w.view.islands().map((i: Record<string, any>) => i.name()),
                 keys: Object.keys(localStorage),
                 version: localStorage.getItem('versionCalculator'),
                 exchangeKeys: Object.keys(localStorage).filter((k) => k.startsWith('exchange.')),
@@ -372,7 +372,7 @@ test.describe('integration: Marcia 69 sample game', () => {
         const gold = () =>
             page.evaluate(
                 ({ product, factory }) => {
-                    const isl = (window as any).view.islands().find((i: any) => i.name() === 'Listening Weasel Nome');
+                    const isl = window.view.islands().find((i: Record<string, any>) => i.name() === 'Listening Weasel Nome');
                     const f = isl.assetsMap.get(factory);
                     const p = isl.assetsMap.get(product);
                     return {

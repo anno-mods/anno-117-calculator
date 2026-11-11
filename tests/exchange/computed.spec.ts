@@ -42,7 +42,7 @@ async function open(page: Page): Promise<void> {
 async function load(page: Page, text: string): Promise<void> {
     await settle(page);
     const res = await page.evaluate((t: string) => {
-        const ex = (window as any).exchange;
+        const ex = window.exchange;
         const plan = ex.planImport(t);
         if ('error' in plan) return { ok: false, error: plan.error };
         const r = ex.applyImport(plan, { reload: false });
@@ -55,7 +55,7 @@ async function load(page: Page, text: string): Promise<void> {
 
 async function summary(page: Page): Promise<Json> {
     await settle(page);
-    return page.evaluate(() => (window as any).exchange.computeSummary());
+    return page.evaluate(() => window.exchange.computeSummary());
 }
 
 test.describe('computed block (U11)', () => {
@@ -66,7 +66,7 @@ test.describe('computed block (U11)', () => {
     test('export of a fixture island contains residents per level, buildings required and imports', async ({ page }) => {
         await load(page, JSON.stringify(tradeFixture()));
         await settle(page);
-        const { document: doc } = await page.evaluate(() => (window as any).exchange.exportDocument());
+        const { document: doc } = await page.evaluate(() => window.exchange.exportDocument());
         const b = (doc.islands as Json[]).find((i) => i.name === 'B') as Json;
         const c = doc.computed.islands[b.id];
         expect(c, 'computed for island B').toBeTruthy();
@@ -80,7 +80,7 @@ test.describe('computed block (U11)', () => {
         const ok = validateSchema(doc);
         expect(ok, JSON.stringify(validateSchema.errors?.slice(0, 5))).toBe(true);
         const read = await page.evaluate((d: Json) => {
-            const r = (window as any).exchange.readExchange(JSON.stringify(d));
+            const r = window.exchange.readExchange(JSON.stringify(d));
             return 'error' in r ? { error: r.error, problems: [] } : { problems: r.problems, computed: r.document ? r.document.computed : r.computed };
         }, doc);
         expect(read.error).toBeUndefined();
@@ -97,7 +97,7 @@ test.describe('computed block (U11)', () => {
         // Learn what the calculator computes for this state, then import the same state with a 5 % deviation.
         await load(page, JSON.stringify(tradeFixture()));
         const own = await summary(page);
-        const bId = await page.evaluate(() => (window as any).exchange.islandId('B'));
+        const bId = await page.evaluate(() => window.exchange.islandId('B'));
         const real = own.islands[bId].residents[String(NEED_LEVEL)] as number;
         expect(real).toBeGreaterThan(0);
 
@@ -117,13 +117,13 @@ test.describe('computed block (U11)', () => {
         expect(await page.evaluate(() => sessionStorage.getItem('exchange.computed'))).toBeNull();
         await page.locator('#exchange-close-button').click();
         await expect(page.locator('#exchange-report-dialog')).toBeHidden();
-        expect(await page.evaluate(() => !!(window as any).view.island())).toBe(true);
+        expect(await page.evaluate(() => !!window.view.island())).toBe(true);
     });
 
     test('differences below tolerance produce no entry', async ({ page }) => {
         await load(page, JSON.stringify(tradeFixture()));
         const own = await summary(page);
-        const bId = await page.evaluate(() => (window as any).exchange.islandId('B'));
+        const bId = await page.evaluate(() => window.exchange.islandId('B'));
         const real = own.islands[bId].residents[String(NEED_LEVEL)] as number;
 
         const doc = tradeFixture();
@@ -133,6 +133,6 @@ test.describe('computed block (U11)', () => {
 
         await expect(page.locator('#exchange-computed-differences')).toHaveCount(0);
         expect(await page.evaluate(() => sessionStorage.getItem('exchange.computed'))).toBeNull();
-        expect(await page.evaluate(() => (window as any).view.exchangeReport.differences().length)).toBe(0);
+        expect(await page.evaluate(() => window.view.exchangeReport.differences().length)).toBe(0);
     });
 });

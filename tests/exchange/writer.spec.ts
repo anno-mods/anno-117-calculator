@@ -34,7 +34,7 @@ test.describe('applyImport (U8)', () => {
     test('invalid JSON in the plan aborts before clear(); storage unchanged', async ({ page }) => {
         await ready(page);
         const r = await page.evaluate((text: string) => {
-            const ex = (window as any).exchange;
+            const ex = window.exchange;
             localStorage.setItem('marker', 'keep-me');
             const plan = ex.planImport(text);
             plan.keyMap['tradeRoutes'] = '{not json';
@@ -52,7 +52,7 @@ test.describe('applyImport (U8)', () => {
     test('a QuotaExceededError on the 20th write restores the snapshot byte for byte', async ({ page }) => {
         await ready(page);
         const r = await page.evaluate((text: string) => {
-            const ex = (window as any).exchange;
+            const ex = window.exchange;
             localStorage.setItem('marker', 'café ☃ {"a":1}  ');
             const plan = ex.planImport(text);
             for (let i = 0; i < 30; i++) plan.keyMap['Pad' + i] = '{"pad":' + i + '}';
@@ -72,7 +72,7 @@ test.describe('applyImport (U8)', () => {
     test('a failure restores an injected storage and sessionStorage hand-off', async ({ page }) => {
         await ready(page);
         const r = await page.evaluate((text: string) => {
-            const ex = (window as any).exchange;
+            const ex = window.exchange;
             const data = new Map<string, string>([['x', '1']]);
             const fake = {
                 get length() { return data.size; },
@@ -95,7 +95,7 @@ test.describe('applyImport (U8)', () => {
     test('writes versionCalculator, ordered islandNames, islandName and the computed hand-off', async ({ page }) => {
         await ready(page);
         const r = await page.evaluate((text: string) => {
-            const ex = (window as any).exchange;
+            const ex = window.exchange;
             const plan = ex.planImport(text);
             plan.computed = { islands: { a: { residents: { '1': 5 } } } };
             const res = ex.applyImport(plan, { reload: false });
@@ -124,17 +124,49 @@ test.describe('applyImport (U8)', () => {
         await ready(page);
         const r = await page.evaluate((text: string) => {
             sessionStorage.setItem('exchange.computed', 'stale');
-            const ex = (window as any).exchange;
+            const ex = window.exchange;
             ex.applyImport(ex.planImport(text), { reload: false });
             return sessionStorage.getItem('exchange.computed');
         }, doc());
-        expect(r).toBe('stale');
+        expect(r).toBeNull();
+    });
+
+    test('a failing sessionStorage hand-off keeps the import and reports a warning', async ({ page }) => {
+        await ready(page);
+        const r = await page.evaluate((text: string) => {
+            const ex = window.exchange;
+            const data = new Map<string, string>();
+            const local = {
+                get length() { return data.size; },
+                key: (i: number) => [...data.keys()][i] ?? null,
+                getItem: (k: string) => (data.has(k) ? data.get(k)! : null),
+                setItem: (k: string, v: string) => { data.set(k, v); },
+                removeItem: (k: string) => { data.delete(k); },
+                clear: () => data.clear(),
+            };
+            const sess = {
+                length: 0,
+                key: () => null,
+                getItem: () => null,
+                setItem: () => { throw new DOMException('quota', 'QuotaExceededError'); },
+                removeItem: () => undefined,
+                clear: () => undefined,
+            };
+            const plan = ex.planImport(text);
+            plan.computed = { islands: {} };
+            const res = ex.applyImport(plan, { reload: false, storage: local, sessionStorage: sess });
+            return { res, keys: [...data.keys()] };
+        }, doc());
+        expect(r.res.ok).toBe(true);
+        expect(r.keys).toContain('Alpha');
+        expect(r.res.warnings).toHaveLength(1);
+        expect(r.res.warnings[0]).toContain('computed');
     });
 
     test('unknown document-level and island-level fields are written to the two exchange.ext keys', async ({ page }) => {
         await ready(page);
         const r = await page.evaluate((text: string) => {
-            const ex = (window as any).exchange;
+            const ex = window.exchange;
             const res = ex.applyImport(ex.planImport(text), { reload: false });
             return { res, top: localStorage.getItem('exchange.ext'), beta: localStorage.getItem('Beta'), alpha: localStorage.getItem('Alpha') };
         }, doc());
@@ -155,7 +187,7 @@ test.describe('applyImport (U8)', () => {
             ],
         });
         const r = await page.evaluate((t: string) => {
-            const ex = (window as any).exchange;
+            const ex = window.exchange;
             const res = ex.applyImport(ex.planImport(t), { reload: false });
             return { res, names: localStorage.getItem('islandNames'), orphan: localStorage.getItem('Orphan'), top: localStorage.getItem('exchange.ext') };
         }, text);
@@ -170,7 +202,7 @@ test.describe('applyImport (U8)', () => {
         const r = await page.evaluate((text: string) => {
             localStorage.setItem('calculatorSettings', JSON.stringify({ language: 'german', 'settings.showAllProducts': '1' }));
             localStorage.setItem('darkMode.checked', 'true');
-            const ex = (window as any).exchange;
+            const ex = window.exchange;
             const res = ex.applyImport(ex.planImport(text), { reload: false });
             return { res, settings: JSON.parse(localStorage.getItem('calculatorSettings') as string), dark: localStorage.getItem('darkMode.checked') };
         }, doc());
@@ -186,7 +218,7 @@ test.describe('applyImport (U8)', () => {
         const r = await page.evaluate((text: string) => {
             localStorage.removeItem('calculatorSettings');
             localStorage.removeItem('darkMode.checked');
-            const ex = (window as any).exchange;
+            const ex = window.exchange;
             ex.applyImport(ex.planImport(text), { reload: false });
             return { settings: JSON.parse(localStorage.getItem('calculatorSettings') as string), dark: localStorage.getItem('darkMode.checked') };
         }, doc());
@@ -204,7 +236,7 @@ test.describe('applyImport (U8)', () => {
         await Promise.all([
             page.waitForEvent('load'),
             page.evaluate((text: string) => {
-                const ex = (window as any).exchange;
+                const ex = window.exchange;
                 const res = ex.applyImport(ex.planImport(text));
                 if (!res.ok) throw new Error(res.error);
             }, doc()),
@@ -212,8 +244,8 @@ test.describe('applyImport (U8)', () => {
         await appReady(page);
 
         const state = await page.evaluate(() => ({
-            names: (window as any).view.islands().map((i: any) => i.name()),
-            selected: (window as any).view.island().name(),
+            names: window.view.islands().map((i: Record<string, any>) => i.name()),
+            selected: window.view.island().name(),
             version: localStorage.getItem('versionCalculator'),
             visibleModals: Array.from(document.querySelectorAll('.modal.show')).length,
         }));
@@ -224,8 +256,8 @@ test.describe('applyImport (U8)', () => {
 
         // rename keeps the preserved island data
         const renamed = await page.evaluate(() => {
-            const view = (window as any).view;
-            const beta = view.islands().find((i: any) => i.name() === 'Beta');
+            const view = window.view;
+            const beta = view.islands().find((i: Record<string, any>) => i.name() === 'Beta');
             view.islandManager.islandNameInput('Gamma');
             view.islandManager.rename(beta, 'Gamma');
             return null;
@@ -239,8 +271,8 @@ test.describe('applyImport (U8)', () => {
 
         // delete removes the store and with it the preserved island data
         await page.evaluate(() => {
-            const view = (window as any).view;
-            const g = view.islands().find((i: any) => i.name() === 'Gamma');
+            const view = window.view;
+            const g = view.islands().find((i: Record<string, any>) => i.name() === 'Gamma');
             view.islandManager.delete(g);
         });
         await page.waitForTimeout(100);
@@ -265,7 +297,7 @@ test.describe('applyImport (U8)', () => {
             await Promise.all([
                 page.waitForEvent('load'),
                 page.evaluate((t: string) => {
-                    const ex = (window as any).exchange;
+                    const ex = window.exchange;
                     const plan = ex.planImport(t);
                     if (plan.error) throw new Error(plan.error);
                     const res = ex.applyImport(plan);
@@ -273,7 +305,7 @@ test.describe('applyImport (U8)', () => {
                 }, text),
             ]);
             await appReady(page);
-            const n = await page.evaluate(() => (window as any).view.islands().length);
+            const n = await page.evaluate(() => window.view.islands().length);
             expect(n).toBeGreaterThan(1);
             expect(errors).toEqual([]);
         });

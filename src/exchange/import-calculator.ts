@@ -96,7 +96,11 @@ export function planCalculator(islands: IslandsPlan, read: ReadOk): CalculatorIm
                 break;
             case "settings":
                 if (isPlainObject(v)) {
-                    for (const s of Object.keys(v)) if (!DEVICE_SETTINGS.has(s)) plan.settings[s] = v[s];
+                    // Object.fromEntries defines own properties, so a "__proto__" key neither hits the prototype nor vanishes.
+                    plan.settings = Object.fromEntries([
+                        ...Object.entries(plan.settings),
+                        ...Object.entries(v).filter(([s]) => !DEVICE_SETTINGS.has(s)),
+                    ]);
                 } else {
                     drop("ext.calculator.settings is not an object; it is ignored.", { key: k });
                 }

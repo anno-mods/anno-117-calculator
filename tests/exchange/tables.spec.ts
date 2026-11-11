@@ -4,7 +4,7 @@ import { test, expect, Page } from '@playwright/test';
 
 async function ready(page: Page) {
     await page.goto('/');
-    await page.waitForFunction(() => (window as any).view && (window as any).view.island() && (window as any).exchange);
+    await page.waitForFunction(() => window.view && window.view.island() && window.exchange);
 }
 
 // Storage writes are debounced with setTimeout(0); wait until they are flushed.
@@ -18,13 +18,13 @@ test.describe('discoveries table (U3)', () => {
     test('all 16 techs resolve to existing effects, only 37870 is repeatable', async ({ page }) => {
         await ready(page);
         const r = await page.evaluate(() => {
-            const t = (window as any).exchange.tables();
-            const known = new Set((window as any).params.effects.map((e: any) => e.guid));
+            const t = window.exchange.tables();
+            const known = new Set(window.params.effects.map((e: Record<string, any>) => e.guid));
             return {
                 count: t.discoveries.length,
-                missing: t.discoveries.flatMap((d: any) => d.effects).filter((g: number) => !known.has(g)),
-                empty: t.discoveries.filter((d: any) => d.effects.length === 0).map((d: any) => d.tech),
-                repeatable: t.discoveries.filter((d: any) => d.repeatable).map((d: any) => d.tech),
+                missing: t.discoveries.flatMap((d: Record<string, any>) => d.effects).filter((g: number) => !known.has(g)),
+                empty: t.discoveries.filter((d: Record<string, any>) => d.effects.length === 0).map((d: Record<string, any>) => d.tech),
+                repeatable: t.discoveries.filter((d: Record<string, any>) => d.repeatable).map((d: Record<string, any>) => d.tech),
             };
         });
         expect(r.count).toBe(16);
@@ -35,7 +35,7 @@ test.describe('discoveries table (U3)', () => {
 
     test('specific effects: session and global lists, area buffs never writable', async ({ page }) => {
         await ready(page);
-        const t = await page.evaluate(() => (window as any).exchange.tables());
+        const t = await page.evaluate(() => window.exchange.tables());
         for (const g of [155616, 145095, 148043, 145099]) expect(t.specificEffects.session).toContain(g);
         expect(t.specificEffects.global).toContain(43620);
         expect(t.specificEffects.neverWritable.slice().sort()).toEqual(AREA_BUFFS.slice().sort());
@@ -43,7 +43,7 @@ test.describe('discoveries table (U3)', () => {
             expect(t.writableEffects).not.toContain(g);
             expect(t.specificEffects.session).not.toContain(g);
             expect(t.specificEffects.global).not.toContain(g);
-            expect(t.discoveries.flatMap((d: any) => d.effects)).not.toContain(g);
+            expect(t.discoveries.flatMap((d: Record<string, any>) => d.effects)).not.toContain(g);
         }
         // the writable set holds every discovery effect and every specific effect
         for (const d of t.discoveries) for (const g of d.effects) expect(t.writableEffects).toContain(g);
@@ -55,22 +55,22 @@ test.describe('materials table (U3)', () => {
     test('13 materials, end factory per available region, Timber/Sawmill GUIDs', async ({ page }) => {
         await ready(page);
         const r = await page.evaluate(() => {
-            const t = (window as any).exchange.tables();
-            const p = (window as any).params;
-            const expected = p.products.filter((x: any) => x.isConstructionMaterial);
+            const t = window.exchange.tables();
+            const p = window.params;
+            const expected = p.products.filter((x: Record<string, any>) => x.isConstructionMaterial);
             const problems: string[] = [];
             for (const prod of expected) {
-                const m = t.materials.find((x: any) => x.product === prod.guid);
+                const m = t.materials.find((x: Record<string, any>) => x.product === prod.guid);
                 if (!m) { problems.push('missing material ' + prod.guid); continue; }
                 for (const region of prod.associatedRegions || []) {
                     const f = m.endFactories[region];
                     if (f === undefined) { problems.push(prod.guid + ' no factory in ' + region); continue; }
-                    const fc = p.factories.find((x: any) => x.guid === f);
-                    if (!fc || !fc.outputs.some((o: any) => o.product === prod.guid) || !fc.associatedRegions.includes(region))
+                    const fc = p.factories.find((x: Record<string, any>) => x.guid === f);
+                    if (!fc || !fc.outputs.some((o: Record<string, any>) => o.product === prod.guid) || !fc.associatedRegions.includes(region))
                         problems.push(prod.guid + ' wrong factory ' + f + ' for ' + region);
                 }
             }
-            return { count: t.materials.length, problems, timber: t.materials.find((x: any) => x.product === 2174) };
+            return { count: t.materials.length, problems, timber: t.materials.find((x: Record<string, any>) => x.product === 2174) };
         });
         expect(r.count).toBe(13);
         expect(r.problems).toEqual([]);
@@ -82,12 +82,12 @@ test.describe('mythical-item effects and classifier (U3)', () => {
     test('mythical-item table lists the effects with source mythical-item and their DLC', async ({ page }) => {
         await ready(page);
         const r = await page.evaluate(() => {
-            const t = (window as any).exchange.tables();
-            const expected = (window as any).params.effects.filter((e: any) => e.source === 'mythical-item');
+            const t = window.exchange.tables();
+            const expected = window.params.effects.filter((e: Record<string, any>) => e.source === 'mythical-item');
             return {
-                got: t.mythicalItemEffects.map((e: any) => e.effect).sort((a: number, b: number) => a - b),
-                want: expected.map((e: any) => e.guid).sort((a: number, b: number) => a - b),
-                dlc: t.mythicalItemEffects.find((e: any) => e.effect === 185132),
+                got: t.mythicalItemEffects.map((e: Record<string, any>) => e.effect).sort((a: number, b: number) => a - b),
+                want: expected.map((e: Record<string, any>) => e.guid).sort((a: number, b: number) => a - b),
+                dlc: t.mythicalItemEffects.find((e: Record<string, any>) => e.effect === 185132),
             };
         });
         expect(r.got.length).toBeGreaterThan(0);
@@ -98,10 +98,10 @@ test.describe('mythical-item effects and classifier (U3)', () => {
     test('classifier distinguishes an item key from an effect key', async ({ page }) => {
         await ready(page);
         const r = await page.evaluate(() => {
-            const ex = (window as any).exchange;
-            const p = (window as any).params;
+            const ex = window.exchange;
+            const p = window.params;
             const item = p.items[0].guid;
-            const effect = p.effects.find((e: any) => e.source === 'mythical-item').guid;
+            const effect = p.effects.find((e: Record<string, any>) => e.source === 'mythical-item').guid;
             return {
                 item: ex.classifyItemOrEffect(item),
                 effect: ex.classifyItemOrEffect(effect),
@@ -128,7 +128,7 @@ test.describe('storage key builders (U3)', () => {
     test('builders match the keys the app writes', async ({ page }) => {
         await ready(page);
         const guids = await page.evaluate(() => {
-            const view = (window as any).view;
+            const view = window.view;
             const island = view.island();
             const prod = island.products[0];
             const level = island.populationLevels[0];
@@ -137,7 +137,7 @@ test.describe('storage key builders (U3)', () => {
             return { island: island.name(), product: prod.guid, level: level.guid, need: need.need.guid, residence: residence.guid };
         });
         await page.evaluate((g) => {
-            const view = (window as any).view;
+            const view = window.view;
             const island = view.island();
             island.residenceBuildings[0].buildings.constructed(7);
             island.residenceBuildings[0].buildings.planned(9);
@@ -147,7 +147,7 @@ test.describe('storage key builders (U3)', () => {
         }, guids);
         await flush(page);
         const r = await page.evaluate((g) => {
-            const k = (window as any).exchange.keys;
+            const k = window.exchange.keys;
             const store = JSON.parse(localStorage.getItem(g.island) || '{}');
             return {
                 constructedKey: k.buildingsConstructed(g.residence), plannedKey: k.buildingsPlanned(g.residence),

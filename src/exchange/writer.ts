@@ -41,6 +41,8 @@ export interface ApplyResult {
     error?: string;
     // The keys written to the storage, in write order. Empty on failure.
     written: string[];
+    // Non-fatal problems after a committed import (e.g. the sessionStorage hand-off failed).
+    warnings?: string[];
 }
 
 function quotaError(): Error {
@@ -159,7 +161,6 @@ export function applyImport(plan: ImportPlan, opts: ApplyOptions = {}): ApplyRes
             out.setItem(key, keyMap[key]);
             written.push(key);
         }
-        if (plan.computed !== undefined && session) session.setItem(COMPUTED_SESSION_KEY, JSON.stringify(plan.computed));
     } catch (e) {
         const message = describe(e);
         try {
@@ -171,6 +172,17 @@ export function applyImport(plan: ImportPlan, opts: ApplyOptions = {}): ApplyRes
         return { ok: false, error: message, written: [] };
     }
 
+    // The computed hand-off is advisory: a failure here must not undo the committed import.
+    const warnings: string[] = [];
+    if (session) {
+        try {
+            if (plan.computed !== undefined) session.setItem(COMPUTED_SESSION_KEY, JSON.stringify(plan.computed));
+            else session.removeItem(COMPUTED_SESSION_KEY);
+        } catch (e) {
+            warnings.push(`The computed comparison could not be handed over: ${describe(e)}`);
+        }
+    }
+
     if (opts.reload !== false) location.reload();
-    return { ok: true, written };
+    return warnings.length ? { ok: true, written, warnings } : { ok: true, written };
 }

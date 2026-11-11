@@ -27,7 +27,7 @@ interface Plan {
 
 async function ready(page: Page) {
     await page.goto('/');
-    await page.waitForFunction(() => (window as any).view && (window as any).view.island() && (window as any).exchange);
+    await page.waitForFunction(() => window.view && window.view.island() && window.exchange);
 }
 
 function doc(extra: Record<string, any>, islands: Record<string, any>[] = [{ id: 'a', name: 'A', session: LATIUM }]): string {
@@ -35,7 +35,7 @@ function doc(extra: Record<string, any>, islands: Record<string, any>[] = [{ id:
 }
 
 async function plan(page: Page, text: string): Promise<Plan> {
-    const r = await page.evaluate((t: string) => (window as any).exchange.planImport(t), text);
+    const r = await page.evaluate((t: string) => window.exchange.planImport(t), text);
     if ('error' in r) throw new Error(r.error);
     return r;
 }
@@ -192,7 +192,7 @@ test.describe('import plan: discoveries, effects, settings, materials (U7)', () 
 
     test('materials Timber 4 on a Latium island writes 3089 constructed 4 and fullyUtilize "1" (AE21)', async ({ page }) => {
         const timber = await page.evaluate(
-            (sawmill: number) => (window as any).exchange.tables().materials.find((m: any) => m.endFactories.Roman === sawmill).product,
+            (sawmill: number) => window.exchange.tables().materials.find((m: Record<string, any>) => m.endFactories.Roman === sawmill).product,
             SAWMILL_LATIUM,
         );
         const p = await plan(page, doc({}, [{ id: 'a', name: 'A', session: LATIUM, materials: { [timber]: 4 } }]));
@@ -203,7 +203,7 @@ test.describe('import plan: discoveries, effects, settings, materials (U7)', () 
 
     test('buildings entry of the end factory wins over materials; the difference is reported (R50)', async ({ page }) => {
         const timber = await page.evaluate(
-            (sawmill: number) => (window as any).exchange.tables().materials.find((m: any) => m.endFactories.Roman === sawmill).product,
+            (sawmill: number) => window.exchange.tables().materials.find((m: Record<string, any>) => m.endFactories.Roman === sawmill).product,
             SAWMILL_LATIUM,
         );
         const withBuildings = await plan(

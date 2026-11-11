@@ -34,7 +34,7 @@ interface ReadErr { error: string; code: string }
 type ReadOut = ReadOk | ReadErr;
 
 async function read(page: Page, text: string): Promise<ReadOut> {
-    return page.evaluate((t: string) => (window as any).exchange.readExchange(t), text);
+    return page.evaluate((t: string) => window.exchange.readExchange(t), text);
 }
 
 function asOk(r: ReadOut): ReadOk {
@@ -50,7 +50,7 @@ function asErr(r: ReadOut): ReadErr {
 test.describe('exchange reader (U4)', () => {
     test.beforeEach(async ({ page }) => {
         await page.goto('/');
-        await page.waitForFunction(() => (window as any).view && (window as any).view.island());
+        await page.waitForFunction(() => window.view && window.view.island());
     });
 
     test('newer major fails and names both versions; newer minor passes', async ({ page }) => {

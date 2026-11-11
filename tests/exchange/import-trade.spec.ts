@@ -32,7 +32,7 @@ interface TradePlan {
 
 async function ready(page: Page) {
     await page.goto('/');
-    await page.waitForFunction(() => (window as any).view && (window as any).view.island() && (window as any).exchange);
+    await page.waitForFunction(() => window.view && window.view.island() && window.exchange);
 }
 
 function doc(islands: Record<string, any>[], trade?: Record<string, any>): string {
@@ -51,7 +51,7 @@ function isl(id: string, extra: Record<string, any> = {}): Record<string, any> {
 
 async function planFull(page: Page, text: string): Promise<{ trade: TradePlan; islands: any }> {
     return page.evaluate((t: string) => {
-        const ex = (window as any).exchange;
+        const ex = window.exchange;
         const r = ex.readExchange(t);
         if ('error' in r) throw new Error(r.error);
         const islands = ex.planIslands(r);
@@ -91,7 +91,7 @@ test.describe('import plan: trade (U6)', () => {
         expect(trade.tradeRoutes).toEqual(
             ['B', 'C', 'D', 'E'].map((to) => ({ productGUID: DATES, from: 'A', to, userSetAmount: 0, isDefaultSupplier: true })),
         );
-        expect(islands.islands.map((i: any) => i.name)).toEqual(['A', 'B', 'C', 'D', 'E']);
+        expect(islands.islands.map((i: Record<string, any>) => i.name)).toEqual(['A', 'B', 'C', 'D', 'E']);
         // trade-route defaults leave the product's stored default alone (KTD9)
         for (const i of Object.values(trade.islands)) {
             expect(Object.keys(i.store).filter((k) => k.includes('defaultSupplier'))).toEqual([]);
@@ -386,7 +386,7 @@ test.describe('import plan: trade (U6)', () => {
         for (const name of names) {
             const text = fixtureText('valid/' + name);
             const p = await plan(page, text);
-            const imports = JSON.parse(text).trade.imports as any[];
+            const imports = JSON.parse(text).trade.imports as Array<Record<string, any>>;
             expect(p.tradeRoutes.length, name).toBe(imports.reduce((n, i) => n + i.suppliers.length, 0));
             expect(codes(p.report), name).not.toContain('routes-imports-disagree');
             for (const r of p.tradeRoutes) expect(r.userSetAmount).toBe(0);
@@ -414,7 +414,7 @@ test.describe('import plan: trade (U6)', () => {
         expect(s[`${GOLD}.defaultSupplier.id`]).toBe('null');
         expect(s[`${DATES}.notes`]).toBe('only a note');
         expect(s[`${DATES}.defaultSupplier.type`]).toBeUndefined();
-        const pointers = p.islands['A'].ext.guids.map((g: any) => g.pointer).sort();
+        const pointers = p.islands['A'].ext.guids.map((g: Record<string, any>) => g.pointer).sort();
         expect(pointers).toEqual([`/products/${GOLD + 1000000}`, '/products/2138/producer'].sort());
         expect(s["2138.defaultSupplier.type"]).toBeUndefined();
     });

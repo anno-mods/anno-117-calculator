@@ -56,7 +56,7 @@ test.describe('conformance: valid fixtures import and export', () => {
 
             // The app starts on the imported state and exports a valid file again.
             await appReady(page);
-            expect(await page.evaluate(() => !!(window as any).view.island())).toBe(true);
+            expect(await page.evaluate(() => !!window.view.island())).toBe(true);
             const { document } = await exportDoc(page);
             expect(schemaErrors(JSON.stringify(document)), 'the export validates against the vendored schema').toEqual([]);
             const source = JSON.parse(text) as Json;
@@ -75,7 +75,7 @@ test.describe('conformance: invalid fixtures are rejected by class', () => {
             await openApp(page);
             const before = await page.evaluate(() => JSON.stringify(Object.keys(localStorage).sort()));
             const plan = await page.evaluate((t: string) => {
-                const r = (window as any).exchange.planImport(t);
+                const r = window.exchange.planImport(t);
                 return 'error' in r ? { error: r.error as string, code: r.code as string } : { problems: r.problems as Json[] };
             }, text);
             const errs = schemaErrors(text);
