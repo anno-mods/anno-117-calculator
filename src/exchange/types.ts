@@ -283,7 +283,9 @@ export interface ExchangeDocument {
     [key: string]: unknown;
 }
 
-// The functions registered on window.exchange by later units (KTD12) are added here as they land.
+// The functions registered on window.exchange (KTD12). Later units add their members here.
 export interface ExchangeApi {
-    [name: string]: unknown;
+    uniqueName(wanted: string, taken: Iterable<string>): string;
+    reservedKeys(): { keys: string[]; prefixes: string[] };
+    islandId(islandName: string): string | null;
 }

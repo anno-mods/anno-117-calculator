@@ -35,6 +35,20 @@ declare const localStorage: any;
 const GAME_CONNECTOR_ISLAND_ID_STORAGE_KEY = 'gameConnector.islandID';
 const GAME_CONNECTOR_AREA_INDEX_STORAGE_KEY = 'gameConnector.areaIndex';
 
+/** Exchange format (KTD3): stable opaque island id, island-store key. */
+const EXCHANGE_ISLAND_ID_STORAGE_KEY = 'exchange.islandId';
+
+function generateExchangeIslandId(): string {
+    const bytes = new Uint8Array(8);
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues)
+        crypto.getRandomValues(bytes);
+    else
+        for (let i = 0; i < bytes.length; i++)
+            bytes[i] = Math.floor(Math.random() * 256);
+
+    return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+}
+
 
 /**
  * Manages persistent storage for island data
@@ -1351,6 +1365,25 @@ export class Island {
     setGameConnectorIdentity(islandID: number, areaIndex: number): void {
         this.storage.setItem(GAME_CONNECTOR_ISLAND_ID_STORAGE_KEY, islandID);
         this.storage.setItem(GAME_CONNECTOR_AREA_INDEX_STORAGE_KEY, areaIndex);
+    }
+
+    /**
+     * Exchange island id (KTD3): stable opaque id (16 hex chars) in the island store. Assigned lazily on
+     * first read. It lives in the same JSON as the island's data, so it survives a rename
+     * (Storage.updateKey) and is removed with the store on delete.
+     */
+    get exchangeIslandId(): string {
+        const stored = this.storage.getItem(EXCHANGE_ISLAND_ID_STORAGE_KEY);
+        if (typeof stored === 'string' && stored)
+            return stored;
+
+        const id = generateExchangeIslandId();
+        this.storage.setItem(EXCHANGE_ISLAND_ID_STORAGE_KEY, id);
+        return id;
+    }
+
+    set exchangeIslandId(id: string) {
+        this.storage.setItem(EXCHANGE_ISLAND_ID_STORAGE_KEY, id);
     }
 }
 
