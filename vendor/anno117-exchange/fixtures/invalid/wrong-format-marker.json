@@ -1,0 +1,12 @@
+{
+  "format": "something-else",
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "x"
+  },
+  "islands": [
+    {
+      "id": "a"
+    }
+  ]
+}

@@ -1,0 +1,290 @@
+{
+  "manifestVersion": 1,
+  "classes": {
+    "envelope": "rejected by the envelope check (format marker, version major, JSON object); also fails the schema",
+    "schema": "passes the envelope check, fails the JSON Schema at expect.path with expect.keyword",
+    "semantic": "passes the JSON Schema, fails a custom check named by expect.code"
+  },
+  "fixtures": [
+    {
+      "file": "valid/minimal-third-party.json",
+      "valid": true,
+      "description": "Only the four required keys (AE6): format, formatVersion, generator.name, one island with an id."
+    },
+    {
+      "file": "valid/third-party-buildings.json",
+      "valid": true,
+      "description": "A tool that knows only islands and building counts (R18)."
+    },
+    {
+      "file": "valid/unknown-generator.json",
+      "valid": true,
+      "description": "Unknown generator name, unknown source kind, private ext blocks that a reader must keep (R11, R19)."
+    },
+    {
+      "file": "valid/newer-minor.json",
+      "valid": true,
+      "description": "Newer minor version 1.9 with keys and a basis value this revision does not know (R9, R19)."
+    },
+    {
+      "file": "valid/unknown-fields-everywhere.json",
+      "valid": true,
+      "description": "An unknown key at the document, generator, source, settings, fleet, effects, research, trade, route, station, slot, ship, import, supplier, governor harbour, visit, history, live, account, racer, race, computed, island, game island, building, factory, item, holder, record, attachment, harbour and coverage level (R13, R19)."
+    },
+    {
+      "file": "valid/unknown-guids.json",
+      "valid": true,
+      "description": "Unknown region (session 999001), building 999002, effect 999003, product 999004, discovery 999006 and DLC 7: kept and written back in place (AE18, R19, R38)."
+    },
+    {
+      "file": "valid/island-deletion-before.json",
+      "valid": true,
+      "description": "Two islands with preserved data; island isl-b is referenced by route stations, imports, visits, history and live (R14).",
+      "pair": {
+        "relation": "deletion",
+        "role": "before",
+        "deleted": "isl-b",
+        "other": "valid/island-deletion-after.json"
+      }
+    },
+    {
+      "file": "valid/island-deletion-after.json",
+      "valid": true,
+      "description": "After deleting isl-b: its record, its station, its imports entry and supplier references, its visits, history and live entries are gone; the rest is unchanged (AE2, R14).",
+      "pair": {
+        "relation": "deletion",
+        "role": "after",
+        "deleted": "isl-b",
+        "other": "valid/island-deletion-before.json"
+      }
+    },
+    {
+      "file": "valid/island-rename-before.json",
+      "valid": true,
+      "description": "Island isl-a is named Latium 5 and carries preserved data.",
+      "pair": {
+        "relation": "rename",
+        "role": "before",
+        "renamed": "isl-a",
+        "other": "valid/island-rename-after.json"
+      }
+    },
+    {
+      "file": "valid/island-rename-after.json",
+      "valid": true,
+      "description": "Same file after renaming isl-a: the id, the unknown key and all preserved data stay attached; only name differs (AE2, R14).",
+      "pair": {
+        "relation": "rename",
+        "role": "after",
+        "renamed": "isl-a",
+        "other": "valid/island-rename-before.json"
+      }
+    },
+    {
+      "file": "valid/cinis-sawmill.json",
+      "valid": true,
+      "description": "Construction-material island: 4 Latium sawmills (3089), no fullyUtilize key, which means on; requires 8 t/min Wood (AE21)."
+    },
+    {
+      "file": "valid/cinis-sawmill-explicit.json",
+      "valid": true,
+      "description": "Same island as a calculator export writes it: fullyUtilize explicit true (R50)."
+    },
+    {
+      "file": "valid/cinis-sawmill-off.json",
+      "valid": true,
+      "description": "Sawmills with fullyUtilize false: materials off (R50)."
+    },
+    {
+      "file": "valid/disabled-needs-new-dlc.json",
+      "valid": true,
+      "description": "Disabled needs listed for one level; the Dawn of the Delta needs are not listed and are therefore on after the DLC is switched on (AE22)."
+    },
+    {
+      "file": "valid/trade-point-to-point.json",
+      "valid": true,
+      "description": "R35 case: one source, one sink.",
+      "tradeCase": "point-to-point"
+    },
+    {
+      "file": "valid/trade-distribution-circuit-relays.json",
+      "valid": true,
+      "description": "R35 case: load-only source, three load-and-unload stops, unload-only last stop (AE13): four imports, source share 1.",
+      "tradeCase": "distribution-circuit-relays"
+    },
+    {
+      "file": "valid/trade-relay-net-zero.json",
+      "valid": true,
+      "description": "R35 case: a load-and-unload stop whose recorded visits net to zero is a pure relay and gets no import.",
+      "tradeCase": "relay-net-zero"
+    },
+    {
+      "file": "valid/trade-manual-one-slot.json",
+      "valid": true,
+      "description": "R35 case: a manually saved route with one slot.",
+      "tradeCase": "manual-one-slot"
+    },
+    {
+      "file": "valid/trade-distribution-across-sessions.json",
+      "valid": true,
+      "description": "R35 case: source in Latium, sinks in Latium and Aegyptus.",
+      "tradeCase": "distribution-across-sessions"
+    },
+    {
+      "file": "valid/trade-multi-source-collection.json",
+      "valid": true,
+      "description": "R35 case: two sources load different slots, one island unloads both: shares by unload amount.",
+      "tradeCase": "multi-source-collection"
+    },
+    {
+      "file": "valid/trade-non-player-station.json",
+      "valid": true,
+      "description": "R35 case: a station on a non-player area has no island id; its leg is dropped.",
+      "tradeCase": "non-player-station"
+    },
+    {
+      "file": "valid/trade-same-sink-twice.json",
+      "valid": true,
+      "description": "R35 case: one island visited twice in one lap, served by different sources each time.",
+      "tradeCase": "same-sink-twice"
+    },
+    {
+      "file": "valid/trade-loaded-never-unloaded.json",
+      "valid": true,
+      "description": "R35 case: a good is loaded and no stop unloads it: no import.",
+      "tradeCase": "loaded-never-unloaded"
+    },
+    {
+      "file": "valid/trade-bidirectional-circuit.json",
+      "valid": true,
+      "description": "R35 case: each island supplies the other with a different good.",
+      "tradeCase": "bidirectional-circuit"
+    },
+    {
+      "file": "valid/trade-shared-supply.json",
+      "valid": true,
+      "description": "R35 case: two routes with different ships supply the same island and good: shares by ship count times unload amount.",
+      "tradeCase": "shared-supply"
+    },
+    {
+      "file": "valid/trade-no-ships.json",
+      "valid": true,
+      "description": "R35 case: a route without ships moves no goods and gets no entry.",
+      "tradeCase": "no-ships"
+    },
+    {
+      "file": "valid/history-and-live.json",
+      "valid": true,
+      "description": "History series (values with start and step, timestamped points, game and wall clock), a live snapshot, recorded visits of two traders and a computed block (R28, R17)."
+    },
+    {
+      "file": "valid/item-locations.json",
+      "valid": true,
+      "description": "Item records in every R56 place: a building holder with a mythicEffect item, a ship holder with items and carried, itemStorage with a shared-slot stack (slot 4) and a count record, several records of GUID 51316, account.items, transferItems, racers with race, unlocatedItems, per-record ext (AE26, KTD16). Holder building and ship type GUIDs are placeholders."
+    },
+    {
+      "file": "invalid/newer-major.json",
+      "valid": false,
+      "class": "envelope",
+      "reason": "formatVersion has a newer major version than 1 (R4, AE4)",
+      "expect": {
+        "code": "unsupported-major"
+      }
+    },
+    {
+      "file": "invalid/wrong-format-marker.json",
+      "valid": false,
+      "class": "envelope",
+      "reason": "format is not anno117-exchange (R4)",
+      "expect": {
+        "code": "wrong-format"
+      }
+    },
+    {
+      "file": "invalid/missing-format-version.json",
+      "valid": false,
+      "class": "envelope",
+      "reason": "formatVersion is missing (R4, R18)",
+      "expect": {
+        "code": "missing-formatVersion"
+      }
+    },
+    {
+      "file": "invalid/not-an-object.json",
+      "valid": false,
+      "class": "envelope",
+      "reason": "the top level is an array, not an object (R4)",
+      "expect": {
+        "code": "not-object"
+      }
+    },
+    {
+      "file": "invalid/missing-generator-name.json",
+      "valid": false,
+      "class": "schema",
+      "reason": "generator.name is required (R18)",
+      "expect": {
+        "path": "/generator",
+        "keyword": "required"
+      }
+    },
+    {
+      "file": "invalid/island-without-id.json",
+      "valid": false,
+      "class": "schema",
+      "reason": "islands[].id is required (R18)",
+      "expect": {
+        "path": "/islands/0",
+        "keyword": "required"
+      }
+    },
+    {
+      "file": "invalid/missing-islands.json",
+      "valid": false,
+      "class": "schema",
+      "reason": "islands is required (R18)",
+      "expect": {
+        "path": "/",
+        "keyword": "required"
+      }
+    },
+    {
+      "file": "invalid/building-count-wrong-type.json",
+      "valid": false,
+      "class": "schema",
+      "reason": "built must be a non-negative integer",
+      "expect": {
+        "path": "/islands/0/buildings/3089/built",
+        "keyword": "type"
+      }
+    },
+    {
+      "file": "invalid/item-record-without-item.json",
+      "valid": false,
+      "class": "schema",
+      "reason": "an item record needs the item GUID (R56)",
+      "expect": {
+        "path": "/islands/0/itemStorage/0",
+        "keyword": "required"
+      }
+    },
+    {
+      "file": "invalid/duplicate-item-instance.json",
+      "valid": false,
+      "class": "semantic",
+      "reason": "instance 2001 appears in two item records, but an instance id is unique in the file (R56); the schema cannot express this",
+      "expect": {
+        "code": "duplicate-instance"
+      }
+    },
+    {
+      "file": "invalid/duplicate-island-id.json",
+      "valid": false,
+      "class": "semantic",
+      "reason": "island id a appears twice, but ids are unique in the file (R21)",
+      "expect": {
+        "code": "duplicate-island-id"
+      }
+    }
+  ]
+}

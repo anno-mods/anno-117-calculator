@@ -1,0 +1,193 @@
+{
+  "format": "anno117-exchange",
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "savegame-writer",
+    "version": "1.0.0"
+  },
+  "islands": [
+    {
+      "id": "i1",
+      "name": "Latium 5",
+      "session": 3245,
+      "itemHolders": [
+        {
+          "guid": 91001,
+          "instance": 9001,
+          "position": {
+            "x": 412.5,
+            "z": 288,
+            "height": 3
+          },
+          "rotation": 1.5708,
+          "enabledSockets": 3,
+          "items": [
+            {
+              "item": 51328,
+              "instance": 1001,
+              "slot": 0,
+              "boosted": true,
+              "boostConditionMet": true,
+              "mythicEffect": 152715,
+              "ext": {
+                "savegame-writer": {
+                  "EffectID": 77,
+                  "QuestID": 12
+                }
+              }
+            },
+            {
+              "item": 51330,
+              "instance": 1002,
+              "slot": 1,
+              "boosted": false,
+              "boostConditionMet": false
+            }
+          ]
+        },
+        {
+          "kind": "ship",
+          "guid": 91002,
+          "instance": 5001,
+          "route": "r1",
+          "enabledSockets": 1,
+          "items": [
+            {
+              "item": 51292,
+              "instance": 1003,
+              "slot": 0
+            }
+          ],
+          "carried": [
+            {
+              "item": 51334,
+              "instance": 1004,
+              "slot": 0
+            },
+            {
+              "item": 51338,
+              "instance": 1005,
+              "slot": 1,
+              "ext": {
+                "savegame-writer": {
+                  "note": "per-record ext"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "guid": 91003,
+          "instance": 9002,
+          "enabledSockets": 2,
+          "items": []
+        }
+      ],
+      "itemStorage": [
+        {
+          "item": 51316,
+          "instance": 2001,
+          "slot": 4
+        },
+        {
+          "item": 51316,
+          "instance": 2002,
+          "slot": 4
+        },
+        {
+          "item": 51316,
+          "instance": 2003,
+          "slot": 4
+        },
+        {
+          "item": 51344,
+          "slot": 5,
+          "count": 7
+        },
+        {
+          "item": 51316,
+          "instance": 2004,
+          "slot": 6
+        }
+      ]
+    },
+    {
+      "id": "i2",
+      "name": "Latium 6",
+      "session": 3245,
+      "itemStorage": [
+        {
+          "item": 51324,
+          "instance": 2101
+        }
+      ]
+    }
+  ],
+  "trade": {
+    "routes": [
+      {
+        "id": "r1",
+        "stations": [],
+        "ships": [
+          {
+            "type": 91002,
+            "slots": 4,
+            "count": 1
+          }
+        ]
+      }
+    ]
+  },
+  "account": {
+    "items": [
+      {
+        "item": 51346,
+        "instance": 3001,
+        "slot": 0
+      },
+      {
+        "item": 51316,
+        "instance": 3002,
+        "slot": 1
+      }
+    ],
+    "transferItems": [
+      51346,
+      51316,
+      51328
+    ],
+    "racers": [
+      {
+        "item": 95403,
+        "appearance": 2,
+        "trainings": {
+          "1": 3,
+          "2": 1
+        }
+      },
+      {
+        "item": 96821,
+        "trainings": {}
+      }
+    ],
+    "race": {
+      "wins": 4,
+      "losses": 2
+    }
+  },
+  "unlocatedItems": [
+    {
+      "item": 51321,
+      "instance": 4001
+    },
+    {
+      "item": 51326,
+      "instance": 4002,
+      "ext": {
+        "savegame-writer": {
+          "why": "no container"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "format": "anno117-exchange",
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "savegame-writer",
+    "version": "1.0.0"
+  },
+  "source": {
+    "kind": "savegame",
+    "file": "Marcia 69.a8s",
+    "gameVersion": "1.0.3",
+    "saveTime": "2026-11-01T18:30:00Z"
+  },
+  "islands": [
+    {
+      "id": "i1",
+      "name": "Latium 5",
+      "session": 3245,
+      "gameIsland": {
+        "sessionGuid": 3245,
+        "islandId": 5,
+        "areaIndex": 1,
+        "areaKey": 8513
+      }
+    },
+    {
+      "id": "i2"
+    }
+  ],
+  "history": [
+    {
+      "island": "i1",
+      "product": 2137,
+      "kind": "storage",
+      "clock": "game",
+      "unit": "t",
+      "start": 0,
+      "step": 600,
+      "values": [
+        12,
+        14,
+        15.5,
+        15
+      ]
+    },
+    {
+      "island": "i1",
+      "product": 2137,
+      "kind": "production",
+      "clock": "game",
+      "unit": "t/min",
+      "points": [
+        {
+          "t": 0,
+          "v": 3.0
+        },
+        {
+          "t": 900,
+          "v": 3.5
+        }
+      ]
+    },
+    {
+      "island": "i2",
+      "product": 151680,
+      "kind": "consumption",
+      "clock": "wall",
+      "unit": "t/min",
+      "start": 1760000000,
+      "step": 60,
+      "values": [
+        1.0,
+        1.2
+      ]
+    }
+  ],
+  "live": {
+    "clock": "wall",
+    "timestamp": 1760003600,
+    "unit": "t/min",
+    "islands": {
+      "i1": {
+        "2137": {
+          "generation": 3.5,
+          "consumption": 3.0,
+          "delta": 0.5,
+          "idealGeneration": 4.0,
+          "idealConsumption": 3.0,
+          "buildings": 7,
+          "productivity": 0.875,
+          "storage": 15
+        }
+      }
+    }
+  },
+  "trade": {
+    "visits": [
+      {
+        "route": "r1",
+        "island": "i1",
+        "trader": "player",
+        "time": 1234.5,
+        "clock": "game",
+        "shipType": 1001,
+        "goods": {
+          "151680": 20
+        }
+      },
+      {
+        "route": "r1",
+        "island": "i1",
+        "trader": "npc-4",
+        "time": 1300,
+        "clock": "game",
+        "goods": {
+          "151680": -5
+        }
+      }
+    ]
+  },
+  "computed": {
+    "islands": {
+      "i1": {
+        "residents": {
+          "1499": 120
+        },
+        "buildingsRequired": {
+          "3174": 6.4
+        },
+        "imports": {
+          "151680": 1.25
+        }
+      }
+    }
+  }
+}

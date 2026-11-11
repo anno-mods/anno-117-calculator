@@ -1,0 +1,510 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/anno-mods/anno-117-exchange-format/schema/anno117-exchange.schema.json",
+  "title": "Anno 117 exchange file",
+  "description": "Tool-neutral plan file for Anno 117 (format version 1.x). Required: format, formatVersion, generator.name, islands[].id. Every object is open: keys this schema does not list are valid and readers preserve them (R13, R19). No list of regions, buildings, effects, products, DLCs or source kinds is closed. Types of listed keys are constrained so readers can rely on them.",
+  "type": "object",
+  "required": ["format", "formatVersion", "generator", "islands"],
+  "properties": {
+    "format": { "const": "anno117-exchange", "description": "Format marker." },
+    "formatVersion": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+$",
+      "description": "major.minor. This schema accepts major 1 and any minor; a reader that supports major 1 accepts every 1.x file and ignores what it does not know (R9, R19). A newer major is rejected (R4)."
+    },
+    "generator": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "description": "Writing tool." },
+        "version": { "type": "string" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "description": "Where the data came from (R22). kind is open: savegame, tool and manual are known.",
+      "properties": {
+        "kind": { "type": "string" },
+        "file": { "type": "string" },
+        "savegameFormatVersion": { "type": ["string", "integer"] },
+        "gameVersion": { "type": "string" },
+        "saveTime": { "type": "string", "description": "ISO 8601 date-time." }
+      }
+    },
+    "name": { "type": "string", "description": "Plan name." },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "dlcs": {
+          "type": "array",
+          "items": { "type": "integer" },
+          "uniqueItems": true,
+          "description": "Owned DLC numbers: 1 Prophecies of Ash (67902), 2 The Hippodrome (67903), 3 Dawn of the Delta (67904). A number not in this list is kept (R19, R38). Absent states nothing about ownership."
+        },
+        "difficulty": { "type": "object", "description": "Difficulty options; the calculator's need consumption option id is difficulty.needConsumption." },
+        "volcano": { "type": "object", "description": "Eruption cycle: phases and durations." },
+        "seasons": { "type": "object", "description": "Nile season assumptions: enabled, mode, phase, unlocks." },
+        "map": { "type": "object", "description": "Map template or file, size, expansions (R41)." }
+      }
+    },
+    "fleet": {
+      "type": "object",
+      "properties": {
+        "effects": { "type": "array", "items": { "type": "integer" } },
+        "ships": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "effects": {
+      "type": "object",
+      "properties": {
+        "global": { "$ref": "#/$defs/guidNumberMap" },
+        "bySession": {
+          "type": "object",
+          "description": "Session GUID -> effect GUID -> scale.",
+          "propertyNames": { "pattern": "^[0-9]+$" },
+          "additionalProperties": { "$ref": "#/$defs/guidNumberMap" }
+        }
+      }
+    },
+    "research": {
+      "type": "object",
+      "properties": {
+        "researched": { "type": "array", "items": { "type": "integer" }, "description": "Researched discovery GUIDs." },
+        "counts": { "$ref": "#/$defs/guidIntegerMap", "description": "Repeat counts per repeatable discovery GUID." },
+        "queue": { "type": "array", "items": { "type": "integer" } },
+        "knowledgePerMinute": { "type": "number", "minimum": 0 },
+        "basis": { "type": "string", "description": "researched (what the player has done) or applied (what the calculator applies, R44). Absent means researched." }
+      }
+    },
+    "dominantPatron": { "type": "integer" },
+    "trade": {
+      "type": "object",
+      "properties": {
+        "routes": { "type": "array", "items": { "$ref": "#/$defs/route" } },
+        "imports": { "type": "array", "items": { "$ref": "#/$defs/import" } },
+        "governorHarbours": { "type": "array", "items": { "$ref": "#/$defs/governorHarbour" } },
+        "visits": { "type": "array", "items": { "$ref": "#/$defs/visit" } }
+      }
+    },
+    "history": { "type": "array", "items": { "$ref": "#/$defs/series" } },
+    "live": { "$ref": "#/$defs/live" },
+    "account": {
+      "type": "object",
+      "properties": {
+        "items": { "type": "array", "items": { "$ref": "#/$defs/itemRecord" } },
+        "transferItems": { "type": "array", "items": { "type": "integer" } },
+        "racers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["item"],
+            "properties": {
+              "item": { "type": "integer" },
+              "appearance": { "type": ["integer", "string"] },
+              "trainings": { "$ref": "#/$defs/guidIntegerMap", "description": "Attribute id -> level." }
+            }
+          }
+        },
+        "race": {
+          "type": "object",
+          "properties": { "wins": { "type": "integer", "minimum": 0 }, "losses": { "type": "integer", "minimum": 0 } }
+        }
+      }
+    },
+    "unlocatedItems": { "type": "array", "items": { "$ref": "#/$defs/itemRecord" } },
+    "computed": { "$ref": "#/$defs/computed" },
+    "islands": { "type": "array", "items": { "$ref": "#/$defs/island" } },
+    "ext": { "$ref": "#/$defs/ext" }
+  },
+  "$defs": {
+    "ext": {
+      "type": "object",
+      "description": "Tool-private data: ext.<generator> -> anything (R11). Preserved verbatim by every other tool.",
+      "additionalProperties": { "type": "object" }
+    },
+    "guid": { "type": "integer", "minimum": 0 },
+    "guidNumberMap": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[0-9]+$" },
+      "additionalProperties": { "type": "number" }
+    },
+    "guidIntegerMap": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[0-9]+$" },
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "guidBooleanMap": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[0-9]+$" },
+      "additionalProperties": { "type": "boolean" }
+    },
+    "position": {
+      "type": "object",
+      "description": "Game tile units; see spec/format.md, coordinate system.",
+      "required": ["x", "z"],
+      "properties": { "x": { "type": "number" }, "z": { "type": "number" }, "height": { "type": "number" } }
+    },
+    "itemRecord": {
+      "type": "object",
+      "description": "R56. A record without instance stands for count (default 1) items of that GUID. Fields only when the writer knows them.",
+      "required": ["item"],
+      "properties": {
+        "item": { "type": "integer" },
+        "instance": { "type": "integer", "description": "The game's item instance id; unique in the file (checked outside the schema)." },
+        "slot": { "type": "integer", "minimum": 0 },
+        "count": { "type": "integer", "minimum": 1 },
+        "boosted": { "type": "boolean" },
+        "boostConditionMet": { "type": "boolean" },
+        "mythicEffect": { "type": "integer", "description": "Effect GUID activated through this item." },
+        "ext": { "$ref": "#/$defs/ext" }
+      }
+    },
+    "itemHolder": {
+      "type": "object",
+      "properties": {
+        "kind": { "type": "string", "description": "building or ship; absent means building." },
+        "guid": { "type": "integer", "description": "Building GUID, or ship type GUID when kind is ship." },
+        "instance": { "type": "integer", "description": "Object id of the building or ship." },
+        "position": { "$ref": "#/$defs/position" },
+        "rotation": { "type": "number", "description": "Radians; absent means 0." },
+        "enabledSockets": { "type": "integer", "minimum": 0 },
+        "route": { "type": ["string", "integer"], "description": "Ships only: the id of the trade route." },
+        "items": { "type": "array", "items": { "$ref": "#/$defs/itemRecord" } },
+        "carried": { "type": "array", "items": { "$ref": "#/$defs/itemRecord" } },
+        "ext": { "$ref": "#/$defs/ext" }
+      }
+    },
+    "buildingEntry": {
+      "type": "object",
+      "properties": {
+        "built": { "type": "integer", "minimum": 0 },
+        "planned": { "type": "integer", "minimum": 0 },
+        "fullyUtilize": { "type": "boolean" }
+      }
+    },
+    "island": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "description": "Opaque, unique in the file." },
+        "name": { "type": "string" },
+        "session": { "type": "integer", "description": "Region/session GUID. Any value is valid (R19)." },
+        "gameIsland": {
+          "type": "object",
+          "properties": {
+            "sessionGuid": { "type": "integer" },
+            "islandId": { "type": "integer", "minimum": 0 },
+            "areaIndex": { "type": "integer", "minimum": 0 },
+            "areaKey": { "type": "integer", "minimum": 0, "description": "(areaIndex << 13) | (islandId << 6) | regionCode." },
+            "name": { "type": "string" }
+          }
+        },
+        "islandFile": { "type": "string" },
+        "islandSize": { "type": "string" },
+        "fertilities": { "$ref": "#/$defs/guidBooleanMap" },
+        "fertilitiesComplete": { "type": "boolean" },
+        "patron": { "type": "integer" },
+        "devotion": { "type": "number", "minimum": 0 },
+        "buildings": {
+          "type": "object",
+          "propertyNames": { "pattern": "^[0-9]+$" },
+          "additionalProperties": { "$ref": "#/$defs/buildingEntry" }
+        },
+        "residencesByLevel": { "$ref": "#/$defs/guidIntegerMap" },
+        "population": { "$ref": "#/$defs/guidNumberMap" },
+        "disabledNeeds": {
+          "type": "object",
+          "description": "Population level GUID -> list of disabled need GUIDs. Present (possibly empty) for every writer that models needs.",
+          "propertyNames": { "pattern": "^[0-9]+$" },
+          "additionalProperties": { "type": "array", "items": { "type": "integer" } }
+        },
+        "needNotes": {
+          "type": "object",
+          "propertyNames": { "pattern": "^[0-9]+$" },
+          "additionalProperties": {
+            "type": "object",
+            "propertyNames": { "pattern": "^[0-9]+$" },
+            "additionalProperties": { "type": "string" }
+          }
+        },
+        "products": {
+          "type": "object",
+          "propertyNames": { "pattern": "^[0-9]+$" },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "producer": { "type": ["integer", "string"], "description": "Factory GUID, or the string none." },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "factories": {
+          "type": "object",
+          "propertyNames": { "pattern": "^[0-9]+$" },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "description": "Items on this factory type; off = not listed.",
+                "items": {
+                  "type": "object",
+                  "required": ["item"],
+                  "properties": { "item": { "type": "integer" }, "boosted": { "type": "boolean" } }
+                }
+              },
+              "effects": { "type": "array", "items": { "type": "integer" }, "description": "Per-target effects switched on." },
+              "aqueduct": { "type": "boolean" },
+              "modules": { "$ref": "#/$defs/guidBooleanMap", "description": "Module GUID -> attached (type-level)." },
+              "manualProductivity": { "type": "number", "minimum": 0 }
+            }
+          }
+        },
+        "itemHolders": { "type": "array", "items": { "$ref": "#/$defs/itemHolder" } },
+        "itemStorage": { "type": "array", "items": { "$ref": "#/$defs/itemRecord" } },
+        "moduleAttachments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "building": { "type": "integer" },
+              "instance": { "type": "integer" },
+              "module": { "type": "integer" },
+              "moduleInstance": { "type": "integer" }
+            }
+          }
+        },
+        "effects": { "$ref": "#/$defs/guidNumberMap" },
+        "appliedEffects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "integer" },
+              "effect": { "type": "integer" },
+              "source": { "type": "string" },
+              "share": { "type": "number", "minimum": 0, "maximum": 1 },
+              "applied": { "type": "boolean" },
+              "method": { "type": "string" },
+              "scale": { "type": "number" }
+            }
+          }
+        },
+        "rangeBuffs": { "$ref": "#/$defs/guidNumberMap" },
+        "residenceItems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["item"],
+            "properties": { "item": { "type": "integer" }, "boosted": { "type": "boolean" } }
+          }
+        },
+        "villaCoverage": { "$ref": "#/$defs/coverage" },
+        "residenceEffects": { "type": "object" },
+        "publicCoverages": { "type": "object" },
+        "notes": {
+          "type": "object",
+          "propertyNames": { "pattern": "^[0-9]+$" },
+          "additionalProperties": { "type": "string" }
+        },
+        "harbour": {
+          "type": "object",
+          "properties": {
+            "warehouse": { "type": "integer" },
+            "spots": { "type": "integer", "minimum": 0 },
+            "item": { "type": "object", "properties": { "item": { "type": "integer" }, "boosted": { "type": "boolean" } } }
+          }
+        },
+        "position": { "type": "object", "description": "Slot on the template, or file element and coordinates (R41)." },
+        "islandItems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["item"],
+            "properties": { "item": { "type": "integer" }, "boosted": { "type": "boolean" } }
+          }
+        },
+        "materials": { "type": "object" },
+        "romanization": {},
+        "wonders": {},
+        "extraDemand": {},
+        "minimumStock": { "$ref": "#/$defs/guidNumberMap" },
+        "layout": { "description": "Reserved (R31)." },
+        "ext": { "$ref": "#/$defs/ext" }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "properties": {
+        "default": { "type": "number", "minimum": 0, "maximum": 100 },
+        "byLevel": { "$ref": "#/$defs/guidNumberMap" },
+        "byResidence": { "$ref": "#/$defs/guidNumberMap" }
+      }
+    },
+    "route": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": { "type": ["string", "integer"] },
+        "name": { "type": "string" },
+        "manual": { "type": "boolean", "description": "Manually saved route." },
+        "stations": {
+          "type": "array",
+          "description": "In circuit order; the file order is the order.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "island": { "type": "string", "description": "Island id; absent on a non-player area." },
+              "slots": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "product": { "type": "integer" },
+                    "mode": { "type": "string", "description": "load or unload; other values are kept." },
+                    "slot": { "type": "integer", "minimum": 0 },
+                    "amount": { "type": "number", "minimum": 0 }
+                  }
+                }
+              },
+              "ext": { "$ref": "#/$defs/ext" }
+            }
+          }
+        },
+        "ships": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "integer" },
+              "slots": { "type": "integer", "minimum": 0 },
+              "modules": { "type": "array", "items": { "type": "integer" } },
+              "count": { "type": "integer", "minimum": 0 }
+            }
+          }
+        },
+        "ext": { "$ref": "#/$defs/ext" }
+      }
+    },
+    "import": {
+      "type": "object",
+      "required": ["island", "product"],
+      "properties": {
+        "island": { "type": "string", "description": "Receiving island id." },
+        "product": { "type": "integer" },
+        "amount": { "type": "number", "minimum": 0, "description": "t/min, only where a writer derives a total." },
+        "basis": { "type": "string", "description": "planned, measured or entered; other values are kept." },
+        "suppliers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "anyOf": [{ "required": ["island"] }, { "required": ["governor"] }],
+            "properties": {
+              "island": { "type": "string" },
+              "governor": { "type": "integer" },
+              "share": { "type": "number", "minimum": 0, "maximum": 1 },
+              "amount": { "type": "number", "minimum": 0, "description": "Minimum entered by the user, t/min." },
+              "default": { "type": "boolean", "description": "The residual supplier (R54)." }
+            }
+          }
+        },
+        "ext": { "$ref": "#/$defs/ext" }
+      }
+    },
+    "governorHarbour": {
+      "type": "object",
+      "properties": {
+        "governor": { "type": "integer" },
+        "region": { "type": "integer" },
+        "position": { "$ref": "#/$defs/position" },
+        "goods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": { "product": { "type": "integer" }, "rate": { "type": "number", "minimum": 0 } }
+          }
+        },
+        "stockLimits": { "$ref": "#/$defs/guidNumberMap" }
+      }
+    },
+    "visit": {
+      "type": "object",
+      "properties": {
+        "route": { "type": ["string", "integer"] },
+        "island": { "type": "string" },
+        "trader": { "type": ["string", "integer"], "description": "Trader id; the calculator and planner read only the player's." },
+        "time": { "type": "number" },
+        "clock": { "type": "string" },
+        "shipType": { "type": "integer" },
+        "goods": { "$ref": "#/$defs/guidNumberMap", "description": "Product GUID -> net amount; zero nets absent." }
+      }
+    },
+    "series": {
+      "type": "object",
+      "properties": {
+        "island": { "type": "string" },
+        "product": { "type": "integer" },
+        "kind": { "type": "string", "description": "storage, production or consumption; others kept." },
+        "clock": { "type": "string", "description": "game or wall; others kept." },
+        "unit": { "type": "string" },
+        "start": { "type": "number" },
+        "step": { "type": "number" },
+        "values": { "type": "array", "items": { "type": "number" } },
+        "points": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["t", "v"],
+            "properties": { "t": { "type": "number" }, "v": { "type": "number" } }
+          }
+        }
+      }
+    },
+    "live": {
+      "type": "object",
+      "properties": {
+        "clock": { "type": "string" },
+        "timestamp": { "type": "number" },
+        "unit": { "type": "string" },
+        "islands": {
+          "type": "object",
+          "description": "Island id -> product GUID -> values.",
+          "additionalProperties": {
+            "type": "object",
+            "propertyNames": { "pattern": "^[0-9]+$" },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "generation": { "type": "number" },
+                "consumption": { "type": "number" },
+                "delta": { "type": "number" },
+                "idealGeneration": { "type": "number" },
+                "idealConsumption": { "type": "number" },
+                "buildings": { "type": "number" },
+                "productivity": { "type": "number" },
+                "storage": { "type": "number" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "computed": {
+      "type": "object",
+      "properties": {
+        "islands": {
+          "type": "object",
+          "description": "Island id -> calculated values at export time (informational, R17).",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "residents": { "$ref": "#/$defs/guidNumberMap" },
+              "buildingsRequired": { "$ref": "#/$defs/guidNumberMap" },
+              "imports": { "$ref": "#/$defs/guidNumberMap" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

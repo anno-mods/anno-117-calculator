@@ -1,0 +1,627 @@
+{
+  "format": "anno117-exchange",
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "gen-x",
+    "version": "2",
+    "unknownKey": {
+      "nested": [
+        1,
+        {
+          "deep": true
+        }
+      ]
+    }
+  },
+  "source": {
+    "kind": "tool",
+    "unknownKey": {
+      "nested": [
+        1,
+        {
+          "deep": true
+        }
+      ]
+    }
+  },
+  "settings": {
+    "dlcs": [
+      1
+    ],
+    "difficulty": {
+      "unknownKey": {
+        "nested": [
+          1,
+          {
+            "deep": true
+          }
+        ]
+      }
+    },
+    "volcano": {
+      "unknownKey": {
+        "nested": [
+          1,
+          {
+            "deep": true
+          }
+        ]
+      }
+    },
+    "seasons": {
+      "unknownKey": {
+        "nested": [
+          1,
+          {
+            "deep": true
+          }
+        ]
+      }
+    },
+    "map": {
+      "unknownKey": {
+        "nested": [
+          1,
+          {
+            "deep": true
+          }
+        ]
+      }
+    },
+    "unknownKey": {
+      "nested": [
+        1,
+        {
+          "deep": true
+        }
+      ]
+    }
+  },
+  "fleet": {
+    "effects": [],
+    "ships": [
+      {
+        "type": 1,
+        "unknownKey": {
+          "nested": [
+            1,
+            {
+              "deep": true
+            }
+          ]
+        }
+      }
+    ],
+    "unknownKey": {
+      "nested": [
+        1,
+        {
+          "deep": true
+        }
+      ]
+    }
+  },
+  "effects": {
+    "global": {
+      "43620": 1
+    },
+    "bySession": {
+      "3245": {
+        "145095": 1
+      }
+    },
+    "unknownKey": {
+      "nested": [
+        1,
+        {
+          "deep": true
+        }
+      ]
+    }
+  },
+  "research": {
+    "researched": [
+      37870
+    ],
+    "counts": {
+      "37870": 5
+    },
+    "unknownKey": {
+      "nested": [
+        1,
+        {
+          "deep": true
+        }
+      ]
+    }
+  },
+  "trade": {
+    "routes": [
+      {
+        "id": "r1",
+        "stations": [
+          {
+            "island": "i1",
+            "slots": [
+              {
+                "product": 151680,
+                "mode": "load",
+                "slot": 0,
+                "amount": 10,
+                "unknownKey": {
+                  "nested": [
+                    1,
+                    {
+                      "deep": true
+                    }
+                  ]
+                }
+              }
+            ],
+            "unknownKey": {
+              "nested": [
+                1,
+                {
+                  "deep": true
+                }
+              ]
+            }
+          }
+        ],
+        "ships": [
+          {
+            "type": 1,
+            "slots": 4,
+            "unknownKey": {
+              "nested": [
+                1,
+                {
+                  "deep": true
+                }
+              ]
+            }
+          }
+        ],
+        "unknownKey": {
+          "nested": [
+            1,
+            {
+              "deep": true
+            }
+          ]
+        }
+      }
+    ],
+    "imports": [
+      {
+        "island": "i1",
+        "product": 151680,
+        "suppliers": [
+          {
+            "island": "i2",
+            "share": 1,
+            "unknownKey": {
+              "nested": [
+                1,
+                {
+                  "deep": true
+                }
+              ]
+            }
+          }
+        ],
+        "unknownKey": {
+          "nested": [
+            1,
+            {
+              "deep": true
+            }
+          ]
+        }
+      }
+    ],
+    "governorHarbours": [
+      {
+        "governor": 5,
+        "goods": [
+          {
+            "product": 151680,
+            "rate": 2,
+            "unknownKey": {
+              "nested": [
+                1,
+                {
+                  "deep": true
+                }
+              ]
+            }
+          }
+        ],
+        "unknownKey": {
+          "nested": [
+            1,
+            {
+              "deep": true
+            }
+          ]
+        }
+      }
+    ],
+    "visits": [
+      {
+        "route": "r1",
+        "island": "i1",
+        "goods": {
+          "151680": 5
+        },
+        "unknownKey": {
+          "nested": [
+            1,
+            {
+              "deep": true
+            }
+          ]
+        }
+      }
+    ],
+    "unknownKey": {
+      "nested": [
+        1,
+        {
+          "deep": true
+        }
+      ]
+    }
+  },
+  "history": [
+    {
+      "island": "i1",
+      "product": 151680,
+      "kind": "storage",
+      "values": [
+        1,
+        2
+      ],
+      "unknownKey": {
+        "nested": [
+          1,
+          {
+            "deep": true
+          }
+        ]
+      }
+    }
+  ],
+  "live": {
+    "islands": {
+      "i1": {
+        "151680": {
+          "generation": 1,
+          "unknownKey": {
+            "nested": [
+              1,
+              {
+                "deep": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    "unknownKey": {
+      "nested": [
+        1,
+        {
+          "deep": true
+        }
+      ]
+    }
+  },
+  "account": {
+    "items": [
+      {
+        "item": 51316,
+        "instance": 1,
+        "unknownKey": {
+          "nested": [
+            1,
+            {
+              "deep": true
+            }
+          ]
+        }
+      }
+    ],
+    "racers": [
+      {
+        "item": 1,
+        "trainings": {
+          "1": 2
+        },
+        "unknownKey": {
+          "nested": [
+            1,
+            {
+              "deep": true
+            }
+          ]
+        }
+      }
+    ],
+    "race": {
+      "wins": 1,
+      "unknownKey": {
+        "nested": [
+          1,
+          {
+            "deep": true
+          }
+        ]
+      }
+    },
+    "unknownKey": {
+      "nested": [
+        1,
+        {
+          "deep": true
+        }
+      ]
+    }
+  },
+  "unlocatedItems": [
+    {
+      "item": 51316,
+      "instance": 2,
+      "unknownKey": {
+        "nested": [
+          1,
+          {
+            "deep": true
+          }
+        ]
+      }
+    }
+  ],
+  "computed": {
+    "islands": {
+      "i1": {
+        "residents": {
+          "1499": 10
+        },
+        "unknownKey": {
+          "nested": [
+            1,
+            {
+              "deep": true
+            }
+          ]
+        }
+      }
+    },
+    "unknownKey": {
+      "nested": [
+        1,
+        {
+          "deep": true
+        }
+      ]
+    }
+  },
+  "islands": [
+    {
+      "id": "i1",
+      "session": 3245,
+      "gameIsland": {
+        "sessionGuid": 3245,
+        "islandId": 5,
+        "areaIndex": 1,
+        "areaKey": 8513,
+        "unknownKey": {
+          "nested": [
+            1,
+            {
+              "deep": true
+            }
+          ]
+        }
+      },
+      "buildings": {
+        "3174": {
+          "built": 1,
+          "unknownKey": {
+            "nested": [
+              1,
+              {
+                "deep": true
+              }
+            ]
+          }
+        }
+      },
+      "factories": {
+        "3174": {
+          "items": [
+            {
+              "item": 51316,
+              "unknownKey": {
+                "nested": [
+                  1,
+                  {
+                    "deep": true
+                  }
+                ]
+              }
+            }
+          ],
+          "unknownKey": {
+            "nested": [
+              1,
+              {
+                "deep": true
+              }
+            ]
+          }
+        }
+      },
+      "itemHolders": [
+        {
+          "guid": 1,
+          "items": [
+            {
+              "item": 51316,
+              "instance": 3,
+              "unknownKey": {
+                "nested": [
+                  1,
+                  {
+                    "deep": true
+                  }
+                ]
+              }
+            }
+          ],
+          "position": {
+            "x": 1,
+            "z": 2,
+            "unknownKey": {
+              "nested": [
+                1,
+                {
+                  "deep": true
+                }
+              ]
+            }
+          },
+          "unknownKey": {
+            "nested": [
+              1,
+              {
+                "deep": true
+              }
+            ]
+          }
+        }
+      ],
+      "itemStorage": [
+        {
+          "item": 51316,
+          "instance": 4,
+          "unknownKey": {
+            "nested": [
+              1,
+              {
+                "deep": true
+              }
+            ]
+          }
+        }
+      ],
+      "moduleAttachments": [
+        {
+          "building": 1,
+          "instance": 7,
+          "unknownKey": {
+            "nested": [
+              1,
+              {
+                "deep": true
+              }
+            ]
+          }
+        }
+      ],
+      "appliedEffects": [
+        {
+          "type": 3174,
+          "effect": 158334,
+          "unknownKey": {
+            "nested": [
+              1,
+              {
+                "deep": true
+              }
+            ]
+          }
+        }
+      ],
+      "harbour": {
+        "spots": 3,
+        "unknownKey": {
+          "nested": [
+            1,
+            {
+              "deep": true
+            }
+          ]
+        }
+      },
+      "villaCoverage": {
+        "default": 50,
+        "unknownKey": {
+          "nested": [
+            1,
+            {
+              "deep": true
+            }
+          ]
+        }
+      },
+      "products": {
+        "151680": {
+          "producer": "none",
+          "unknownKey": {
+            "nested": [
+              1,
+              {
+                "deep": true
+              }
+            ]
+          }
+        }
+      },
+      "ext": {
+        "gen-x": {
+          "unknownKey": {
+            "nested": [
+              1,
+              {
+                "deep": true
+              }
+            ]
+          }
+        }
+      },
+      "unknownKey": {
+        "nested": [
+          1,
+          {
+            "deep": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "i2"
+    }
+  ],
+  "ext": {
+    "gen-x": {
+      "unknownKey": {
+        "nested": [
+          1,
+          {
+            "deep": true
+          }
+        ]
+      }
+    }
+  },
+  "unknownKey": {
+    "nested": [
+      1,
+      {
+        "deep": true
+      }
+    ]
+  }
+}

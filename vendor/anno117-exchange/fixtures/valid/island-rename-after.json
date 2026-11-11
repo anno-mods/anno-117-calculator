@@ -1,0 +1,128 @@
+{
+  "format": "anno117-exchange",
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "calculator-test",
+    "version": "1.0.0"
+  },
+  "islands": [
+    {
+      "id": "isl-a",
+      "name": "Roma Nova",
+      "session": 3245,
+      "gameIsland": {
+        "sessionGuid": 3245,
+        "islandId": 5,
+        "areaIndex": 1,
+        "areaKey": 8513
+      },
+      "buildings": {
+        "3174": {
+          "built": 2
+        }
+      },
+      "unknownIslandKey": {
+        "keep": "a"
+      },
+      "needNotes": {
+        "1499": {
+          "2689": "bread note"
+        }
+      },
+      "ext": {
+        "calculator": {
+          "collapsed": {
+            "panel-1": true
+          }
+        }
+      }
+    },
+    {
+      "id": "isl-c",
+      "name": "Latium 7",
+      "session": 3245,
+      "buildings": {
+        "3089": {
+          "built": 1
+        }
+      }
+    }
+  ],
+  "trade": {
+    "routes": [
+      {
+        "id": "r1",
+        "name": "Dates run",
+        "stations": [
+          {
+            "island": "isl-a",
+            "slots": [
+              {
+                "product": 151680,
+                "mode": "unload",
+                "slot": 0,
+                "amount": 10
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "imports": [
+      {
+        "island": "isl-a",
+        "product": 151680,
+        "basis": "planned",
+        "suppliers": [
+          {
+            "island": "isl-c",
+            "share": 1
+          }
+        ]
+      }
+    ],
+    "visits": [
+      {
+        "route": "r1",
+        "island": "isl-a",
+        "trader": "player",
+        "goods": {
+          "151680": 10
+        }
+      }
+    ]
+  },
+  "history": [
+    {
+      "island": "isl-a",
+      "product": 2137,
+      "kind": "storage",
+      "clock": "game",
+      "unit": "t",
+      "start": 0,
+      "step": 60,
+      "values": [
+        1,
+        2,
+        3
+      ]
+    }
+  ],
+  "live": {
+    "clock": "wall",
+    "timestamp": 1760000000,
+    "unit": "t/min",
+    "islands": {
+      "isl-a": {
+        "2137": {
+          "generation": 1.5
+        }
+      }
+    }
+  },
+  "ext": {
+    "calculator": {
+      "darkMode": true
+    }
+  }
+}

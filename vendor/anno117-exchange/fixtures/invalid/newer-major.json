@@ -1,0 +1,12 @@
+{
+  "format": "anno117-exchange",
+  "formatVersion": "2.0",
+  "generator": {
+    "name": "future"
+  },
+  "islands": [
+    {
+      "id": "a"
+    }
+  ]
+}

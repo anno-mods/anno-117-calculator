@@ -1,0 +1,51 @@
+{
+  "format": "anno117-exchange",
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "calculator-test",
+    "version": "1.0.0"
+  },
+  "settings": {
+    "dlcs": [
+      1,
+      2,
+      3
+    ]
+  },
+  "islands": [
+    {
+      "id": "latium-5",
+      "name": "Latium 5",
+      "session": 3245,
+      "disabledNeeds": {
+        "1499": [
+          2665
+        ],
+        "1496": []
+      },
+      "needNotes": {
+        "1499": {
+          "2665": "no fish here"
+        }
+      }
+    },
+    {
+      "id": "latium-6",
+      "name": "Latium 6",
+      "session": 3245,
+      "disabledNeeds": {}
+    }
+  ],
+  "ext": {
+    "conformance": {
+      "expect": {
+        "dlcSwitchedOn": 3,
+        "needsOnForRomanLevels": [
+          2690,
+          2770
+        ],
+        "note": "Wine (2690) and Soap (2770) come with Dawn of the Delta and are not listed, so they are on (AE22, R43); latium-6 lists no disabled need, an empty object, not 'not provided'"
+      }
+    }
+  }
+}

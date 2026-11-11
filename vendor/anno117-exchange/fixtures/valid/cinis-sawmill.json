@@ -1,0 +1,32 @@
+{
+  "format": "anno117-exchange",
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "calculator-test",
+    "version": "1.0.0"
+  },
+  "islands": [
+    {
+      "id": "cinis",
+      "name": "Cinis",
+      "session": 3245,
+      "buildings": {
+        "3089": {
+          "built": 4
+        }
+      }
+    }
+  ],
+  "ext": {
+    "conformance": {
+      "expect": {
+        "product": 2077,
+        "demandPerMinute": 8,
+        "sawmills": 4,
+        "cycleSeconds": 30,
+        "note": "4 sawmills, each 2 t/min Wood (30 s cycle), all fully utilized (R50, AE21)"
+      },
+      "fullyUtilizeAbsentMeans": "on"
+    }
+  }
+}

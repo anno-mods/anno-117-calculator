@@ -1,0 +1,100 @@
+{
+  "format": "anno117-exchange",
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "conformance",
+    "version": "1.0.0"
+  },
+  "islands": [
+    {
+      "id": "a",
+      "name": "A",
+      "session": 3245,
+      "gameIsland": {
+        "sessionGuid": 3245,
+        "islandId": 1,
+        "areaIndex": 1,
+        "areaKey": 8257
+      }
+    },
+    {
+      "id": "b",
+      "name": "B",
+      "session": 3245,
+      "gameIsland": {
+        "sessionGuid": 3245,
+        "islandId": 2,
+        "areaIndex": 1,
+        "areaKey": 8321
+      }
+    }
+  ],
+  "trade": {
+    "routes": [
+      {
+        "id": "r1",
+        "stations": [
+          {
+            "slots": [
+              {
+                "product": 151680,
+                "mode": "load",
+                "slot": 0,
+                "amount": 10
+              }
+            ],
+            "island": "a"
+          },
+          {
+            "slots": [
+              {
+                "product": 151680,
+                "mode": "unload",
+                "slot": 0,
+                "amount": 5
+              }
+            ]
+          },
+          {
+            "slots": [
+              {
+                "product": 151680,
+                "mode": "unload",
+                "slot": 0,
+                "amount": 5
+              }
+            ],
+            "island": "b"
+          }
+        ],
+        "ships": [
+          {
+            "type": 1001,
+            "slots": 4,
+            "count": 1
+          }
+        ]
+      }
+    ],
+    "imports": [
+      {
+        "island": "b",
+        "product": 151680,
+        "basis": "planned",
+        "suppliers": [
+          {
+            "island": "a",
+            "share": 1
+          }
+        ]
+      }
+    ]
+  },
+  "ext": {
+    "conformance": {
+      "case": "non-player-station",
+      "rule": "reference-derivation",
+      "note": ""
+    }
+  }
+}

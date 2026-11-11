@@ -1,0 +1,35 @@
+{
+  "format": "anno117-exchange",
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "unknown-tool-9000",
+    "version": "1.0.0"
+  },
+  "source": {
+    "kind": "telepathy",
+    "file": "x.dat"
+  },
+  "islands": [
+    {
+      "id": "u1",
+      "buildings": {
+        "3174": {
+          "built": 1
+        }
+      },
+      "ext": {
+        "unknown-tool-9000": {
+          "cursor": [
+            3,
+            4
+          ]
+        }
+      }
+    }
+  ],
+  "ext": {
+    "unknown-tool-9000": {
+      "theme": "dark"
+    }
+  }
+}

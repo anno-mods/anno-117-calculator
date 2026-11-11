@@ -16,6 +16,7 @@ import { ConstantsConfig, NeedConsumptionConfig, TextConfig } from './types.conf
 import { Storage as SubStorage, Island, Region, Session } from './world';
 import { Effect, ProductCategory, Fertility, AreaBuff } from './production';
 import { isAggregating, compareAggregateDemands } from './aggregate';
+import './exchange';
 
 
 declare const $: any;

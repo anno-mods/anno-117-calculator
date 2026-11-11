@@ -1,0 +1,208 @@
+{
+  "format": "anno117-exchange",
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "conformance",
+    "version": "1.0.0"
+  },
+  "islands": [
+    {
+      "id": "a",
+      "name": "A",
+      "session": 3245,
+      "gameIsland": {
+        "sessionGuid": 3245,
+        "islandId": 1,
+        "areaIndex": 1,
+        "areaKey": 8257
+      }
+    },
+    {
+      "id": "b",
+      "name": "B",
+      "session": 3245,
+      "gameIsland": {
+        "sessionGuid": 3245,
+        "islandId": 2,
+        "areaIndex": 1,
+        "areaKey": 8321
+      }
+    },
+    {
+      "id": "c",
+      "name": "C",
+      "session": 3245,
+      "gameIsland": {
+        "sessionGuid": 3245,
+        "islandId": 3,
+        "areaIndex": 1,
+        "areaKey": 8385
+      }
+    },
+    {
+      "id": "d",
+      "name": "D",
+      "session": 3245,
+      "gameIsland": {
+        "sessionGuid": 3245,
+        "islandId": 4,
+        "areaIndex": 1,
+        "areaKey": 8449
+      }
+    },
+    {
+      "id": "e",
+      "name": "E",
+      "session": 3245,
+      "gameIsland": {
+        "sessionGuid": 3245,
+        "islandId": 5,
+        "areaIndex": 1,
+        "areaKey": 8513
+      }
+    }
+  ],
+  "trade": {
+    "routes": [
+      {
+        "id": "r1",
+        "name": "Dates",
+        "stations": [
+          {
+            "slots": [
+              {
+                "product": 151680,
+                "mode": "load",
+                "slot": 0,
+                "amount": 10
+              }
+            ],
+            "island": "a"
+          },
+          {
+            "slots": [
+              {
+                "product": 151680,
+                "mode": "unload",
+                "slot": 0,
+                "amount": 5
+              },
+              {
+                "product": 151680,
+                "mode": "load",
+                "slot": 1,
+                "amount": 5
+              }
+            ],
+            "island": "b"
+          },
+          {
+            "slots": [
+              {
+                "product": 151680,
+                "mode": "unload",
+                "slot": 0,
+                "amount": 5
+              },
+              {
+                "product": 151680,
+                "mode": "load",
+                "slot": 1,
+                "amount": 5
+              }
+            ],
+            "island": "c"
+          },
+          {
+            "slots": [
+              {
+                "product": 151680,
+                "mode": "unload",
+                "slot": 0,
+                "amount": 5
+              },
+              {
+                "product": 151680,
+                "mode": "load",
+                "slot": 1,
+                "amount": 5
+              }
+            ],
+            "island": "d"
+          },
+          {
+            "slots": [
+              {
+                "product": 151680,
+                "mode": "unload",
+                "slot": 0,
+                "amount": 5
+              }
+            ],
+            "island": "e"
+          }
+        ],
+        "ships": [
+          {
+            "type": 1001,
+            "slots": 4,
+            "count": 1
+          }
+        ]
+      }
+    ],
+    "imports": [
+      {
+        "island": "b",
+        "product": 151680,
+        "basis": "planned",
+        "suppliers": [
+          {
+            "island": "a",
+            "share": 1
+          }
+        ]
+      },
+      {
+        "island": "c",
+        "product": 151680,
+        "basis": "planned",
+        "suppliers": [
+          {
+            "island": "a",
+            "share": 1
+          }
+        ]
+      },
+      {
+        "island": "d",
+        "product": 151680,
+        "basis": "planned",
+        "suppliers": [
+          {
+            "island": "a",
+            "share": 1
+          }
+        ]
+      },
+      {
+        "island": "e",
+        "product": 151680,
+        "basis": "planned",
+        "suppliers": [
+          {
+            "island": "a",
+            "share": 1
+          }
+        ]
+      }
+    ]
+  },
+  "ext": {
+    "conformance": {
+      "case": "distribution-circuit-relays",
+      "rule": "reference-derivation",
+      "note": "Relay stops pass nothing on: a station that unloads the good is never a supplier."
+    }
+  }
+}

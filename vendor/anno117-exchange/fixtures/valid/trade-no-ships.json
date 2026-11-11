@@ -1,0 +1,72 @@
+{
+  "format": "anno117-exchange",
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "conformance",
+    "version": "1.0.0"
+  },
+  "islands": [
+    {
+      "id": "a",
+      "name": "A",
+      "session": 3245,
+      "gameIsland": {
+        "sessionGuid": 3245,
+        "islandId": 1,
+        "areaIndex": 1,
+        "areaKey": 8257
+      }
+    },
+    {
+      "id": "b",
+      "name": "B",
+      "session": 3245,
+      "gameIsland": {
+        "sessionGuid": 3245,
+        "islandId": 2,
+        "areaIndex": 1,
+        "areaKey": 8321
+      }
+    }
+  ],
+  "trade": {
+    "routes": [
+      {
+        "id": "r1",
+        "stations": [
+          {
+            "slots": [
+              {
+                "product": 151680,
+                "mode": "load",
+                "slot": 0,
+                "amount": 10
+              }
+            ],
+            "island": "a"
+          },
+          {
+            "slots": [
+              {
+                "product": 151680,
+                "mode": "unload",
+                "slot": 0,
+                "amount": 10
+              }
+            ],
+            "island": "b"
+          }
+        ],
+        "ships": []
+      }
+    ],
+    "imports": []
+  },
+  "ext": {
+    "conformance": {
+      "case": "no-ships",
+      "rule": "reference-derivation",
+      "note": ""
+    }
+  }
+}

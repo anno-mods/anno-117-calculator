@@ -47,6 +47,7 @@
     "@types/jquery": "^3.5.29",
     "@types/knockout": "^3.4.72",
     "@types/node": "^20.10.5",
+    "ajv": "^8.20.0",
     "http-server": "^14.1.1",
     "javascript-lp-solver": "^1.0.3",
     "ts-loader": "^9.5.1",
