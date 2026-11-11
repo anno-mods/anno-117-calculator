@@ -40228,7 +40228,6 @@ if(window.params == null)window.params={
       "targets": [
         3169,
         2786,
-        3169,
         5955,
         5973,
         152256,
@@ -40261,7 +40260,6 @@ if(window.params == null)window.params={
       "name": "Specialist Productivity C RopesChain",
       "rarity": "Common",
       "targets": [
-        3168,
         3168,
         5956,
         31750,
@@ -40863,7 +40861,6 @@ if(window.params == null)window.params={
         3177,
         2694,
         2795,
-        3177,
         8427,
         23723,
         23753,
@@ -46330,9 +46327,7 @@ if(window.params == null)window.params={
         150586,
         150587,
         6475,
-        6514,
-        150586,
-        150587
+        6514
       ]
     },
     {
@@ -47430,9 +47425,7 @@ if(window.params == null)window.params={
       "supplyWeight": 2.0
     },
     {
-      "dlcUnlocks": [
-        67904
-      ],
+      "dlcUnlocks": [],
       "guid": 2690,
       "iconPath": "data/ui/fhd/base/icon_content/production_goods/icon_3d_wine_goods.png",
       "isBuilding": false,
@@ -47636,9 +47629,7 @@ if(window.params == null)window.params={
       "supplyWeight": 1.0
     },
     {
-      "dlcUnlocks": [
-        67904
-      ],
+      "dlcUnlocks": [],
       "guid": 2770,
       "iconPath": "data/ui/fhd/base/icon_content/production_goods/icon_3d_lavender_soap_goods.png",
       "isBuilding": false,
@@ -48522,9 +48513,7 @@ if(window.params == null)window.params={
       "supplyWeight": 4.0
     },
     {
-      "dlcUnlocks": [
-        67904
-      ],
+      "dlcUnlocks": [],
       "guid": 8423,
       "iconPath": "data/ui/fhd/base/icon_content/production_goods/icon_3d_wine_goods.png",
       "isBuilding": false,
@@ -48626,9 +48615,7 @@ if(window.params == null)window.params={
       "supplyWeight": 2.0
     },
     {
-      "dlcUnlocks": [
-        67904
-      ],
+      "dlcUnlocks": [],
       "guid": 6444,
       "iconPath": "data/ui/fhd/base/icon_content/production_goods/icon_3d_lavender_soap_goods.png",
       "isBuilding": false,
@@ -50672,9 +50659,7 @@ if(window.params == null)window.params={
       "supplyWeight": 4.0
     },
     {
-      "dlcUnlocks": [
-        67904
-      ],
+      "dlcUnlocks": [],
       "guid": 151741,
       "iconPath": "data/ui/fhd/base/icon_content/production_goods/icon_3d_wine_goods.png",
       "isBuilding": false,
@@ -50814,9 +50799,7 @@ if(window.params == null)window.params={
       "supplyWeight": 2.0
     },
     {
-      "dlcUnlocks": [
-        67904
-      ],
+      "dlcUnlocks": [],
       "guid": 151745,
       "iconPath": "data/ui/fhd/base/icon_content/production_goods/icon_3d_lavender_soap_goods.png",
       "isBuilding": false,
@@ -53686,9 +53669,7 @@ if(window.params == null)window.params={
         "Roman",
         "Egyptian"
       ],
-      "dlcUnlocks": [
-        67904
-      ],
+      "dlcUnlocks": [],
       "guid": 2071,
       "iconPath": "data/ui/fhd/base/icon_content/production_goods/icon_3d_lavender_goods.png",
       "isAbstract": false,
@@ -53749,9 +53730,7 @@ if(window.params == null)window.params={
         "Celtic",
         "Egyptian"
       ],
-      "dlcUnlocks": [
-        67904
-      ],
+      "dlcUnlocks": [],
       "guid": 2070,
       "iconPath": "data/ui/fhd/base/icon_content/production_goods/icon_3d_grapes_goods.png",
       "isAbstract": false,
@@ -53941,9 +53920,7 @@ if(window.params == null)window.params={
         "Celtic",
         "Egyptian"
       ],
-      "dlcUnlocks": [
-        67904
-      ],
+      "dlcUnlocks": [],
       "guid": 2076,
       "iconPath": "data/ui/fhd/base/icon_content/production_goods/icon_3d_honeycombs_goods.png",
       "isAbstract": false,
@@ -54339,9 +54316,7 @@ if(window.params == null)window.params={
         "Celtic",
         "Egyptian"
       ],
-      "dlcUnlocks": [
-        67904
-      ],
+      "dlcUnlocks": [],
       "guid": 2132,
       "iconPath": "data/ui/fhd/base/icon_content/production_goods/icon_3d_pig_lard_goods.png",
       "isAbstract": false,
@@ -54757,9 +54732,7 @@ if(window.params == null)window.params={
         "Celtic",
         "Egyptian"
       ],
-      "dlcUnlocks": [
-        67904
-      ],
+      "dlcUnlocks": [],
       "guid": 2138,
       "iconPath": "data/ui/fhd/base/icon_content/production_goods/icon_3d_wine_goods.png",
       "isAbstract": false,
@@ -54878,9 +54851,7 @@ if(window.params == null)window.params={
         "Roman",
         "Egyptian"
       ],
-      "dlcUnlocks": [
-        67904
-      ],
+      "dlcUnlocks": [],
       "guid": 2143,
       "iconPath": "data/ui/fhd/base/icon_content/production_goods/icon_3d_lavender_soap_goods.png",
       "isAbstract": false,
