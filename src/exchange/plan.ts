@@ -2,6 +2,7 @@
 // complete key map of raw top-level localStorage keys (KTD1). Pure: no storage, no DOM. The atomic writer (U8)
 // writes the key map; the report dialog (U10) shows the report; U11 compares against `computed`.
 
+import { planCalculator } from "./import-calculator";
 import { planEffects } from "./import-effects";
 import { planIslands } from "./import-islands";
 import { planTrade } from "./import-trade";
@@ -60,19 +61,23 @@ export function planImport(text: string, ctx: ImportContext): ImportPlanResult {
     const islands = planIslands(read, ctx);
     const trade = planTrade(islands, read, ctx);
     const fx = planEffects(islands, read, ctx);
+    const calc = planCalculator(islands, read);
 
     const keyMap: Record<string, string> = {};
     let preservedImports = trade.document.preservedImports.length;
     let capturedFields = 0;
 
-    // Island stores: island part, then the trade additions, then the material additions; ext merged from all three.
+    // Island stores: the calculator-only raw keys, then the island part, the trade additions and the material
+    // additions (the core mapping wins); ext merged from all of them.
     for (const ip of islands.islands) {
         const t = trade.islands[ip.key];
         const m = fx.islands[ip.key];
-        const store: Record<string, unknown> = { ...ip.store, ...(t?.store ?? {}), ...(m?.store ?? {}) };
+        const c = calc.islands[ip.key];
+        const store: Record<string, unknown> = { ...(c?.store ?? {}), ...ip.store, ...(t?.store ?? {}), ...(m?.store ?? {}) };
         const ext: IslandExt = { ...ip.ext, guids: [...ip.ext.guids, ...(t?.ext.guids ?? [])], preservedImports: t?.ext.preservedImports ?? [] };
         if (t?.ext.minimumStock !== undefined) ext.minimumStock = t.ext.minimumStock;
         if (m?.ext.materials !== undefined) ext.materials = m.ext.materials;
+        if (c?.extra !== undefined) ext.calculator = c.extra;
         store[EXCHANGE_EXT_KEY] = ext;
         keyMap[ip.key] = JSON.stringify(store);
         preservedImports += ext.preservedImports?.length ?? 0;
@@ -84,7 +89,13 @@ export function planImport(text: string, ctx: ImportContext): ImportPlanResult {
         .map((u) => ({ pointer: u.pointer, kind: u.kind, value: u.value }));
     capturedFields += captured.length;
 
-    const documentExt: DocumentExt = { orphans: islands.orphans, captured, preservedImports: trade.document.preservedImports };
+    const documentExt: DocumentExt = {
+        orphans: islands.orphans,
+        captured,
+        preservedImports: trade.document.preservedImports,
+        fileIslandIds: read.doc.islands.map((i) => i.id),
+    };
+    if (calc.extra !== undefined) documentExt.calculator = calc.extra;
     if (islands.document.account !== undefined) documentExt.account = islands.document.account;
     if (islands.document.unlocatedItems !== undefined) documentExt.unlocatedItems = islands.document.unlocatedItems;
     if (trade.document.trade !== undefined) documentExt.trade = trade.document.trade;
@@ -93,16 +104,18 @@ export function planImport(text: string, ctx: ImportContext): ImportPlanResult {
     if (fx.ext.settings) documentExt.settings = fx.ext.settings;
 
     const names = islands.islands.map((i) => i.key);
-    keyMap["tradeRoutes"] = JSON.stringify(trade.tradeRoutes);
+    keyMap["tradeRoutes"] = JSON.stringify([...trade.tradeRoutes, ...calc.routes]);
     keyMap["sessionSettings"] = JSON.stringify(fx.sessionSettings);
     keyMap["globalEffects"] = JSON.stringify(fx.globalEffects);
     // DLC keys and the need consumption option; DLCs the island data switches on (mythical items) win over a listed "0".
-    keyMap["calculatorSettings"] = JSON.stringify({ ...fx.calculatorSettings, ...islands.settingsKeys });
+    // The calculator-only settings of ext.calculator sit below both.
+    keyMap["calculatorSettings"] = JSON.stringify({ ...calc.settings, ...fx.calculatorSettings, ...islands.settingsKeys });
+    for (const k of Object.keys(calc.keyMap)) keyMap[k] = calc.keyMap[k];
     keyMap["islandNames"] = JSON.stringify(names);
     if (names.length) keyMap[ISLAND_NAME_KEY] = names[0];
     keyMap[EXCHANGE_EXT_KEY] = JSON.stringify(documentExt);
 
-    const entries = [...islands.report, ...trade.report, ...fx.report, ...documentReport(read)];
+    const entries = [...islands.report, ...trade.report, ...fx.report, ...calc.report, ...documentReport(read)];
     const report: ImportPlanReport = {
         carriedThrough: entries.filter((e) => e.kind === "carried-through"),
         notMapped: entries.filter((e) => e.kind === "not-mapped"),

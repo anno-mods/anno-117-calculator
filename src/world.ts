@@ -38,7 +38,7 @@ const GAME_CONNECTOR_AREA_INDEX_STORAGE_KEY = 'gameConnector.areaIndex';
 /** Exchange format (KTD3): stable opaque island id, island-store key. */
 const EXCHANGE_ISLAND_ID_STORAGE_KEY = 'exchange.islandId';
 
-function generateExchangeIslandId(): string {
+export function generateExchangeIslandId(): string {
     const bytes = new Uint8Array(8);
     if (typeof crypto !== 'undefined' && crypto.getRandomValues)
         crypto.getRandomValues(bytes);
@@ -167,12 +167,26 @@ export class Storage {
             return;
 
         this.savingScheduled = true;
+        pendingSaves.add(this);
         setTimeout(() => {
             this.savingScheduled = false;
-            localStorage.setItem(this.key, JSON.stringify(this.json, null, 4));            
+            pendingSaves.delete(this);
+            localStorage.setItem(this.key, JSON.stringify(this.json, null, 4));
         }, 0);
     }
+
+    /**
+     * Writes every store with a scheduled (debounced) save to localStorage now. The scheduled save still runs and
+     * writes the same JSON again. The exchange exporter reads localStorage and calls this first (U9).
+     */
+    static flushPending(): void {
+        for (const s of pendingSaves)
+            localStorage.setItem(s.key, JSON.stringify(s.json, null, 4));
+    }
 }
+
+// Stores whose debounced save has not run yet.
+const pendingSaves = new Set<Storage>();
 
 /**
  * Represents a region in the game: all sessions of a region have the same products, factories, residences.

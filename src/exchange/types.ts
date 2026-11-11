@@ -302,6 +302,19 @@ export interface ExchangeApi {
     planEffects(islands: IslandsPlan, read: ReadOk): EffectsPlan;
     planImport(text: string): ImportPlanResult;
     applyImport(plan: ImportPlan, opts?: ApplyOptions): ApplyResult;
+    // U9: reads localStorage (after flushing pending debounced saves) and returns the exchange document.
+    buildDocument(): ExchangeDocument;
+    exportDocument(): ExportResult;
+    // U11 registers this; buildDocument adds its result as `computed` when present.
+    computeSummary?(): Computed;
+}
+
+// Result of exportDocument (U9). `report` lists what the export dropped or approximated because the user changed the
+// data the preserved copy depended on (codes: module-attachments-dropped, import-entry-dropped, entry-pruned,
+// preserved-field-dropped, item-boost-dropped); kind is "approximated" for every entry.
+export interface ExportResult {
+    document: ExchangeDocument;
+    report: ReportEntry[];
 }
 
 // Result of readExchange (U4).
@@ -457,6 +470,9 @@ export interface IslandExt {
     minimumStock?: Record<GuidKey, number>;
     // Added by the effects unit (U7): `materials` of the file when it holds content the calculator cannot place.
     materials?: Record<string, unknown>;
+    // Added by the calculator-state import (U9): keys of the file's `islands[].ext.calculator` the calculator does not
+    // know (everything but `store`), written back unchanged.
+    calculator?: Record<string, unknown>;
     [key: string]: unknown;
 }
 
@@ -649,6 +665,29 @@ export interface DocumentExt {
     research?: ResearchExt;
     effects?: EffectsExt;
     settings?: SettingsExt;
+    // Ids of the file's islands[] at import time (U9): the exporter prunes references to the ones that are gone (KTD15)
+    // and keeps references to ids that never named an island of the file (non-player suppliers).
+    fileIslandIds?: string[];
+    // Keys of the file's top-level `ext.calculator` the calculator does not know, written back unchanged (U9).
+    calculator?: Record<string, unknown>;
+    [key: string]: unknown;
+}
+
+// Shape of the calculator's own `ext.calculator` blocks (U9). Document level: raw calculator-only state. Island
+// level: `store` holds the island-store keys that have no counterpart in the core format, by raw storage key.
+export interface CalculatorDocumentExt {
+    collapsibleStates?: Record<string, unknown>;
+    darkMode?: boolean;
+    statisticsCollections?: Record<string, unknown>;
+    allIslands?: Record<string, unknown>;
+    routes?: StoredTradeRoute[];
+    settings?: Record<string, unknown>;
+    areaBuffs?: Record<GuidKey, number>;
+    [key: string]: unknown;
+}
+
+export interface CalculatorIslandExt {
+    store?: Record<string, unknown>;
     [key: string]: unknown;
 }
 
