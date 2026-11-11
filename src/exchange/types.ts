@@ -288,4 +288,69 @@ export interface ExchangeApi {
     uniqueName(wanted: string, taken: Iterable<string>): string;
     reservedKeys(): { keys: string[]; prefixes: string[] };
     islandId(islandName: string): string | null;
+    keys: ExchangeKeys;
+    parseFactoryScalingKey(key: string): FactoryScalingKey | null;
+    classifyItemOrEffect(guid: Guid): "item" | "effect" | "unknown";
+    tables(): ExchangeTables;
+}
+
+// Storage key builders of src/exchange/keys.ts, as exposed on window.exchange.keys.
+export interface ExchangeKeys {
+    buildingsConstructed(g: Guid): string;
+    buildingsPlanned(g: Guid): string;
+    buildingsFullyUtilize(g: Guid): string;
+    needChecked(level: Guid, need: Guid): string;
+    needNotes(level: Guid, need: Guid): string;
+    factoryItemScaling(factory: Guid, item: Guid): string;
+    factoryEffectScaling(factory: Guid, effect: Guid): string;
+    aqueductChecked(factory: Guid): string;
+    moduleChecked(factory: Guid, module: Guid): string;
+    islandEffectScaling(effect: Guid): string;
+    islandFertilityChecked(fertility: Guid): string;
+    productNotes(product: Guid): string;
+    defaultSupplierType(product: Guid): string;
+    defaultSupplierId(product: Guid): string;
+    gameConnectorIslandId: string;
+    gameConnectorAreaIndex: string;
+    sessionEffectScaling(session: Guid, effect: Guid): string;
+    globalEffectScaling(effect: Guid): string;
+    globalEffectStoredKey(effect: Guid): string;
+}
+
+export interface FactoryScalingKey {
+    target: Guid;
+    guid: Guid;
+    kind: "item" | "effect";
+}
+
+export interface DiscoveryEntry {
+    tech: Guid;
+    effects: Guid[];
+    repeatable: boolean;
+    dlcUnlocks: Guid[];
+}
+
+export interface SpecificEffects {
+    session: Guid[];
+    global: Guid[];
+    neverWritable: Guid[];
+}
+
+export interface MaterialEntry {
+    product: Guid;
+    endFactories: Record<string, Guid>;
+}
+
+export interface MythicalItemEffect {
+    effect: Guid;
+    dlcUnlocks: Guid[];
+}
+
+// Plain-data snapshot of the mapping tables (U3), built from window.params.
+export interface ExchangeTables {
+    discoveries: DiscoveryEntry[];
+    specificEffects: SpecificEffects;
+    writableEffects: Guid[];
+    materials: MaterialEntry[];
+    mythicalItemEffects: MythicalItemEffect[];
 }

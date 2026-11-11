@@ -1,5 +1,26 @@
-import { ExchangeApi } from "./types";
+import { ExchangeApi, ExchangeTables } from "./types";
 import { reservedKeys, uniqueName } from "./names";
+import * as keys from "./keys";
+import { buildDiscoveries, buildSpecificEffects, buildWritableEffects } from "./discoveries";
+import { buildMaterials, buildMythicalItemEffects, makeClassifier } from "./materials";
+
+// Tables are derived from window.params on demand; params.js is loaded before the bundle and never changes at runtime.
+function tables(): ExchangeTables {
+    const params = window.params;
+    const discoveries = buildDiscoveries(params.techs);
+    const specificEffects = buildSpecificEffects(params.effects);
+    return {
+        discoveries,
+        specificEffects,
+        writableEffects: buildWritableEffects(discoveries, specificEffects),
+        materials: buildMaterials(params.products, params.factories),
+        mythicalItemEffects: buildMythicalItemEffects(params.effects),
+    };
+}
+
+function classifyItemOrEffect(guid: number): "item" | "effect" | "unknown" {
+    return makeClassifier(window.params.items, window.params.effects)(guid);
+}
 
 // Narrow test and debug entry point (KTD12). Later units register their functions here.
 export const exchange: ExchangeApi = {
@@ -10,6 +31,10 @@ export const exchange: ExchangeApi = {
         const island = window.view?.islands?.().find((i: { name(): string }) => i.name() === islandName);
         return island ? island.exchangeIslandId : null;
     },
+    keys,
+    parseFactoryScalingKey: (key: string) => keys.parseFactoryScalingKey(key, classifyItemOrEffect),
+    classifyItemOrEffect,
+    tables,
 };
 
 declare global {
