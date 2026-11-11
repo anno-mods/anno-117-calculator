@@ -6,6 +6,7 @@ import { planTrade } from "./import-trade";
 import { reservedKeys, uniqueName } from "./names";
 import * as keys from "./keys";
 import { buildDiscoveries, buildSpecificEffects, buildWritableEffects } from "./discoveries";
+import { applyImport } from "./writer";
 import { readExchange } from "./reader";
 import { buildMaterials, buildMythicalItemEffects, makeClassifier } from "./materials";
 
@@ -45,6 +46,7 @@ export const exchange: ExchangeApi = {
     planTrade: (islands: IslandsPlan, read: ReadOk): TradePlan => planTrade(islands, read, { params: window.params }),
     planEffects: (islands: IslandsPlan, read: ReadOk): EffectsPlan => planEffects(islands, read, { params: window.params }),
     planImport: (text: string): ImportPlanResult => planImport(text, { params: window.params }),
+    applyImport,
 };
 
 declare global {

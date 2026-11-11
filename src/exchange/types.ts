@@ -285,6 +285,8 @@ export interface ExchangeDocument {
     [key: string]: unknown;
 }
 
+import type { ApplyOptions, ApplyResult } from "./writer";
+
 // The functions registered on window.exchange (KTD12). Later units add their members here.
 export interface ExchangeApi {
     uniqueName(wanted: string, taken: Iterable<string>): string;
@@ -299,6 +301,7 @@ export interface ExchangeApi {
     planTrade(islands: IslandsPlan, read: ReadOk): TradePlan;
     planEffects(islands: IslandsPlan, read: ReadOk): EffectsPlan;
     planImport(text: string): ImportPlanResult;
+    applyImport(plan: ImportPlan, opts?: ApplyOptions): ApplyResult;
 }
 
 // Result of readExchange (U4).
