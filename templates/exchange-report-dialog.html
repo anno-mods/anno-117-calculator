@@ -1,0 +1,51 @@
+<div id="exchange-report-dialog" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true" data-bind="debug: 'Exchange Report Dialog'">
+    <div class="modal-dialog modal-lg" data-bind="with: $root.exchangeReport">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 data-bind="text: title">Exchange</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- ko if: importMode -->
+                <div id="exchange-replace-warning" class="alert alert-warning" data-bind="text: $root.texts.exchangeReplaceWarning.name"></div>
+                <table class="table table-sm mb-3">
+                    <tr>
+                        <td data-bind="text: $root.texts.exchangeCountIslands.name"></td>
+                        <td class="text-right" id="exchange-count-islands" data-bind="text: islandCount"></td>
+                    </tr>
+                    <!-- ko if: orphanCount() > 0 -->
+                    <tr>
+                        <td data-bind="text: $root.texts.exchangeCountOrphans.name"></td>
+                        <td class="text-right" id="exchange-count-orphans" data-bind="text: orphanCount"></td>
+                    </tr>
+                    <!-- /ko -->
+                    <tr>
+                        <td data-bind="text: $root.texts.exchangeCountTradeRoutes.name"></td>
+                        <td class="text-right" id="exchange-count-trade-routes" data-bind="text: tradeRouteCount"></td>
+                    </tr>
+                </table>
+                <!-- /ko -->
+                <!-- ko if: failed -->
+                <div id="exchange-failed-message" class="alert alert-danger" data-bind="text: $root.texts.exchangeFailed.name"></div>
+                <!-- /ko -->
+                <!-- ko foreach: sections -->
+                <div data-bind="attr: { id: id }">
+                    <h6 data-bind="text: $root.texts[textKey].name"></h6>
+                    <ul class="mb-3" data-bind="foreach: entries">
+                        <li data-bind="text: message"></li>
+                    </ul>
+                </div>
+                <!-- /ko -->
+            </div>
+            <div class="modal-footer">
+                <!-- ko if: importMode -->
+                <button type="button" id="exchange-cancel-button" class="btn btn-secondary" data-dismiss="modal" data-bind="text: $root.texts.exchangeCancel.name">Cancel</button>
+                <button type="button" id="exchange-confirm-button" class="btn btn-primary" data-bind="text: $root.texts.exchangeConfirm.name, click: confirm">Confirm</button>
+                <!-- /ko -->
+                <!-- ko ifnot: importMode -->
+                <button type="button" id="exchange-close-button" class="btn btn-secondary" data-dismiss="modal" data-bind="text: $root.texts.exchangeClose.name">Close</button>
+                <!-- /ko -->
+            </div>
+        </div>
+    </div>
+</div>

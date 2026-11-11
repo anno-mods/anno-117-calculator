@@ -23,6 +23,20 @@
                         </td>
                     </tr>
                     <tr>
+                        <td data-bind="text: $root.texts.downloadExchange.name"></td>
+                        <td>
+                            <div class="btn-group float-right">
+                                <label class="btn btn-secondary" id="import-exchange-button" role="button" href="#" for="exchange-selector" data-bind="attr: { title: $root.texts.importExchange.name }">
+                                    <input id="exchange-selector" type="file" accept=".json,application/json" style="display: none;">
+                                    <span class="fa fa-upload"> </span>
+                                </label>
+                                <label data-bind="click: () => exportExchange(), attr: { title: $root.texts.exportExchange.name }" id="export-exchange-button" role="button" href="#" class="btn btn-secondary">
+                                    <span class="fa fa-download"> </span>
+                                </label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
                         <td data-bind="text: $root.texts.downloadCalculator.name" style="white-space:pre-wrap"></td>
                         <td>
                             <a id="download-calculator-button" role="button" href="https://github.com/anno-mods/anno-117-calculator/releases/latest" class="btn btn-secondary float-right">
@@ -31,6 +45,12 @@
                         </td>
                     </tr>
                 </table>
+                <!-- ko if: $root.exchangeReport.invalid -->
+                <div id="exchange-invalid-message" class="alert alert-danger">
+                    <span data-bind="text: $root.texts.exchangeInvalid.name"></span>
+                    <small class="d-block" data-bind="text: $root.exchangeReport.invalid"></small>
+                </div>
+                <!-- /ko -->
             </div>
         </div>
     </div>

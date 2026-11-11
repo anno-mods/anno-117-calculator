@@ -17,6 +17,8 @@ import { Storage as SubStorage, Island, Region, Session } from './world';
 import { Effect, ProductCategory, Fertility, AreaBuff } from './production';
 import { isAggregating, compareAggregateDemands } from './aggregate';
 import './exchange';
+import { ExchangeReportDialog } from './exchange/report-dialog';
+import type { ImportPlan, ReportEntry } from './exchange/types';
 
 
 declare const $: any;
@@ -30,6 +32,7 @@ window.formatNumber = formatNumber;
 window.formatPercentage = formatPercentage;
 window.factoryReset = factoryReset;
 window.exportConfig = exportConfig;
+window.exportExchange = exportExchange;
 
 // Knockout itself, for console debugging (ko.dataFor/contextFor on a live element) and so binding
 // tests can assert which binding handlers are registered. The app never reads it back off window.
@@ -107,6 +110,7 @@ window.view = {
     },
     viewMode: null,
     islandManager: null,
+    exchangeReport: new ExchangeReportDialog(() => window.view.texts),
     // Debug settings for Knockout binding debugging
     debug: {
         enabled: ko.observable(false),
@@ -314,6 +318,89 @@ function installImportConfigListener(): void {
 }
 
 
+
+/**
+ * Opens #exchange-report-dialog. The download dialog is closed first so two modals never stack.
+ */
+function showExchangeReportDialog(): void {
+    const download = $('#download-dialog');
+    const open = () => $('#exchange-report-dialog').modal('show');
+    if (download.hasClass('show')) {
+        download.one('hidden.bs.modal', () => setTimeout(open, 0));
+        download.modal('hide');
+    } else {
+        open();
+    }
+}
+
+/**
+ * Exports the exchange file (tool-neutral format) and shows the read-only report when the export dropped or
+ * approximated something.
+ */
+function exportExchange(): void {
+    const result = window.exchange.exportDocument();
+    const blob = new Blob([JSON.stringify(result.document, null, 2)], { type: "application/json" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style.display = "none";
+    a.href = url;
+    a.download = "Anno117CalculatorExchange.json";
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    ($ as any).notify({ message: window.view.texts.exchangeExported.name() }, { type: 'success', placement: { align: 'center' } });
+
+    const report: ReportEntry[] = result.report;
+    if (report.length > 0) {
+        window.view.exchangeReport.showExport(report);
+        showExchangeReportDialog();
+    }
+}
+
+/**
+ * Installs the change listener of #exchange-selector: reads the file, plans the import and opens the confirmation
+ * dialog. Nothing is written before Confirm.
+ */
+function installImportExchangeListener(): void {
+    $('#exchange-selector').on('change', (event: JQuery.ChangeEvent) => {
+        event.preventDefault();
+        const input = event.target as HTMLInputElement;
+        if (!input.files || !input.files[0])
+            return;
+
+        const file = input.files[0];
+        const fileReader = new FileReader();
+        const dialog: ExchangeReportDialog = window.view.exchangeReport;
+        dialog.invalid(null);
+
+        fileReader.onload = function (ev: ProgressEvent<FileReader>) {
+            input.value = '';
+            const text = (ev.target as FileReader).result as string;
+            const plan = window.exchange.planImport(text);
+            if ('error' in plan) {
+                dialog.invalid(plan.error);
+                return;
+            }
+            dialog.showImport(plan, (confirmed: ImportPlan) => {
+                const result = window.exchange.applyImport(confirmed);
+                if (!result.ok)
+                    console.error('Exchange import failed:', result.error);
+                return result.ok;
+            });
+            showExchangeReportDialog();
+        };
+
+        fileReader.onerror = function (err: ProgressEvent<FileReader>) {
+            input.value = '';
+            console.error(err);
+            dialog.invalid(String(fileReader.error));
+        };
+
+        fileReader.readAsText(file);
+    });
+}
 
 /**
  * Sets up Knockout numeric input validation and extender
@@ -744,4 +831,5 @@ $(document).ready(function () {
     
     // Install import config listener (must occur after template binding)
     installImportConfigListener();
-}); 
+    installImportExchangeListener();
+});
