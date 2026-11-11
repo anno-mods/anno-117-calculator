@@ -1,5 +1,7 @@
-import { ExchangeApi, ExchangeTables, IslandsPlan, ReadOk, TradePlan } from "./types";
+import { EffectsPlan, ExchangeApi, ExchangeTables, ImportPlanResult, IslandsPlan, ReadOk, TradePlan } from "./types";
+import { planEffects } from "./import-effects";
 import { planIslands } from "./import-islands";
+import { planImport } from "./plan";
 import { planTrade } from "./import-trade";
 import { reservedKeys, uniqueName } from "./names";
 import * as keys from "./keys";
@@ -41,6 +43,8 @@ export const exchange: ExchangeApi = {
     readExchange,
     planIslands: (read: ReadOk): IslandsPlan => planIslands(read, { params: window.params }),
     planTrade: (islands: IslandsPlan, read: ReadOk): TradePlan => planTrade(islands, read, { params: window.params }),
+    planEffects: (islands: IslandsPlan, read: ReadOk): EffectsPlan => planEffects(islands, read, { params: window.params }),
+    planImport: (text: string): ImportPlanResult => planImport(text, { params: window.params }),
 };
 
 declare global {

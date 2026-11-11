@@ -12,6 +12,14 @@ import { EffectConfig, TechConfig } from "../types.config";
 // effects (99955, 99957) with the same scope; the format does not name them, so they are not written.
 export const SESSION_EFFECTS: readonly Guid[] = [155616, 145095, 148043, 145099];
 
+// The three volcano effects, written with the volcanic soil level in the Latium and the Meta (Worldmap) session
+// (conversion rules, "Volcanic soil level"), and the Nile flood effect, written 1 in the Aegyptus session when
+// seasons are enabled in average mode.
+export const VOLCANO_EFFECTS: readonly Guid[] = [145095, 148043, 145099];
+export const VOLCANO_SESSIONS: readonly Guid[] = [3245, 37135];
+export const NILE_FLOOD_EFFECT: Guid = 155616;
+export const NILE_FLOOD_SESSION: Guid = 149679;
+
 // Global (Meta scope) wonder effects: Vervactor's Plough / Ceres "More Fields" (43620) and Cernunnos "Extra Goods"
 // (50262), both source "veneration-effect", effectScope "ObjectsInMeta". Further veneration-effect effects found in
 // params at runtime are added by specificEffects().

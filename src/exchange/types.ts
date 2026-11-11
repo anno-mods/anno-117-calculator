@@ -297,6 +297,8 @@ export interface ExchangeApi {
     readExchange(text: string): ReadResult;
     planIslands(read: ReadOk): IslandsPlan;
     planTrade(islands: IslandsPlan, read: ReadOk): TradePlan;
+    planEffects(islands: IslandsPlan, read: ReadOk): EffectsPlan;
+    planImport(text: string): ImportPlanResult;
 }
 
 // Result of readExchange (U4).
@@ -447,6 +449,11 @@ export interface IslandExt {
     guids: AbsentGuidEntry[];
     // Module `checked` values the import wrote (KTD14), by storage key.
     moduleWritten: Record<string, string>;
+    // Added by the trade unit (U6): original import entries of the island, `minimumStock` of the file.
+    preservedImports?: PreservedImport[];
+    minimumStock?: Record<GuidKey, number>;
+    // Added by the effects unit (U7): `materials` of the file when it holds content the calculator cannot place.
+    materials?: Record<string, unknown>;
     [key: string]: unknown;
 }
 
@@ -553,9 +560,123 @@ export interface TradePlan {
     report: ReportEntry[];
 }
 
+// ---- Import plan for discoveries, effects, settings and materials (U7) ----
+
+// What the importer keeps of the document-level effect, research and settings blocks that it does not write to storage.
+// Content of the `research`, `effects` and `settings` keys of the top-level `exchange.ext`.
+export interface ResearchExt {
+    // Discoveries (and counts) the calculator has no counterpart for, as in the file.
+    unmatched?: Guid[];
+    unmatchedCounts?: Record<GuidKey, number>;
+    queue?: Guid[];
+    knowledgePerMinute?: number;
+    basis?: string;
+}
+
+export interface EffectsExt {
+    // Entries of `effects.global` the calculator cannot write (unknown GUID, wrong scope, dormant area buff).
+    global?: Record<GuidKey, number>;
+    // Same for `effects.bySession`: unknown session, unknown effect or an effect of another scope.
+    bySession?: Record<GuidKey, Record<GuidKey, number>>;
+}
+
+export interface SettingsExt {
+    // `settings.volcano` and `settings.seasons` as given: the calculator applies the specific effects only (CD7).
+    volcano?: Record<string, unknown>;
+    seasons?: Record<string, unknown>;
+    // `settings.difficulty` without the need consumption id when that id was written.
+    difficulty?: Record<string, unknown>;
+    // DLC numbers outside 1-3.
+    dlcsUnknown?: number[];
+}
+
+export interface EffectsPlan {
+    // `<effect>.scaling` -> scale: content of the top-level key `globalEffects`.
+    globalEffects: Record<string, number>;
+    // `session.<session>.effect.<effect>.scaling` -> scale: content of the top-level key `sessionSettings`.
+    sessionSettings: Record<string, number>;
+    // DLC keys ("1"/"0") and `settings.needConsumption`: content of the top-level key `calculatorSettings`.
+    calculatorSettings: Record<string, string>;
+    // Additions to the island stores by island store key (construction materials, R50).
+    islands: Record<string, { store: Record<string, unknown>; ext: { materials?: Record<string, unknown> } }>;
+    // Document-scope parts kept in the top-level `exchange.ext`.
+    ext: { research?: ResearchExt; effects?: EffectsExt; settings?: SettingsExt };
+    // research.basis as read: absent is "researched".
+    basis: string;
+    report: ReportEntry[];
+}
+
+// ---- The complete import plan (U7) ----
+
+export interface PlanProblem {
+    pointer: string;
+    code: ReadProblemCode | "invalid-json";
+    message: string;
+}
+
+export interface ImportPlanReport {
+    carriedThrough: ReportEntry[];
+    notMapped: ReportEntry[];
+    approximated: ReportEntry[];
+    notProvided: ReportEntry[];
+    counts: {
+        // islands written as stores
+        islands: number;
+        // islands kept in exchange.ext.orphans
+        orphans: number;
+        tradeRoutes: number;
+        // import entries kept whole in an ext (island and document level)
+        preservedImports: number;
+        // fields kept in an island ext or in the top-level ext because the calculator does not model them
+        capturedFields: number;
+    };
+    orphans: { id: string; session?: number }[];
+}
+
+// Top-level localStorage key `exchange.ext`.
+export interface DocumentExt {
+    orphans: OrphanIsland[];
+    account?: unknown;
+    unlocatedItems?: unknown;
+    // Document-level captured fields (unknown and unmodelled), pointer as in the file.
+    captured: CapturedField[];
+    trade?: { routes?: TradeRoute[]; visits?: Record<string, unknown>[]; governorHarbours?: Record<string, unknown>[] };
+    // Import entries whose receiving island has no store.
+    preservedImports: PreservedImport[];
+    research?: ResearchExt;
+    effects?: EffectsExt;
+    settings?: SettingsExt;
+    [key: string]: unknown;
+}
+
+export interface ImportPlan {
+    // Raw top-level localStorage keys -> value. Every value is a string; all are JSON text except `islandName`.
+    keyMap: Record<string, string>;
+    report: ImportPlanReport;
+    orphans: OrphanIsland[];
+    // The file's `computed` block for the comparison of U11; undefined when the file has none.
+    computed?: Computed;
+    // Problems of the reader (coerced or dropped values) and of the key map validation (KTD1).
+    problems: PlanProblem[];
+}
+
+export type ImportPlanResult = ImportPlan | ReadError;
+
 export type ImportParams = Pick<
     ParamsConfig,
-    "sessions" | "regions" | "fertilities" | "patrons" | "dlcs" | "effects" | "items" | "factories" | "modules" | "residenceBuildings" | "products"
+    | "sessions"
+    | "regions"
+    | "fertilities"
+    | "patrons"
+    | "dlcs"
+    | "effects"
+    | "items"
+    | "factories"
+    | "modules"
+    | "residenceBuildings"
+    | "products"
+    | "techs"
+    | "needConsumptions"
 >;
 
 export interface ImportContext {
