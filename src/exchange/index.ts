@@ -1,4 +1,5 @@
-import { ExchangeApi, ExchangeTables } from "./types";
+import { ExchangeApi, ExchangeTables, IslandsPlan, ReadOk } from "./types";
+import { planIslands } from "./import-islands";
 import { reservedKeys, uniqueName } from "./names";
 import * as keys from "./keys";
 import { buildDiscoveries, buildSpecificEffects, buildWritableEffects } from "./discoveries";
@@ -37,6 +38,7 @@ export const exchange: ExchangeApi = {
     classifyItemOrEffect,
     tables,
     readExchange,
+    planIslands: (read: ReadOk): IslandsPlan => planIslands(read, { params: window.params }),
 };
 
 declare global {

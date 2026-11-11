@@ -2,6 +2,8 @@
 // Every object is open: unknown content stays typed as Record<string, unknown> and is preserved.
 // GUID-keyed maps use decimal GUID strings as keys.
 
+import type { ParamsConfig } from "../types.config";
+
 export type Guid = number;
 export type GuidKey = string;
 export type Ext = Record<string, Record<string, unknown>>;
@@ -293,6 +295,7 @@ export interface ExchangeApi {
     classifyItemOrEffect(guid: Guid): "item" | "effect" | "unknown";
     tables(): ExchangeTables;
     readExchange(text: string): ReadResult;
+    planIslands(read: ReadOk): IslandsPlan;
 }
 
 // Result of readExchange (U4).
@@ -403,4 +406,87 @@ export interface ExchangeTables {
     writableEffects: Guid[];
     materials: MaterialEntry[];
     mythicalItemEffects: MythicalItemEffect[];
+}
+
+// ---- Import plan for islands (U5) ----
+
+// Where a line of the import report comes from. `carried-through`: kept in exchange.ext and written back on export.
+// `not-mapped`: kept, but the calculator does not apply it. `approximated`: applied with a loss or a side effect.
+// `not-provided`: the file does not say, the calculator keeps its own default.
+export type ReportKind = "carried-through" | "not-mapped" | "approximated" | "not-provided";
+
+export interface ReportEntry {
+    kind: ReportKind;
+    code: string;
+    // File island id; absent for document-scope lines.
+    island?: string;
+    message: string;
+    detail?: Record<string, unknown>;
+}
+
+// A captured field of an island. `pointer` is relative to the island record (e.g. "/population").
+export interface CapturedField {
+    pointer: string;
+    kind: UnknownKind;
+    value: unknown;
+}
+
+// A GUID-keyed entry (or a GUID inside a list) that params does not know, kept with its location in the island record.
+export interface AbsentGuidEntry {
+    pointer: string;
+    value: unknown;
+}
+
+// Content of the island store key `exchange.ext`.
+export interface IslandExt {
+    // Display name the file gave the island (name, else gameIsland.name, else id), before the collision suffix.
+    originalName: string;
+    gameIsland?: { areaKey?: number; name?: string };
+    captured: CapturedField[];
+    guids: AbsentGuidEntry[];
+    // Module `checked` values the import wrote (KTD14), by storage key.
+    moduleWritten: Record<string, string>;
+    [key: string]: unknown;
+}
+
+export interface IslandPlan {
+    // File island id.
+    id: string;
+    // Display name after the collision suffix; equals `key`.
+    name: string;
+    // Top-level localStorage key of the island store.
+    key: string;
+    // Plain key map of the island store, values as the loaders expect them (counts and scalings numbers,
+    // checked flags "1"/"0"). Includes `exchange.ext`.
+    store: Record<string, unknown>;
+    ext: IslandExt;
+    report: ReportEntry[];
+    // The island record of the file, for the trade and material units.
+    file: ExchangeIsland;
+}
+
+export interface OrphanIsland {
+    id: string;
+    session?: number;
+    island: ExchangeIsland;
+}
+
+export interface IslandsPlan {
+    islands: IslandPlan[];
+    orphans: OrphanIsland[];
+    // All report lines: islands, orphans and the document-scope item places.
+    report: ReportEntry[];
+    // calculatorSettings keys the island data requires (DLC id -> "1"); merged by the settings unit.
+    settingsKeys: Record<string, string>;
+    // Document-scope parts preserved by the writer and exporter units.
+    document: { account?: unknown; unlocatedItems?: unknown };
+}
+
+export type ImportParams = Pick<
+    ParamsConfig,
+    "sessions" | "regions" | "fertilities" | "patrons" | "dlcs" | "effects" | "items" | "factories" | "modules" | "residenceBuildings"
+>;
+
+export interface ImportContext {
+    params: ImportParams;
 }
