@@ -429,7 +429,7 @@ test.describe('import plan: islands (U5)', () => {
         const i = await planOne(page, {
             itemHolders: [
                 {
-                    guid: 91001,
+                    guid: 31032,
                     instance: 1,
                     items: [
                         { item: 51328, instance: 10, slot: 0, mythicEffect: MYTH_A, boostConditionMet: true },
@@ -449,7 +449,7 @@ test.describe('import plan: islands (U5)', () => {
 
     test('mythicEffect without boostConditionMet true is not applied', async ({ page }) => {
         const i = await planOne(page, {
-            itemHolders: [{ guid: 91001, instance: 1, items: [{ item: 51328, instance: 10, mythicEffect: MYTH_A }] }],
+            itemHolders: [{ guid: 31032, instance: 1, items: [{ item: 51328, instance: 10, mythicEffect: MYTH_A }] }],
         });
         expect(i.store[`island.effect.${MYTH_A}.scaling`]).toBe(0);
     });
@@ -457,7 +457,7 @@ test.describe('import plan: islands (U5)', () => {
     test('a ship holder mythicEffect is preserved and reported as not applied', async ({ page }) => {
         const i = await planOne(page, {
             itemHolders: [
-                { kind: 'ship', guid: 91002, instance: 2, route: 'r1', items: [{ item: 51292, instance: 12, mythicEffect: MYTH_A, boostConditionMet: true }] },
+                { kind: 'ship', guid: 37222, instance: 2, route: 'r1', items: [{ item: 51292, instance: 12, mythicEffect: MYTH_A, boostConditionMet: true }] },
             ],
         });
         expect(i.store[`island.effect.${MYTH_A}.scaling`]).toBe(0);
@@ -470,17 +470,17 @@ test.describe('import plan: islands (U5)', () => {
     test('island effects[E] sets the same key and the larger value wins', async ({ page }) => {
         const a = await planOne(page, {
             effects: { [MYTH_A]: 1 },
-            itemHolders: [{ guid: 91001, instance: 1, items: [{ item: 51328, instance: 10, mythicEffect: MYTH_A, boostConditionMet: false }] }],
+            itemHolders: [{ guid: 31032, instance: 1, items: [{ item: 51328, instance: 10, mythicEffect: MYTH_A, boostConditionMet: false }] }],
         });
         expect(a.store[`island.effect.${MYTH_A}.scaling`]).toBe(1);
         const b = await planOne(page, {
             effects: { [MYTH_A]: 0 },
-            itemHolders: [{ guid: 91001, instance: 1, items: [{ item: 51328, instance: 10, mythicEffect: MYTH_A, boostConditionMet: true }] }],
+            itemHolders: [{ guid: 31032, instance: 1, items: [{ item: 51328, instance: 10, mythicEffect: MYTH_A, boostConditionMet: true }] }],
         });
         expect(b.store[`island.effect.${MYTH_A}.scaling`]).toBe(1);
         const c = await planOne(page, {
             effects: { [MYTH_A]: 3 },
-            itemHolders: [{ guid: 91001, instance: 1, items: [{ item: 51328, instance: 10, mythicEffect: MYTH_A, boostConditionMet: true }] }],
+            itemHolders: [{ guid: 31032, instance: 1, items: [{ item: 51328, instance: 10, mythicEffect: MYTH_A, boostConditionMet: true }] }],
         });
         expect(c.store[`island.effect.${MYTH_A}.scaling`]).toBe(3);
     });
@@ -493,7 +493,7 @@ test.describe('import plan: islands (U5)', () => {
                     id: 'd',
                     name: 'D',
                     session: LATIUM,
-                    itemHolders: [{ guid: 91001, instance: 1, items: [{ item: 51328, instance: 10, mythicEffect: MYTH_DLC3, boostConditionMet: true }] }],
+                    itemHolders: [{ guid: 31032, instance: 1, items: [{ item: 51328, instance: 10, mythicEffect: MYTH_DLC3, boostConditionMet: true }] }],
                 },
             ]),
         );
@@ -508,7 +508,7 @@ test.describe('import plan: islands (U5)', () => {
 
     test('an unknown mythicEffect GUID is kept in the record and reported', async ({ page }) => {
         const i = await planOne(page, {
-            itemHolders: [{ guid: 91001, instance: 1, items: [{ item: 51328, instance: 10, mythicEffect: 999777, boostConditionMet: true }] }],
+            itemHolders: [{ guid: 31032, instance: 1, items: [{ item: 51328, instance: 10, mythicEffect: 999777, boostConditionMet: true }] }],
         });
         expect(keysMatching(i.store, /999777/)).toEqual([]);
         expect(i.report.some((x) => x.code === 'unknown-guid' && x.detail?.guid === 999777)).toBe(true);

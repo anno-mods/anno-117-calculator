@@ -12,7 +12,7 @@
       "session": 3245,
       "itemHolders": [
         {
-          "guid": 91001,
+          "guid": 31032,
           "instance": 9001,
           "position": {
             "x": 412.5,
@@ -47,7 +47,7 @@
         },
         {
           "kind": "ship",
-          "guid": 91002,
+          "guid": 37222,
           "instance": 5001,
           "route": "r1",
           "enabledSockets": 1,
@@ -77,7 +77,7 @@
           ]
         },
         {
-          "guid": 91003,
+          "guid": 87351,
           "instance": 9002,
           "enabledSockets": 2,
           "items": []
@@ -130,7 +130,7 @@
         "stations": [],
         "ships": [
           {
-            "type": 91002,
+            "type": 37222,
             "slots": 4,
             "count": 1
           }

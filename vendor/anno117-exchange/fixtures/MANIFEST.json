@@ -180,7 +180,7 @@
     {
       "file": "valid/item-locations.json",
       "valid": true,
-      "description": "Item records in every R56 place: a building holder with a mythicEffect item, a ship holder with items and carried, itemStorage with a shared-slot stack (slot 4) and a count record, several records of GUID 51316, account.items, transferItems, racers with race, unlocatedItems, per-record ext (AE26, KTD16). Holder building and ship type GUIDs are placeholders."
+      "description": "Item records in every R56 place: a building holder with a mythicEffect item, a ship holder with items and carried, itemStorage with a shared-slot stack (slot 4) and a count record, several records of GUID 51316, account.items, transferItems, racers with race, unlocatedItems, per-record ext (AE26, KTD16). Holders use game GUIDs: villa 31032 (Villa 01 Roman), guesthouse 87351 (Villa 01 Roman Guesthouse), ship type 37222 (Roman ModularShip Penteconter)."
     },
     {
       "file": "invalid/newer-major.json",

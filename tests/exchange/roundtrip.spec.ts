@@ -224,14 +224,14 @@ test.describe('integration: Cinis, trade floor, DLC and needs', () => {
     test('a mythical effect of a building holder item is applied, the effect DLC is on and the report names it (KTD16)', async ({ page }) => {
         const holders = [
             {
-                guid: 91001,
+                guid: 31032,
                 instance: 1,
                 items: [
                     { item: 51328, instance: 10, slot: 0, mythicEffect: MYTH_DLC3, boostConditionMet: true },
                     { item: 51330, instance: 11, slot: 1, mythicEffect: MYTH_PLAIN, boostConditionMet: false },
                 ],
             },
-            { kind: 'ship', guid: 91002, instance: 2, carried: [{ item: 51328, instance: 12, mythicEffect: 166441, boostConditionMet: true }] },
+            { kind: 'ship', guid: 37222, instance: 2, carried: [{ item: 51328, instance: 12, mythicEffect: 166441, boostConditionMet: true }] },
         ];
         const res = await importText(page, fileOf([{ id: 'a', name: 'Alpha', session: LATIUM, itemHolders: holders }]));
         expect(res.ok, res.error).toBe(true);
