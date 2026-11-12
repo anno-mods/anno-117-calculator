@@ -288,13 +288,16 @@ export class Consumer extends NamedElement{
             if (!product) {
                 throw new Error(`Fuel product with GUID ${window.view.constants.fuelProduct} not found in assetsMap`);
             }
-            let cycleTime = window.view.constants.fuelProductionTime as number;
+            let fuelTime = window.view.constants.fuelProductionTime as number;
 
+            // One unit of fuel lasts the burn time whatever the cycle time or productivity
+            // (in-game: 3 min burn cycle for 90 s and 120 s buildings, also at 1000 % productivity).
+            // The factor is t/min per working building, so it must not depend on cycleTime or boost.
             const fuelFactor = ko.pureComputed(() => {
                 const percentBuff = this.buffs().reduce((a:number, b: AppliedBuff)=> a+b.fuelDurationPercent() , 0);
                 const factor = percentBuff / 100 + 1;
 
-                return this.cycleTime / (factor * cycleTime) / this.boost();
+                return 60 / (factor * fuelTime);
             });
             this.inputDemandFuel = new Demand(product, this, assetsMap, fuelFactor);
             this.buildings.utilized.subscribe(buildings => this.inputDemandFuel!.updateAmount(buildings));
