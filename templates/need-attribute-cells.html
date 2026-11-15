@@ -1,0 +1,31 @@
+<!-- ko foreach: $data.cells -->
+<td class="need-attribute-cell" data-bind="attr: {title: $data.attribute.name()}">
+    <!-- ko if: $data.isPopulation && $data.value > 0 -->
+    <img class="icon-sm icon-light" src="../icons/icon_resource_population.png" />
+    <span class="ml-1" data-bind="text: $data.text()"></span>
+    <!-- /ko -->
+    <!-- ko if: !$data.isPopulation && $data.value !== 0 -->
+    <span data-bind="text: $data.text()"></span>
+    <!-- /ko -->
+</td>
+<!-- /ko -->
+<!-- ko if: $root.presenter.residence.needColumns().weight -->
+<td class="need-weight-cell" data-bind="text: $data.supplyWeight !== 0 ? formatNumber($data.supplyWeight) : ''"></td>
+<!-- /ko -->
+<!-- ko if: $root.presenter.residence.needColumns().dlc -->
+<td class="need-dlc-cell">
+    <!-- ko foreach: $data.dlcs -->
+    <img class="icon-sm" data-bind="attr: {src: $data.icon ? $data.icon : null, title: $data.name(), alt: $data.name()}" />
+    <!-- /ko -->
+</td>
+<!-- /ko -->
+<!-- ko if: $root.presenter.residence.needColumns().building -->
+<td class="need-building-cell">
+    <!-- ko foreach: $data.supplyBuildings() -->
+    <img class="icon-sm" data-bind="attr: {src: $data.icon ? $data.icon : null, title: $data.name(), alt: $data.name()}" />
+    <!-- /ko -->
+</td>
+<!-- /ko -->
+<!-- ko if: $root.presenter.residence.needColumns().coverage -->
+<td class="need-coverage-cell" data-bind="text: $data.coverage() !== undefined ? formatNumber($data.coverage()) + ' %' : ''"></td>
+<!-- /ko -->

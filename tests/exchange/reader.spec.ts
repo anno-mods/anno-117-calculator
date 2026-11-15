@@ -281,6 +281,54 @@ test.describe('exchange reader (U4)', () => {
         expect(ok.doc.islands[0].itemStorage).toHaveLength(1);
     });
 
+    const islandFile = (island: Record<string, unknown>): string =>
+        JSON.stringify({ format: 'anno117-exchange', formatVersion: '1.0', generator: { name: 'reader-test' }, islands: [{ id: 'a', name: 'A', session: 3245, ...island }] });
+
+    test('residenceItems entries read as typed entries without captured fields', async ({ page }) => {
+        const ok = asOk(await read(page, islandFile({ residenceItems: [{ item: 41352, boosted: true }] })));
+        expect(ok.problems).toEqual([]);
+        expect(ok.doc.islands[0].residenceItems).toEqual([{ item: 41352, boosted: true }]);
+        expect(ok.unknown.filter((u) => u.pointer.startsWith('/islands/0/residenceItems'))).toEqual([]);
+    });
+
+    test('a residenceItems entry without item reads like a factory item without item', async ({ page }) => {
+        const residence = asOk(await read(page, islandFile({ residenceItems: [{ boosted: true }] })));
+        const factory = asOk(await read(page, islandFile({ factories: { '3089': { items: [{ boosted: true }] } } })));
+        const shape = (p: Problem) => ({ code: p.code, tail: p.pointer.replace(/^.*\/items\/0|^.*\/residenceItems\/0/, '') });
+        expect(residence.problems.map(shape)).toEqual(factory.problems.map(shape));
+    });
+
+    test('an extra key of a residenceItems entry is captured at its pointer', async ({ page }) => {
+        const ok = asOk(await read(page, islandFile({ residenceItems: [{ item: 1, slot: 3 }] })));
+        const captured = ok.unknown.find((u) => u.pointer === '/islands/0/residenceItems/0/slot');
+        expect(captured?.value).toBe(3);
+    });
+
+    test('villaCoverage as a number or an object reads without a problem', async ({ page }) => {
+        for (const value of [50, { default: 50 }, { default: 50, byLevel: { '1': 20 } }]) {
+            const ok = asOk(await read(page, islandFile({ villaCoverage: value })));
+            expect(ok.problems, JSON.stringify(value)).toEqual([]);
+            expect(ok.doc.islands[0].villaCoverage).toEqual(value);
+        }
+    });
+
+    test('residenceEffects and publicCoverages (planner shape and spec shape) and publicCoverage read without a problem', async ({ page }) => {
+        const fields = {
+            residenceEffects: { '1496': { '99014': 62.5 } },
+            publicCoverages: { '1496': { '3617': 84.4 } },
+            publicCoverage: 100,
+        };
+        for (const island of [fields, { residenceEffects: { default: 40 }, publicCoverages: { default: 40 } }]) {
+            const ok = asOk(await read(page, islandFile(island)));
+            expect(ok.problems, JSON.stringify(island)).toEqual([]);
+        }
+        const ok = asOk(await read(page, islandFile(fields)));
+        expect(ok.doc.islands[0].residenceEffects).toEqual(fields.residenceEffects);
+        expect(ok.doc.islands[0].publicCoverages).toEqual(fields.publicCoverages);
+        expect(ok.doc.islands[0].publicCoverage).toBe(100);
+        expect(ok.unknown.find((u) => u.pointer === '/islands/0/publicCoverage')).toBeUndefined();
+    });
+
     test('readExchange is pure: the same text twice gives equal results', async ({ page }) => {
         const text = fixtureText('valid/unknown-fields-everywhere.json');
         const a = await read(page, text);

@@ -2,7 +2,7 @@ import { test, expect, Page } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 import Ajv2020 from 'ajv/dist/2020';
-import { seedOnce, appReady } from '../helpers/exchange';
+import { seedOnce, appReady, summaryByName, summaryDifferences } from '../helpers/exchange';
 
 // U9: the exporter. Every scenario that needs state loads a file through planImport + applyImport (reload false) and
 // a page reload (seedOnce keeps the imported state), then exports from the reloaded app.
@@ -381,9 +381,109 @@ test.describe('exporter (U9)', () => {
         await appReady(page);
         const after = await exportDoc(page);
         const entry = (after.document.trade.imports as Json[]).find((e) => e.product === TIMBER) as Json;
-        expect(entry.suppliers).toEqual([{ island: 'tib', default: true }]);
+        expect(entry.suppliers).toEqual([{ island: 'tib', default: true }, { governor: 7001, amount: 2 }]);
         expect(JSON.stringify(after.document.trade)).not.toContain('"roma"');
-        expect(after.report.some((r) => r.code === 'import-entry-dropped')).toBe(true);
+        expect(after.report.some((r) => r.code === 'import-entry-dropped')).toBe(false);
+    });
+
+    // ---- governor supply (plan 2026-11-12-001 U3) ----
+
+    const BREAD_PRODUCT = 2137;
+    const governorFile = (extraGovernor: Json = {}, harbours?: Json[]) =>
+        fileOf(
+            [
+                { id: 'roma', name: 'Roma', session: LATIUM },
+                { id: 'ost', name: 'Ostia', session: LATIUM },
+            ],
+            {
+                trade: {
+                    ...(harbours ? { governorHarbours: harbours } : {}),
+                    imports: [{ island: 'roma', product: BREAD_PRODUCT, suppliers: [{ island: 'ost', amount: 2 }, { governor: 777, amount: 4, share: 0.5, ext: { k: 1 }, ...extraGovernor }] }],
+                },
+            },
+        );
+    const breadEntry = (doc: Json) => (doc.trade.imports as Json[]).find((e) => e.product === BREAD_PRODUCT) as Json;
+    const setGovernorSupply = (page: Page, v: number) =>
+        page.evaluate((value: number) => {
+            const island = window.view.islands().find((i: Json) => i.name() === 'Roma');
+            island.assetsMap.get(2137).governorSupply(value);
+        }, v);
+
+    test('governor supplier returns in the original order with its fields and unknown fields; no raw key (AE4, R6, KTD6)', async ({ page }) => {
+        const text = governorFile();
+        await load(page, text);
+        const out = await exportDoc(page);
+        expect(breadEntry(out.document)).toEqual((JSON.parse(text).trade.imports as Json[])[0]);
+        const roma = (out.document.islands as Json[]).find((i) => i.name === 'Roma') as Json;
+        expect(JSON.stringify(roma.ext ?? {})).not.toContain('governorSupply');
+        expect(out.report.filter((r) => r.code === 'governor-amount-not-exported')).toEqual([]);
+        expectValid(out.document);
+    });
+
+    test('a governor supply edited to another value keeps the governor without its amount and reports (AE5a, R8)', async ({ page }) => {
+        await load(page, governorFile());
+        await setGovernorSupply(page, 6);
+        const out = await exportDoc(page);
+        expect(breadEntry(out.document).suppliers).toEqual([{ island: 'ost', amount: 2 }, { governor: 777, share: 0.5, ext: { k: 1 } }]);
+        expect(out.report.some((r) => r.code === 'governor-amount-not-exported' && r.detail && r.detail.product === BREAD_PRODUCT)).toBe(true);
+        expectValid(out.document);
+
+        await setGovernorSupply(page, 0);
+        const zero = await exportDoc(page);
+        expect(breadEntry(zero.document).suppliers).toContainEqual({ governor: 777, share: 0.5, ext: { k: 1 } });
+    });
+
+    test('another default supplier keeps the governor without its amount and reports (AE5b, R8)', async ({ page }) => {
+        await load(page, governorFile());
+        await page.evaluate(() => {
+            const island = window.view.islands().find((i: Json) => i.name() === 'Roma');
+            const product = island.assetsMap.get(2137);
+            product.passiveTradeSupplier.setAsDefaultSupplier();
+        });
+        const out = await exportDoc(page);
+        const suppliers = breadEntry(out.document).suppliers as Json[];
+        expect(suppliers).toContainEqual({ governor: 777, share: 0.5, ext: { k: 1 } });
+        expect(out.report.some((r) => r.code === 'governor-amount-not-exported')).toBe(true);
+    });
+
+    test('a changed route floor with supply and default unchanged: the governor follows the island suppliers with its amount, without a default flag (AE5, KTD5)', async ({ page }) => {
+        await load(page, governorFile({ default: true }));
+        await page.evaluate(() => {
+            const routes = JSON.parse(localStorage.getItem('tradeRoutes') as string);
+            for (const r of routes) r.userSetAmount = 3;
+            localStorage.setItem('tradeRoutes', JSON.stringify(routes));
+        });
+        await page.reload();
+        await appReady(page);
+        const out = await exportDoc(page);
+        const suppliers = breadEntry(out.document).suppliers as Json[];
+        expect(suppliers.map((s) => s.island ?? s.governor)).toEqual(['ost', 777]);
+        expect(suppliers[0].amount).toBe(3);
+        expect(suppliers[1]).toEqual({ governor: 777, amount: 4, share: 0.5, ext: { k: 1 } });
+        expect(out.report.some((r) => r.code === 'governor-amount-not-exported')).toBe(false);
+
+        // the export imports again without an ambiguous default
+        const reimport = await load(page, JSON.stringify(out.document));
+        expect(reimport.ok).toBe(true);
+        const again = await exportDoc(page);
+        expect(breadEntry(again.document).suppliers).toContainEqual({ governor: 777, amount: 4, share: 0.5, ext: { k: 1 } });
+    });
+
+    test('governor harbours return unchanged (AE6, R7)', async ({ page }) => {
+        const harbours = [{ governor: 777, region: 3225, session: 5, goods: { 2137: 2 }, limits: { 2137: 9 }, futureField: 1 }];
+        await load(page, governorFile({}, harbours));
+        const out = await exportDoc(page);
+        expect(out.document.trade.governorHarbours).toEqual(harbours);
+    });
+
+    test('governor supply round trip: import, export, import keeps the computed summary', async ({ page }) => {
+        await load(page, governorFile());
+        const before = await summaryByName(page);
+        const out = await exportDoc(page);
+        await load(page, JSON.stringify(out.document));
+        const after = await summaryByName(page);
+        expect(summaryDifferences(before, after)).toEqual([]);
+        expect(before['Roma'].imports[String(BREAD_PRODUCT)]).toBeGreaterThan(3.9);
     });
 
     test('a default route with an amount, a zero-minimum alternative and a local producer survive export, import, export (R54, KTD9)', async ({ page }) => {
@@ -398,8 +498,9 @@ test.describe('exporter (U9)', () => {
         const { e1, e2 } = await roundTrip(page, text);
         const entry = (e1.trade.imports as Json[])[0];
         expect(entry.island).toBe('b');
-        expect(entry.basis).toBe('entered');
-        expect(entry.suppliers).toEqual([{ island: 'a', default: true, amount: 10 }, { island: 'c' }]);
+        // The planned amount is a cap, not a floor (R19a): the entry returns as imported while routes and default are unchanged.
+        expect(entry.basis).toBe('planned');
+        expect(entry.suppliers).toEqual([{ island: 'a', share: 0.7, amount: 10 }, { island: 'c', share: 0.3 }]);
         expect(islandByName(e1, 'Beta').buildings[String(SAWMILL)]).toEqual({ built: 2, fullyUtilize: true });
         expect(normalize(e2)).toEqual(normalize(e1));
     });
@@ -482,6 +583,59 @@ test.describe('exporter (U9)', () => {
         expect(e1.effects.bySession['3245']['145095']).toBe(3);
         expect(normalize(e2)).toEqual(normalize(e1));
         expectValid(e1);
+    });
+
+    test('Covers OQ5: a preserved volcano block with every effect at 0 is exported as enabled false, without level 0', async ({ page }) => {
+        const settings = { volcano: { level: 5, effects: [145095, 148043], durations: { '1': 12 } } };
+        await load(page, fileOf([{ id: 'a', name: 'Alpha', session: LATIUM }], { settings }));
+        await page.evaluate(() => {
+            const s = JSON.parse(localStorage.getItem('sessionSettings') as string);
+            for (const key of Object.keys(s)) if (/\.effect\.\d+\.scaling$/.test(key)) s[key] = 0;
+            delete s['volcano.unlocked'];
+            localStorage.setItem('sessionSettings', JSON.stringify(s));
+        });
+        await page.reload();
+        await appReady(page);
+        const { document } = await exportDoc(page);
+        expect(document.settings.volcano).toEqual({ enabled: false, level: 5, effects: [145095, 148043], durations: { '1': 12 } });
+    });
+
+    test('Covers the unlocked set: level 0 keeps its membership through export and import', async ({ page }) => {
+        await load(page, fileOf([{ id: 'a', name: 'Alpha', session: LATIUM }]));
+        await page.evaluate(() => {
+            const s: Record<string, unknown> = {};
+            for (const session of [3245, 37135]) for (const e of [145095, 148043, 145099]) s[`session.${session}.effect.${e}.scaling`] = 0;
+            s['volcano.unlocked'] = [145095, 148043];
+            localStorage.setItem('sessionSettings', JSON.stringify(s));
+        });
+        await page.reload();
+        await appReady(page);
+        const { document } = await exportDoc(page);
+        for (const session of ['3245', '37135']) {
+            expect(document.effects.bySession[session]).toMatchObject({ '145095': 0, '148043': 0, '145099': 0 });
+        }
+        expect(document.settings.volcano).toEqual({ enabled: false, effects: [145095, 148043] });
+        await load(page, JSON.stringify(document));
+        const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('sessionSettings') as string));
+        expect(stored['volcano.unlocked']).toEqual([145095, 148043]);
+        expect(stored['session.3245.effect.145099.scaling']).toBe(0);
+    });
+
+    test('Covers R1: a kept DLC number that params.dlcs maps is decided by the stored flag', async ({ page }) => {
+        await load(page, fileOf([{ id: 'a', name: 'Alpha', session: LATIUM }], { settings: { dlcs: [1, 4] } }));
+        const doc = await page.evaluate(() => {
+            const dlcs = window.params.dlcs;
+            const original = dlcs.slice();
+            dlcs.push({ ...dlcs[0], guid: 99999, id: 'DLC04_Test' });
+            localStorage.setItem('calculatorSettings', JSON.stringify({ ...JSON.parse(localStorage.getItem('calculatorSettings') ?? '{}'), DLC04_Test: '0' }));
+            try {
+                return window.exchange.buildDocument();
+            } finally {
+                dlcs.length = 0;
+                dlcs.push(...original);
+            }
+        });
+        expect(doc.settings.dlcs).toEqual([1]);
     });
 
     test('export reads localStorage after pending debounced saves are flushed', async ({ page }) => {

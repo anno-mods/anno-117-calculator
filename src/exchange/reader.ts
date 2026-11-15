@@ -74,11 +74,14 @@ const ISLAND_SHAPE = obj(
         effects: map(NUM),
         appliedEffects: KEPT,
         rangeBuffs: KEPT,
-        residenceItems: KEPT,
+        residenceItems: arr(obj({ item: GUID, boosted: BOOL })),
         islandItems: KEPT,
-        villaCoverage: KEPT,
-        residenceEffects: KEPT,
-        publicCoverages: KEPT,
+        // Number or {default?, byLevel?, byResidence?} (villaCoverage); level and GUID maps for the other two.
+        // No union shape exists here, so the island planner validates the values.
+        villaCoverage: prim("any"),
+        residenceEffects: prim("any"),
+        publicCoverages: prim("any"),
+        publicCoverage: prim("any"),
         notes: map(STR),
         harbour: KEPT,
         position: KEPT,

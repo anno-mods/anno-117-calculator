@@ -30,8 +30,20 @@ export const islandEffectScaling = (effect: Guid): string => `island.effect.${ef
 // src/world.ts:1067
 export const islandFertilityChecked = (fertility: Guid): string => `island.fertility.${fertility}.checked`;
 
+// src/world.ts residence item pass: shared state of a residence item (int 0/1/2) and the villa share (percent, 0..100).
+export const residenceItemState = (item: Guid): string => `residenceItem.${item}.state`;
+export const villaCoverage = "villaCoverage";
+// src/world.ts Island.areaEffectCoverage: share of a level's residences in range of an area effect (percent, 0..100).
+export const areaEffectCoverage = (level: Guid, effect: Guid): string => `${level}[${effect}].coverage`;
+// src/world.ts Island.publicCoverage / publicCoverageDefault: share in range of a public building (percent) and the
+// share of public buildings that are not listed per level.
+export const publicBuildingCoverage = (level: Guid, building: Guid): string => `${level}[${building}].publicCoverage`;
+export const publicCoverageDefault = "publicCoverage";
+
 // src/world.ts:1086 persistString(p, "notes") -> `<guid>.notes`
 export const productNotes = (product: Guid): string => `${product}.notes`;
+// src/world.ts persistFloat(p, "governorSupply", ...): t/min a governor delivers to the island, per product (src/production.ts).
+export const governorSupply = (product: Guid): string => `${product}.governorSupply`;
 // src/world.ts:1089-1090 and :1126-1139; values "factory" | "extra_good" | "passive_trade" | "null"
 export const defaultSupplierType = (product: Guid): string => `${product}.defaultSupplier.type`;
 export const defaultSupplierId = (product: Guid): string => `${product}.defaultSupplier.id`;
@@ -42,6 +54,13 @@ export const gameConnectorAreaIndex = "gameConnector.areaIndex";
 
 // src/world.ts:250 -- key inside SubStorage("sessionSettings") (main.ts:385); `session` is the Session GUID.
 export const sessionEffectScaling = (session: Guid, effect: Guid): string => `session.${session}.effect.${effect}.scaling`;
+// Key inside SubStorage("sessionSettings"): the volcano effect GUIDs the user has unlocked (list of numbers).
+export const VOLCANO_UNLOCKED_KEY = "volcano.unlocked";
+// DLC number of a params.dlcs id ("DLC01_Prophecies_of_Ash" -> 1); undefined for an id without the number pattern.
+export function dlcNumber(id: string): number | undefined {
+    const m = /^DLC0*(\d+)_/.exec(id);
+    return m ? parseInt(m[1], 10) : undefined;
+}
 // The global effect key inside SubStorage("globalEffects") is `<guid>.scaling` (src/main.ts:468-469). The
 // `global.effect.<g>.scaling` form is the logical key of the exchange tables; it is mapped to the stored
 // form by globalEffectStoredKey.

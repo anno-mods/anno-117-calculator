@@ -58,6 +58,9 @@ Three invariants; everything else is in `src/AGENTS.md` -> "Aggregate mode (`src
 - **Read-only aggregate rows are a data contract, not a template convention.** `AggregateBuildingsCalc` (`src/aggregate.ts`) is a `BuildingsCalc` of read-only cross-island sums (`readOnly === true`, setters are logged no-ops). Presenters return it from `buildings()`, and shared components branch on `buildings().readOnly`. Prefer this over a template-level condition.
 - **Gate genuinely-disappearing blocks with `<!-- ko ifEditable: true -->` / `<!-- ko ifAggregated: true -->`, never `visible:`** - `visible:` still evaluates a hidden control's `enable:`/`click:` bindings against read-only aggregate data, which throws because the aggregate objects deliberately implement no mutators.
 
+### Residence items and coverage
+Island-store keys: `residenceItem.<item>.state` (0/1/2), `villaCoverage`, `<level>[<effect>].coverage`, `<level>[<building>].publicCoverage`, `publicCoverage` (percent 0..100, default 100). Coverage multiplies buff values through `AppliedBuff.coverage` and never an effect `scaling`. Details: `src/AGENTS.md` -> "Residence items (villa items) and coverage"; exchange mapping: `docs/exchange-format.md`.
+
 ### Initialization Order (world.ts:518)
 **MUST follow this sequence:**
 1. Create objects (factories, products, consumers)

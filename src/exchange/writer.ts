@@ -2,6 +2,7 @@
 // Snapshot -> validate every JSON string -> clear -> write -> reload. Any exception restores the snapshot byte for
 // byte and nothing is reloaded. The old import (main.ts installImportConfigListener) clears and writes without a safety net.
 
+import { isDeviceSetting } from "./scopes";
 import { ImportPlan } from "./types";
 import { versionCalculator } from "../util";
 
@@ -9,9 +10,9 @@ const ISLAND_NAME_KEY = "islandName"; // plain text, not JSON (world.ts)
 const ISLAND_NAMES_KEY = "islandNames";
 const VERSION_KEY = "versionCalculator";
 const SETTINGS_KEY = "calculatorSettings";
-const LANGUAGE_KEY = "language"; // inside calculatorSettings (main.ts, settingsStorage)
 const DARK_MODE_KEY = "darkMode.checked"; // views.ts
-export const COMPUTED_SESSION_KEY = "exchange.computed";
+// sessionStorage flag, set by a committed import and consumed by the bootstrap after the reload.
+export const JUST_IMPORTED_KEY = "exchange.justImported";
 
 // The subset of the Web Storage interface the writer uses; tests inject a fake.
 export interface StorageLike {
@@ -28,8 +29,11 @@ export interface ApplyOptions {
     reload?: boolean;
     // Storage to replace; default window.localStorage.
     storage?: StorageLike;
-    // Storage for the `computed` hand-off (U11); default window.sessionStorage.
+    // Storage for the "just imported" flag; default window.sessionStorage.
     sessionStorage?: StorageLike;
+    // Set the "just imported" flag. Default: true when the page reloads (the flag makes the bootstrap open the Download
+    // dialog), false with reload: false.
+    markImported?: boolean;
     // Test hook: the n-th write (1-based, counted over every setItem of the import) throws a QuotaExceededError.
     failAfterWrites?: number;
     // Session GUIDs in app order, for the island list order; default window.params.sessions.
@@ -41,7 +45,7 @@ export interface ApplyResult {
     error?: string;
     // The keys written to the storage, in write order. Empty on failure.
     written: string[];
-    // Non-fatal problems after a committed import (e.g. the sessionStorage hand-off failed).
+    // Non-fatal problems after a committed import (e.g. the sessionStorage flag could not be written).
     warnings?: string[];
 }
 
@@ -53,7 +57,7 @@ function describe(e: unknown): string {
     return e instanceof Error ? `${e.name}: ${e.message}` : String(e);
 }
 
-function snapshot(storage: StorageLike): Map<string, string> {
+export function snapshot(storage: StorageLike): Map<string, string> {
     const snap = new Map<string, string>();
     for (let i = 0; i < storage.length; i++) {
         const key = storage.key(i);
@@ -62,7 +66,7 @@ function snapshot(storage: StorageLike): Map<string, string> {
     return snap;
 }
 
-function restore(storage: StorageLike, snap: Map<string, string>): void {
+export function restore(storage: StorageLike, snap: Map<string, string>): void {
     storage.clear();
     for (const [k, v] of snap) storage.setItem(k, v);
 }
@@ -89,19 +93,24 @@ function orderedIslandNames(keyMap: Record<string, string>, sessionOrder: number
     return [...names].sort((a, b) => (idx.get(a)! - idx.get(b)!) || a.localeCompare(b));
 }
 
-// Device preferences of the current browser survive an import (R5, CP10).
-function mergeDevicePreferences(keyMap: Record<string, string>, snap: Map<string, string>): void {
+// Device preferences of the current browser survive an import and an undo: dark mode, the language and the scope
+// ticks and toggles (isDeviceSetting).
+export function mergeDevicePreferences(keyMap: Record<string, string>, snap: Map<string, string>): void {
     const dark = snap.get(DARK_MODE_KEY);
     if (dark !== undefined) keyMap[DARK_MODE_KEY] = dark;
 
-    let language: unknown;
+    const device: Record<string, unknown> = {};
     try {
         const old: unknown = JSON.parse(snap.get(SETTINGS_KEY) ?? "{}");
-        if (old && typeof old === "object") language = (old as Record<string, unknown>)[LANGUAGE_KEY];
+        if (old && typeof old === "object" && !Array.isArray(old)) {
+            for (const [k, v] of Object.entries(old)) {
+                if (isDeviceSetting(k) && v !== undefined && v !== null && v !== "") device[k] = v;
+            }
+        }
     } catch {
-        language = undefined;
+        return;
     }
-    if (language === undefined || language === null || language === "") return;
+    if (Object.keys(device).length === 0) return;
     let settings: Record<string, unknown> = {};
     try {
         const planned: unknown = JSON.parse(keyMap[SETTINGS_KEY] ?? "{}");
@@ -109,8 +118,7 @@ function mergeDevicePreferences(keyMap: Record<string, string>, snap: Map<string
     } catch {
         settings = {};
     }
-    settings[LANGUAGE_KEY] = language;
-    keyMap[SETTINGS_KEY] = JSON.stringify(settings);
+    keyMap[SETTINGS_KEY] = JSON.stringify(Object.assign(settings, device));
 }
 
 export function applyImport(plan: ImportPlan, opts: ApplyOptions = {}): ApplyResult {
@@ -165,21 +173,19 @@ export function applyImport(plan: ImportPlan, opts: ApplyOptions = {}): ApplyRes
         const message = describe(e);
         try {
             restore(raw, snap);
-            session?.removeItem(COMPUTED_SESSION_KEY);
         } catch (e2) {
             return { ok: false, error: `${message}; the previous data could not be restored: ${describe(e2)}`, written: [] };
         }
         return { ok: false, error: message, written: [] };
     }
 
-    // The computed hand-off is advisory: a failure here must not undo the committed import.
+    // The "just imported" flag is advisory: a failure here must not undo the committed import.
     const warnings: string[] = [];
-    if (session) {
+    if (session && (opts.markImported ?? opts.reload !== false)) {
         try {
-            if (plan.computed !== undefined) session.setItem(COMPUTED_SESSION_KEY, JSON.stringify(plan.computed));
-            else session.removeItem(COMPUTED_SESSION_KEY);
+            session.setItem(JUST_IMPORTED_KEY, "1");
         } catch (e) {
-            warnings.push(`The computed comparison could not be handed over: ${describe(e)}`);
+            warnings.push(`The just-imported flag could not be written: ${describe(e)}`);
         }
     }
 

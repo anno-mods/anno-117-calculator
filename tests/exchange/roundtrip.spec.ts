@@ -34,8 +34,8 @@ const DLC3_GUID = 67904;
 const DATES_FARM = 152272; // Egyptian factory of DLC 3
 const MYTH_DLC3 = 185132; // mythical-item effect gated by DLC 3
 const MYTH_PLAIN = 166439; // mythical-item effect without DLC
-const WINE_NEED = 2690; // DLC 3 need
-const SOAP_NEED = 2770; // DLC 3 need
+const WINE_NEED = 157041; // DLC 3 gated need on the Roman Equites level (1497)
+const SOAP_NEED = 157042; // DLC 3 gated need on the Roman Equites level (1497)
 const GOLD = 31698;
 const GOLDSMITH = 152358;
 
@@ -162,7 +162,7 @@ test.describe('integration: Cinis, trade floor, DLC and needs', () => {
     });
 
     test('a DLC switched on after import turns the unlisted needs on and keeps a listed need off (AE22)', async ({ page }) => {
-        // Find the population levels that carry the two DLC 3 needs.
+        // Find the population levels that carry the two DLC 3 gated needs.
         const levels = await page.evaluate(
             ({ wine, soap }) => {
                 const isl = window.view.island();
@@ -404,5 +404,105 @@ test.describe('integration: Marcia 69 sample game', () => {
         expect(summaryDifferences(before, await summaryByName(page))).toEqual([]);
         expect(errors).toEqual([]);
         await appReady(page);
+    });
+});
+
+test.describe('integration: supplier amounts as floor 0, route derivation (U8)', () => {
+    test.beforeEach(async ({ page }) => {
+        await openApp(page);
+    });
+
+    const island = (id: string, name: string, extra: Json = {}) => ({ id, name, session: LATIUM, ...extra });
+    const supplierOf = (doc: Json, receiver: string) => (doc.trade.imports as Json[]).find((e) => e.island === receiver && e.product === BREAD);
+
+    test('Covers AE6: a planner amount imports as floor 0 and exports again; a floor set afterwards exports as amount and reports the drop', async ({ page }) => {
+        const text = fileOf([island('a', 'A'), island('b', 'B')], {
+            trade: { imports: [{ island: 'b', product: BREAD, suppliers: [{ island: 'a', default: true, amount: 0.38 }, { governor: 4711, amount: 1.5 }] }] },
+        });
+        expect((await importText(page, text)).ok).toBe(true);
+        const floor = await page.evaluate(() => JSON.parse(localStorage.getItem('tradeRoutes') as string));
+        expect(floor).toEqual([{ productGUID: BREAD, from: 'A', to: 'B', userSetAmount: 0, isDefaultSupplier: true }]);
+        const first = await exportDoc(page);
+        expect(supplierOf(first.document, 'b')!.suppliers).toEqual([{ island: 'a', default: true, amount: 0.38 }, { governor: 4711, amount: 1.5 }]);
+        expect(first.report.map((e: Json) => e.code)).not.toContain('import-entry-dropped');
+
+        await page.evaluate(() => {
+            const routes = JSON.parse(localStorage.getItem('tradeRoutes') as string);
+            routes[0].userSetAmount = 0.2;
+            localStorage.setItem('tradeRoutes', JSON.stringify(routes));
+        });
+        await page.reload();
+        await appReady(page);
+        const edited = await exportDoc(page);
+        const suppliers = supplierOf(edited.document, 'b')!.suppliers as Json[];
+        expect(suppliers.find((s) => s.island === 'a')!.amount).toBe(0.2);
+        expect(edited.report.map((e: Json) => e.code)).toContain('import-entry-dropped');
+        expect(suppliers.some((s) => s.governor === 4711)).toBe(true);
+    });
+
+    test('Covers R22: with the re-calculation toggle the export keeps trade.imports for the derived flows and trade.routes verbatim', async ({ page }) => {
+        const doc = JSON.parse(vendoredFixture('valid/trade-shared-supply.json'));
+        const sel = { islands: true, residences: true, production: true, trade: true, modifiers: true, keepIslands: false, keepRoutes: false, recalcRoutes: true };
+        const res = await importText(page, JSON.stringify(doc), sel);
+        expect(res.ok, res.error).toBe(true);
+        const routes = await page.evaluate(() => JSON.parse(localStorage.getItem('tradeRoutes') as string));
+        expect(routes.length).toBe(2);
+        expect(routes.every((r: Json) => r.userSetAmount === 0)).toBe(true);
+        const { document } = await exportDoc(page);
+        const entry = (document.trade.imports as Json[]).find((e) => e.island === 'c')!;
+        expect((entry.suppliers as Json[]).map((s) => s.island).sort()).toEqual(['a', 'b']);
+        expect(document.trade.routes).toEqual(doc.trade.routes);
+    });
+});
+
+// The Marcia 73 planner export (planner file with trade history) next to the repository root; not part of the vendored fixtures.
+const MARCIA_73 = path.resolve(process.env.MARCIA73_EXPORT ?? path.join(__dirname, '..', '..', 'Marcia 73.with-storage-and-trade-history.exchange.json'));
+
+test.describe('integration: Marcia 73 planner export (U8)', () => {
+    test.skip(!fs.existsSync(MARCIA_73), `Marcia 73 export not found at ${MARCIA_73}; set MARCIA73_EXPORT`);
+
+    test('every island supplier becomes a route at floor 0 and every planner amount is kept in its entry', async ({ page }) => {
+        await openApp(page);
+        const text = fs.readFileSync(MARCIA_73, 'utf-8');
+        const doc = JSON.parse(text);
+        const ids = new Set((doc.islands as Json[]).map((i) => i.id));
+        const expected = new Set<string>();
+        let amounts = 0;
+        for (const e of doc.trade.imports as Json[]) {
+            if (!ids.has(e.island)) continue;
+            for (const s of e.suppliers as Json[]) {
+                if (typeof s.island !== 'string' || !ids.has(s.island) || s.island === e.island) continue;
+                expected.add(`${e.product}|${s.island}|${e.island}`);
+                if (typeof s.amount === 'number' && s.amount > 0) amounts++;
+            }
+        }
+        const result = await page.evaluate((t: string) => {
+            const plan = window.exchange.planImport(t);
+            if ('error' in plan) throw new Error(plan.error);
+            const routes = JSON.parse(plan.keyMap['tradeRoutes']) as Json[];
+            let kept = 0;
+            for (const k of JSON.parse(plan.keyMap['islandNames']) as string[]) {
+                const store = JSON.parse(plan.keyMap[k]);
+                const ext = store && store['exchange.ext'];
+                for (const p of ext?.preservedImports ?? []) if (p.reasons.includes('amount-kept')) kept += p.entry.suppliers.filter((s: Json) => typeof s.island === 'string' && s.amount > 0).length;
+            }
+            return { routes: routes.length, nonZero: routes.filter((r) => r.userSetAmount !== 0).length, kept };
+        }, text);
+        expect(result.routes).toBe(expected.size);
+        expect(result.nonZero).toBe(0);
+        expect(result.kept).toBe(amounts);
+        expect(amounts).toBeGreaterThan(0);
+    });
+
+    test('the re-calculation toggle derives supplier sets from the 113 routes of the file', async ({ page }) => {
+        await openApp(page);
+        const text = fs.readFileSync(MARCIA_73, 'utf-8');
+        const out = await page.evaluate((t: string) => {
+            const read = window.exchange.readExchange(t);
+            if ('error' in read) throw new Error(read.error);
+            return { ships: window.exchange.hasShipRoutes(read.doc), derived: window.exchange.deriveImports(read.doc.trade!.routes!, read.doc.trade!.visits ?? []).length };
+        }, text);
+        expect(out.ships).toBe(true);
+        expect(out.derived).toBeGreaterThan(0);
     });
 });

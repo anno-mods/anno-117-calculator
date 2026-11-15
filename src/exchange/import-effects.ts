@@ -32,6 +32,7 @@ type Scales = Record<GuidKey, number>;
 
 const DEFAULT_RESEARCH_BASIS = "researched";
 const NEED_CONSUMPTION_KEY = "settings.needConsumption";
+const VOLCANO_MAX_LEVEL = 5;
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
     return typeof v === "object" && v !== null && !Array.isArray(v);
@@ -53,7 +54,8 @@ class EffectsPlanner {
         basis: DEFAULT_RESEARCH_BASIS,
         report: [],
     };
-    private readonly effectInfo = new Map<number, { scope: string; dlcUnlocks: number[] }>();
+    private readonly effectInfo = new Map<number, { scope: string; dlcUnlocks: number[]; source: string; targets: number[]; allProduction: boolean }>();
+    private readonly factoryGuids = new Set<number>();
     private readonly sessionGuids = new Set<number>();
     private readonly sessionRegion = new Map<number, string>(); // session guid -> region id
     private readonly dlcIdByGuid = new Map<number, string>();
@@ -62,6 +64,9 @@ class EffectsPlanner {
     private readonly specificSession = new Set<string>();
     // DLC id -> effect GUIDs that switch it on at load (DLC.used, util.ts:424)
     private readonly dlcUse = new Map<string, number[]>();
+    private readonly volcanoClamped: { session: number; effect: number; original: number }[] = [];
+    // `settings.volcano.effects` of a switched-off volcano, in the order of VOLCANO_EFFECTS.
+    private volcanoOffUnlocked: number[] = [];
     private readonly research: ResearchExt = {};
     private readonly effectsExt: EffectsExt = {};
     private readonly settingsExt: SettingsExt = {};
@@ -72,7 +77,10 @@ class EffectsPlanner {
         private readonly ctx: ImportContext,
     ) {
         const p = ctx.params;
-        for (const e of p.effects) this.effectInfo.set(e.guid, { scope: e.effectScope, dlcUnlocks: e.dlcUnlocks ?? [] });
+        for (const e of p.effects) {
+            this.effectInfo.set(e.guid, { scope: e.effectScope, dlcUnlocks: e.dlcUnlocks ?? [], source: e.source, targets: e.targets ?? [], allProduction: e.targetsIsAllProduction });
+        }
+        for (const f of p.factories) this.factoryGuids.add(f.guid);
         const regionIds = new Map<number, string>(p.regions.map((r) => [r.guid, r.id]));
         for (const s of p.sessions) {
             this.sessionGuids.add(s.guid);
@@ -98,6 +106,7 @@ class EffectsPlanner {
         this.dlcs();
         this.difficulty();
         this.materials();
+        this.appliedEffects();
         this.finish();
         return this.result;
     }
@@ -115,6 +124,8 @@ class EffectsPlanner {
 
     private noteDlc(effect: number, value: number): void {
         if (value <= 0) return;
+        // Effects are Modifiers content: with Modifiers unticked they do not count as DLC use (R13).
+        if (this.ctx.scope && !this.ctx.scope.modifiers) return;
         const info = this.effectInfo.get(effect);
         for (const dlc of info?.dlcUnlocks ?? []) {
             const id = this.dlcIdByGuid.get(dlc);
@@ -215,14 +226,22 @@ class EffectsPlanner {
                 const cls = this.classify(guid, "session");
                 if (cls === "ok") {
                     const storageKey = keys.sessionEffectScaling(session, guid);
-                    this.result.sessionSettings[storageKey] = effects[key];
+                    const value = this.clampVolcano(session, guid, effects[key]);
+                    this.result.sessionSettings[storageKey] = value;
                     this.specificSession.add(storageKey);
-                    this.noteDlc(guid, effects[key]);
+                    this.noteDlc(guid, value);
                 } else {
                     this.keepEffect(cls, guid, effects[key], "session", sessionKey);
                 }
             }
         }
+    }
+
+    // R11c: the volcano level is 1 plus the overdrive factor, at most 5; a larger scale is clamped and reported.
+    private clampVolcano(session: number, effect: number, value: number): number {
+        if (value <= VOLCANO_MAX_LEVEL || !VOLCANO_EFFECTS.includes(effect)) return value;
+        this.volcanoClamped.push({ session, effect, original: value });
+        return VOLCANO_MAX_LEVEL;
     }
 
     private sessionBucket(sessionKey: string): Scales {
@@ -250,18 +269,22 @@ class EffectsPlanner {
         const v = this.read.doc.settings?.volcano;
         if (!v) return;
         this.settingsExt.volcano = v;
-        if (v.enabled === false) return;
+        // A switched-off volcano writes scale 0 to its three effects; the unlocked list stays in the preserved setting.
+        const off = v.enabled === false;
         const level = v.level;
         const unlocked = v.effects;
-        if (!isNumber(level) || !Array.isArray(unlocked)) {
+        if (!off && (!isNumber(level) || !Array.isArray(unlocked))) {
             this.add("not-provided", "volcano-incomplete", "settings.volcano has no level or no list of unlocked effects; no volcano effect is derived from it.");
             return;
+        }
+        if (off && Array.isArray(unlocked)) {
+            this.volcanoOffUnlocked = VOLCANO_EFFECTS.filter((e) => unlocked.includes(e));
         }
         const disagree: { session: number; effect: number; setting: number; effectValue: number }[] = [];
         for (const session of VOLCANO_SESSIONS) {
             if (!this.sessionGuids.has(session)) continue;
             for (const effect of VOLCANO_EFFECTS) {
-                const value = unlocked.includes(effect) ? level : 0;
+                const value = off || !Array.isArray(unlocked) || !isNumber(level) ? 0 : unlocked.includes(effect) ? this.clampVolcano(session, effect, level) : 0;
                 const storageKey = keys.sessionEffectScaling(session, effect);
                 if (this.specificSession.has(storageKey)) {
                     const stated = this.result.sessionSettings[storageKey];
@@ -331,11 +354,20 @@ class EffectsPlanner {
             return;
         }
         const numbers = new Set<number>(listed);
-        for (const n of [1, 2, 3]) {
-            const dlc = this.ctx.params.dlcs.find((d) => d.id.startsWith(`DLC0${n}_`));
-            if (dlc) this.result.calculatorSettings[dlc.id] = numbers.has(n) ? "1" : "0";
+        const mapped = new Set<number>();
+        const notListed: string[] = [];
+        for (const dlc of this.ctx.params.dlcs) {
+            const n = keys.dlcNumber(dlc.id);
+            if (n === undefined) continue;
+            mapped.add(n);
+            const on = numbers.has(n);
+            this.result.calculatorSettings[dlc.id] = on ? "1" : "0";
+            if (!on) notListed.push(dlc.id);
         }
-        const unknown = [...numbers].filter((n) => n < 1 || n > 3);
+        if (notListed.length) {
+            this.add("approximated", "dlc-not-listed", `${notListed.join(", ")} are not listed in settings.dlcs; they are written "0" unless the imported content needs them.`, { dlcs: notListed });
+        }
+        const unknown = [...numbers].filter((n) => !mapped.has(n));
         if (unknown.length) {
             this.settingsExt.dlcsUnknown = unknown;
             this.add("carried-through", "dlcs-unknown", `DLC numbers ${unknown.join(", ")} are not DLCs of this calculator; kept and written back on export.`, { dlcs: unknown });
@@ -420,6 +452,44 @@ class EffectsPlanner {
         }
     }
 
+    // ---- range effects per building type (R25) ----
+
+    // `islands[].appliedEffects`: each entry states the per-target range-effect state of its (type, effect) pair, the island-store
+    // key `<type>[<effect>].scaling` (raw 0 or 1, keys.factoryEffectScaling). The entries win over `factories[].effects[]`, which the
+    // island plan wrote earlier (this plan's store is merged on top). `scale` and `method` and the list itself stay kept in the
+    // island's ext; an entry the calculator cannot hold is reported and stays kept at its pointer.
+    private appliedEffects(): void {
+        for (const ip of this.islands.islands) {
+            const list = ip.file.appliedEffects;
+            if (!Array.isArray(list)) continue;
+            const out = this.result.islands[ip.key];
+            list.forEach((entry, i) => {
+                const pointer = `/appliedEffects/${i}`;
+                const notApplied = (why: string): void =>
+                    this.add("not-mapped", "applied-effect-not-applied", `The applied effect at ${pointer} is kept and not applied: ${why}.`, { pointer }, ip.id);
+                if (!isPlainObject(entry)) return notApplied("it is not an object");
+                const { type, effect, applied, share } = entry;
+                if (!isNumber(type) || !isNumber(effect) || typeof applied !== "boolean") return notApplied("it names no building type, effect and applied flag");
+                const info = this.effectInfo.get(effect);
+                if (!info) return notApplied(`effect ${effect} is not in the calculator's data`);
+                if (info.source !== "building") return notApplied(`effect ${effect} has no per-building state`);
+                if (!this.factoryGuids.has(type) || !(info.targets.includes(type) || info.allProduction)) return notApplied(`building ${type} is not a target of effect ${effect}`);
+                const value = applied ? 1 : 0;
+                out.store[keys.factoryEffectScaling(type, effect)] = value;
+                this.noteDlc(effect, value);
+                if (applied && isNumber(share) && share > 0 && share < 1) {
+                    this.add(
+                        "approximated",
+                        "applied-effect-approximated",
+                        `Effect ${effect} reaches ${Math.round(share * 100)} percent of the buildings of type ${type}; the calculator holds one state per building type and applies it fully.`,
+                        { pointer, type, effect, share },
+                        ip.id,
+                    );
+                }
+            });
+        }
+    }
+
     // ---- result ----
 
     private finish(): void {
@@ -428,7 +498,21 @@ class EffectsPlanner {
             delete this.result.globalEffects[keys.globalEffectStoredKey(g)];
             for (const s of this.sessionGuids) delete this.result.sessionSettings[keys.sessionEffectScaling(s, g)];
         }
+        if (this.volcanoClamped.length) {
+            this.add(
+                "approximated",
+                "volcano-level-clamped",
+                `A volcano effect scale above ${VOLCANO_MAX_LEVEL} is written as ${VOLCANO_MAX_LEVEL}.`,
+                { clamped: this.volcanoClamped },
+            );
+        }
+        // The unlocked volcano effects: those with a scale above 0, else the list of a switched-off volcano.
+        const above = VOLCANO_EFFECTS.filter((e) => VOLCANO_SESSIONS.some((s) => (this.result.sessionSettings[keys.sessionEffectScaling(s, e)] ?? 0) > 0));
+        const unlockedSet = above.length ? above : this.volcanoOffUnlocked;
+        if (unlockedSet.length) this.result.volcanoUnlocked = [...unlockedSet];
         for (const [dlc, effects] of this.dlcUse) {
+            // A partial import switches on every DLC its ticked content needs, over an omitted "0" of settings.dlcs (R13).
+            if (this.ctx.scope) this.result.calculatorSettings[dlc] = "1";
             this.add("approximated", "dlc-enabled", `${dlc} is switched on at load because of effect ${effects.join(", ")}.`, { dlc, effects });
         }
         if (Object.keys(this.research).length) this.result.ext.research = this.research;

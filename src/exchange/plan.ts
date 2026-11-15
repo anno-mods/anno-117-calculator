@@ -1,8 +1,9 @@
 // planImport (U7): reads a file and assembles the island, trade and effects parts into one import plan with a
-// complete key map of raw top-level localStorage keys (KTD1). Pure: no storage, no DOM. The atomic writer (U8)
-// writes the key map; the report dialog (U10) shows the report; U11 compares against `computed`.
+// complete key map of raw top-level localStorage keys (KTD1). Pure: no storage, no DOM. The scoped merge (merge.ts)
+// selects from this key map; the atomic writer (writer.ts) writes the final key map.
 
 import { planCalculator } from "./import-calculator";
+import { VOLCANO_UNLOCKED_KEY } from "./keys";
 import { planEffects } from "./import-effects";
 import { planIslands } from "./import-islands";
 import { planTrade } from "./import-trade";
@@ -105,7 +106,7 @@ export function planImport(text: string, ctx: ImportContext): ImportPlanResult {
 
     const names = islands.islands.map((i) => i.key);
     keyMap["tradeRoutes"] = JSON.stringify([...trade.tradeRoutes, ...calc.routes]);
-    keyMap["sessionSettings"] = JSON.stringify(fx.sessionSettings);
+    keyMap["sessionSettings"] = JSON.stringify(fx.volcanoUnlocked ? { ...fx.sessionSettings, [VOLCANO_UNLOCKED_KEY]: fx.volcanoUnlocked } : fx.sessionSettings);
     keyMap["globalEffects"] = JSON.stringify(fx.globalEffects);
     // DLC keys and the need consumption option; DLCs the island data switches on (mythical items) win over a listed "0".
     // The calculator-only settings of ext.calculator sit below both.
@@ -132,7 +133,8 @@ export function planImport(text: string, ctx: ImportContext): ImportPlanResult {
     };
 
     const problems: PlanProblem[] = [...read.problems, ...validateJson(keyMap)];
-    const plan: ImportPlan = { keyMap, report, orphans: islands.orphans, problems };
+    const plan: ImportPlan = { keyMap, report, orphans: islands.orphans, problems, islands: islands.islands.map((i) => ({ id: i.id, key: i.key })) };
+    if (islands.skipped.length) plan.skipped = islands.skipped;
     if (read.computed !== undefined) plan.computed = read.computed;
     return plan;
 }

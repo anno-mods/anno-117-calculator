@@ -1515,6 +1515,9 @@
           },
           "additionalModule": {
             "type": "integer"
+          },
+          "isRiverEmbankment": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -1801,6 +1804,53 @@
               ]
             }
           },
+          "needAttributes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "products": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                },
+                "attributes": {
+                  "type": "object",
+                  "properties": {
+                    "Money": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "Money"
+                  ]
+                }
+              },
+              "required": [
+                "products",
+                "attributes"
+              ]
+            }
+          },
+          "functionalEffect": {
+            "type": "integer"
+          },
+          "attributes": {
+            "type": "object",
+            "properties": {
+              "Population": {
+                "type": "number"
+              },
+              "Health": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "Population",
+              "Health"
+            ]
+          },
           "providedNeedUpgrade": {
             "type": "array",
             "items": {
@@ -1884,7 +1934,8 @@
           "replaceWorkforce",
           "workforceMaintenanceFactorUpgrade",
           "population",
-          "consumptionModifierInPercent"
+          "consumptionModifierInPercent",
+          "functionalEffect"
         ]
       },
       "title": "BuildingBuff",
@@ -2074,6 +2125,18 @@
           "source": {
             "type": "string"
           },
+          "sourceTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sourceGuids": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
           "boostBuffs": {
             "type": "array",
             "items": {
@@ -2100,7 +2163,144 @@
         ]
       },
       "title": "Effect",
-      "description": "Building buff combined with targets (pool of building GUIDs). Source is an enum with literals 'module', 'tech', 'festival', 'veneration-effect', 'session-event', 'island-event', 'building'"
+      "description": "Building buff combined with targets (pool of building GUIDs). Source is an enum with literals 'module', 'tech', 'festival', 'veneration-effect', 'session-event', 'island-event', 'building', 'mythical-item', 'patron-wonder'. sourceGuids are the buildings that emit the effect, sourceTypes the other source kinds."
+    },
+    "publicServices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "locaText": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "providedNeeds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "populationLevel": {
+            "type": "integer"
+          },
+          "radius": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "integer"
+              },
+              "type": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "value",
+              "type"
+            ]
+          },
+          "attributeEffects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "effect": {
+                  "type": "integer"
+                },
+                "scope": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "effect",
+                "scope"
+              ]
+            }
+          },
+          "regions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dlcUnlocks": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        "required": [
+          "guid",
+          "name",
+          "iconPath",
+          "locaText",
+          "providedNeeds",
+          "populationLevel",
+          "regions"
+        ]
+      },
+      "title": "PublicServiceBuilding",
+      "description": "Buildings that supply public-service needs (providedNeeds) to residences in their radius; attributeEffects are the area effects the building adds to nearby buildings."
     },
     "techs": {
       "type": "array",
@@ -2467,6 +2667,9 @@
           "rarity": {
             "type": "string"
           },
+          "allocation": {
+            "type": "string"
+          },
           "dlcUnlocks": {
             "type": "array",
             "items": {
@@ -2478,6 +2681,64 @@
             "items": {
               "type": "integer"
             }
+          },
+          "boostHint": {
+            "type": "object",
+            "properties": {
+              "english": {
+                "type": "string"
+              },
+              "german": {
+                "type": "string"
+              },
+              "spanish": {
+                "type": "string"
+              },
+              "french": {
+                "type": "string"
+              },
+              "italian": {
+                "type": "string"
+              },
+              "japanese": {
+                "type": "string"
+              },
+              "korean": {
+                "type": "string"
+              },
+              "polish": {
+                "type": "string"
+              },
+              "brazilian": {
+                "type": "string"
+              },
+              "russian": {
+                "type": "string"
+              },
+              "simplified_chinese": {
+                "type": "string"
+              },
+              "traditional_chinese": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "english",
+              "german",
+              "spanish",
+              "french",
+              "italian",
+              "japanese",
+              "korean",
+              "polish",
+              "brazilian",
+              "russian",
+              "simplified_chinese",
+              "traditional_chinese"
+            ]
+          },
+          "heroicEffect": {
+            "type": "integer"
           }
         },
         "required": [
@@ -2485,11 +2746,11 @@
           "name",
           "iconPath",
           "locaText",
-          "buffs",
           "targets",
           "effectScope",
           "excludeEffectSourceGUID",
-          "rarity"
+          "rarity",
+          "allocation"
         ]
       },
       "title": "Item",
@@ -2601,6 +2862,7 @@
     "buildingBuffs",
     "areaBuffs",
     "effects",
+    "publicServices",
     "techs",
     "patrons",
     "items",

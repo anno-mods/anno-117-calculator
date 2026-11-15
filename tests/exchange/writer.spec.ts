@@ -69,7 +69,7 @@ test.describe('applyImport (U8)', () => {
         expect(r.alpha).toBeNull();
     });
 
-    test('a failure restores an injected storage and sessionStorage hand-off', async ({ page }) => {
+    test('a failure restores an injected storage and sets no just-imported flag', async ({ page }) => {
         await ready(page);
         const r = await page.evaluate((text: string) => {
             const ex = window.exchange;
@@ -83,28 +83,26 @@ test.describe('applyImport (U8)', () => {
                 clear: () => data.clear(),
             };
             const plan = ex.planImport(text);
-            plan.computed = { islands: {} };
-            const res = ex.applyImport(plan, { reload: false, storage: fake, failAfterWrites: 3 });
-            return { res, keys: [...data.keys()], sess: sessionStorage.getItem('exchange.computed') };
+            const res = ex.applyImport(plan, { reload: false, markImported: true, storage: fake, failAfterWrites: 3 });
+            return { res, keys: [...data.keys()], sess: sessionStorage.getItem('exchange.justImported') };
         }, doc());
         expect(r.res.ok).toBe(false);
         expect(r.keys).toEqual(['x']);
         expect(r.sess).toBeNull();
     });
 
-    test('writes versionCalculator, ordered islandNames, islandName and the computed hand-off', async ({ page }) => {
+    test('writes versionCalculator, ordered islandNames, islandName and the just-imported flag', async ({ page }) => {
         await ready(page);
         const r = await page.evaluate((text: string) => {
             const ex = window.exchange;
             const plan = ex.planImport(text);
-            plan.computed = { islands: { a: { residents: { '1': 5 } } } };
-            const res = ex.applyImport(plan, { reload: false });
+            const res = ex.applyImport(plan, { reload: false, markImported: true });
             return {
                 res,
                 version: localStorage.getItem('versionCalculator'),
                 names: localStorage.getItem('islandNames'),
                 name: localStorage.getItem('islandName'),
-                computed: sessionStorage.getItem('exchange.computed'),
+                flag: sessionStorage.getItem('exchange.justImported'),
                 alpha: JSON.parse(localStorage.getItem('Alpha') as string),
                 keys: Object.keys(localStorage).sort(),
             };
@@ -115,23 +113,26 @@ test.describe('applyImport (U8)', () => {
         // plan order is Beta, Alpha; the app sorts by session then name
         expect(JSON.parse(r.names as string)).toEqual(['Alpha', 'Beta']);
         expect(r.name).toBe('Alpha');
-        expect(JSON.parse(r.computed as string)).toEqual({ islands: { a: { residents: { '1': 5 } } } });
+        expect(r.flag).toBe('1');
         expect(r.alpha.session).toBe(LATIUM);
         expect(r.keys).toContain('exchange.ext');
     });
 
-    test('no computed hand-off when the plan has no computed block', async ({ page }) => {
+    test('no just-imported flag without a reload, and no computed hand-off key', async ({ page }) => {
         await ready(page);
         const r = await page.evaluate((text: string) => {
-            sessionStorage.setItem('exchange.computed', 'stale');
+            sessionStorage.removeItem('exchange.justImported');
             const ex = window.exchange;
-            ex.applyImport(ex.planImport(text), { reload: false });
-            return sessionStorage.getItem('exchange.computed');
+            const plan = ex.planImport(text);
+            plan.computed = { islands: {} };
+            ex.applyImport(plan, { reload: false });
+            return { flag: sessionStorage.getItem('exchange.justImported'), computed: sessionStorage.getItem('exchange.computed') };
         }, doc());
-        expect(r).toBeNull();
+        expect(r.flag).toBeNull();
+        expect(r.computed).toBeNull();
     });
 
-    test('a failing sessionStorage hand-off keeps the import and reports a warning', async ({ page }) => {
+    test('a failing sessionStorage flag keeps the import and reports a warning', async ({ page }) => {
         await ready(page);
         const r = await page.evaluate((text: string) => {
             const ex = window.exchange;
@@ -153,14 +154,13 @@ test.describe('applyImport (U8)', () => {
                 clear: () => undefined,
             };
             const plan = ex.planImport(text);
-            plan.computed = { islands: {} };
-            const res = ex.applyImport(plan, { reload: false, storage: local, sessionStorage: sess });
+            const res = ex.applyImport(plan, { reload: false, markImported: true, storage: local, sessionStorage: sess });
             return { res, keys: [...data.keys()] };
         }, doc());
         expect(r.res.ok).toBe(true);
         expect(r.keys).toContain('Alpha');
         expect(r.res.warnings).toHaveLength(1);
-        expect(r.res.warnings[0]).toContain('computed');
+        expect(r.res.warnings[0]).toContain('flag');
     });
 
     test('unknown document-level and island-level fields are written to the two exchange.ext keys', async ({ page }) => {
@@ -242,17 +242,19 @@ test.describe('applyImport (U8)', () => {
             }, doc()),
         ]);
         await appReady(page);
+        await page.waitForSelector('#download-dialog.show');
 
         const state = await page.evaluate(() => ({
             names: window.view.islands().map((i: Record<string, any>) => i.name()),
             selected: window.view.island().name(),
             version: localStorage.getItem('versionCalculator'),
-            visibleModals: Array.from(document.querySelectorAll('.modal.show')).length,
+            visibleModals: Array.from(document.querySelectorAll('.modal.show')).map((m) => m.id),
         }));
         expect(state.names).toEqual(expect.arrayContaining(['All Islands', 'Alpha', 'Beta']));
         expect(state.selected).toBe('Alpha');
         expect(state.version).toBeTruthy();
-        expect(state.visibleModals).toBe(0);
+        // the import ran with a reload: the Download dialog opens (it offers Undo) and no report dialog shows
+        expect(state.visibleModals).toEqual(['download-dialog']);
 
         // rename keeps the preserved island data
         const renamed = await page.evaluate(() => {

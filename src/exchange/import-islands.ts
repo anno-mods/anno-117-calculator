@@ -5,6 +5,8 @@
 // the patron are strings; `gameConnector.*` are real numbers.
 
 import * as keys from "./keys";
+import { isVillaItem } from "../residence-items";
+import { wantedName } from "./matching";
 import { uniqueName } from "./names";
 import {
     AbsentGuidEntry,
@@ -23,6 +25,7 @@ import {
     ReadOk,
     ReportEntry,
     ReportKind,
+    ScopeSelection,
     UnknownField,
 } from "./types";
 
@@ -55,6 +58,12 @@ class Lookups {
     regionIds = new Map<number, string>();
     residenceByLevel = new Map<number, number>();
     residences = new Set<number>();
+    // population levels that have a residence building
+    residenceLevels = new Set<number>();
+    // area effect (source "building" with residence targets) -> population levels of those targets
+    areaEffects = new Map<number, Set<number>>();
+    // public buildings of params.publicServices
+    publicBuildings = new Set<number>();
     buildings = new Set<number>();
     // GUID of a building -> its single DLC (lockDLCIfSet: a count above 0 switches that DLC on at load)
     buildingDlc = new Map<number, number>();
@@ -62,7 +71,8 @@ class Lookups {
     modules = new Set<number>();
     effects = new Map<number, { source: string; dlcUnlocks: number[] }>();
     mythical = new Set<number>();
-    items = new Map<number, { boostable: boolean; dlcUnlocks: number[] }>();
+    // villa: the item is a residence item (isVillaItem); heroic: GUID of its island-wide effect when that effect exists
+    items = new Map<number, { boostable: boolean; dlcUnlocks: number[]; villa: boolean; heroic: number | undefined }>();
     patrons = new Set<number>();
     dlcIds = new Map<number, string>();
     fertilities: { guid: number; regions: string[] }[];
@@ -72,7 +82,10 @@ class Lookups {
         const p = ctx.params;
         for (const s of p.sessions) this.sessions.set(s.guid, s.region);
         for (const r of p.regions) this.regionIds.set(r.guid, r.id);
+        const levelOfResidence = new Map<number, number>();
         for (const b of p.residenceBuildings) {
+            levelOfResidence.set(b.guid, b.populationLevel);
+            this.residenceLevels.add(b.populationLevel);
             this.residences.add(b.guid);
             this.buildings.add(b.guid);
             if (!this.residenceByLevel.has(b.populationLevel)) this.residenceByLevel.set(b.populationLevel, b.guid);
@@ -90,9 +103,23 @@ class Lookups {
         for (const e of p.effects) {
             this.effects.set(e.guid, { source: e.source, dlcUnlocks: e.dlcUnlocks ?? [] });
             if (e.source === "mythical-item") this.mythical.add(e.guid);
+            if (e.source === "building") {
+                const levels = new Set<number>();
+                for (const t of e.targets ?? []) {
+                    const level = levelOfResidence.get(t);
+                    if (level !== undefined) levels.add(level);
+                }
+                if (levels.size) this.areaEffects.set(e.guid, levels);
+            }
         }
+        for (const s of p.publicServices ?? []) this.publicBuildings.add(s.guid);
         for (const i of p.items) {
-            this.items.set(i.guid, { boostable: (i.boostBuffs ?? []).length > 0, dlcUnlocks: i.dlcUnlocks ?? [] });
+            this.items.set(i.guid, {
+                boostable: (i.boostBuffs ?? []).length > 0,
+                dlcUnlocks: i.dlcUnlocks ?? [],
+                villa: isVillaItem(i, p),
+                heroic: i.heroicEffect && this.effects.has(i.heroicEffect) ? i.heroicEffect : undefined,
+            });
         }
         for (const pa of p.patrons) this.patrons.add(pa.guid);
         for (const d of p.dlcs) this.dlcIds.set(d.guid, d.id);
@@ -124,6 +151,10 @@ class IslandPlanner {
     report: ReportEntry[] = [];
     // Pointers of absent GUID entries; captured fields below them are not repeated.
     private absent: string[] = [];
+    // Island effects switched on by an equipped item (state Base or Boosted) with a heroicEffect (R4); evaluated in effects()
+    private heroicWrites = new Set<number>();
+    // Island effects switched on because residenceEffects lists a level above 0 (R15a); the file's own `effects` entry wins
+    private areaSwitched = new Set<number>();
     // DLC id -> things that switch it on at load
     private dlcUse = new Map<string, { items: number[]; effects: number[]; buildings: number[] }>();
     settingsKeys: Record<string, string> = {};
@@ -134,6 +165,7 @@ class IslandPlanner {
         private readonly read: ReadOk,
         private readonly lk: Lookups,
         originalName: string,
+        private readonly scope?: ScopeSelection,
     ) {
         this.ext = { originalName, captured: [], guids: [], moduleWritten: {} };
     }
@@ -155,11 +187,21 @@ class IslandPlanner {
         return guids.map((g) => this.lk.dlcIds.get(g)).filter((d): d is string => d !== undefined);
     }
 
+    // With a partial selection only the content of ticked scopes counts as DLC use (R13): buildings by their own
+    // scope, items and effects by Modifiers.
+    private ticked(kind: "items" | "effects" | "buildings", guid: number): boolean {
+        const s = this.scope;
+        if (!s) return true;
+        if (kind === "buildings") return this.lk.residences.has(guid) ? s.residences : s.production;
+        return s.modifiers;
+    }
+
     private noteDlc(dlcUnlocks: number[], kind: "items" | "effects" | "buildings", guid: number): void {
+        if (!this.ticked(kind, guid)) return;
         for (const id of this.dlcOf(dlcUnlocks)) {
             let u = this.dlcUse.get(id);
             if (!u) this.dlcUse.set(id, (u = { items: [], effects: [], buildings: [] }));
-            u[kind].push(guid);
+            if (!u[kind].includes(guid)) u[kind].push(guid);
         }
     }
 
@@ -176,6 +218,10 @@ class IslandPlanner {
         this.fertilities();
         this.patronAndDevotion();
         this.factories();
+        this.residenceItems();
+        this.villaCoverage();
+        this.residenceEffects();
+        this.publicCoverages();
         this.effects();
         this.notes();
         this.captured();
@@ -321,6 +367,7 @@ class IslandPlanner {
                 }
                 this.store[keys.factoryItemScaling(f, choice.item)] = state;
                 this.noteDlc(item.dlcUnlocks, "items", choice.item);
+                if (item.heroic !== undefined) this.heroicWrites.add(item.heroic);
             });
             (entry.effects ?? []).forEach((effect, i) => {
                 if (!this.lk.effects.has(effect)) {
@@ -348,9 +395,169 @@ class IslandPlanner {
         }
     }
 
-    private captureModelled(pointer: string, value: unknown): void {
+    private captureModelled(pointer: string, value: unknown, code = "unmodelled-key", message = `${pointer} is kept but not applied by the calculator.`): void {
         this.ext.captured.push({ pointer, kind: "unmodelled", value });
-        this.add("not-mapped", "unmodelled-key", `${pointer} is kept but not applied by the calculator.`, { pointer });
+        this.add("not-mapped", code, message, { pointer });
+    }
+
+    // Residence items (R1-R5a, R10): villa items store the shared state; an item without calculator data, or that is
+    // no villa item, and a repeated item are kept at their pointer and reported. Nothing is shown on screen (KD7).
+    private residenceItems(): void {
+        const list = this.isl.residenceItems;
+        if (!Array.isArray(list)) return;
+        const seen = new Set<number>();
+        list.forEach((choice, i) => {
+            const pointer = `/residenceItems/${i}`;
+            const item = this.lk.items.get(choice.item);
+            if (!item) {
+                this.absentGuid(pointer, choice, choice.item, "Item");
+                return;
+            }
+            if (!item.villa) {
+                this.captureModelled(pointer, choice, "residence-item-not-applied", `Item ${choice.item} is no residence item of the calculator; the entry is kept and not applied.`);
+                return;
+            }
+            if (seen.has(choice.item)) {
+                this.captureModelled(pointer, choice, "residence-item-duplicate", `Item ${choice.item} is listed more than once; the first entry sets its state, this entry is kept.`);
+                return;
+            }
+            seen.add(choice.item);
+            let state = 1;
+            if (choice.boosted === true) {
+                if (item.boostable) state = 2;
+                else this.add("approximated", "item-boost-approximated", `Item ${choice.item} has no boosted variant; it is written as equipped (1).`, { item: choice.item });
+            }
+            this.store[keys.residenceItemState(choice.item)] = state;
+            this.noteDlc(item.dlcUnlocks, "items", choice.item);
+            if (item.heroic !== undefined) this.heroicWrites.add(item.heroic);
+            this.add("approximated", "residence-item-applied", `Residence item ${choice.item} is applied with state ${state}.`, { item: choice.item, state });
+        });
+    }
+
+    // Reads a level-and-GUID coverage map (residenceEffects, publicCoverages) leaf by leaf. `apply` stores a leaf the
+    // calculator can hold and returns false for a leaf it cannot; every unapplied leaf is kept at its pointer and
+    // reported with `code`. The spec shape keys (default, byLevel, byResidence) carry no dimension for the effect or
+    // building and are kept whole. Returns the levels and GUIDs that were applied, per GUID.
+    private coverageLeaves(
+        field: "residenceEffects" | "publicCoverages",
+        code: string,
+        clampCode: string,
+        holds: (level: number, guid: number) => boolean,
+        what: string,
+    ): Map<number, Map<number, number>> {
+        const applied = new Map<number, Map<number, number>>();
+        const given: unknown = this.isl[field];
+        if (given === undefined) return applied;
+        if (typeof given !== "object" || given === null || Array.isArray(given)) {
+            this.captureModelled(`/${field}`, given, code, `/${field} is no level and GUID map; it is kept and not applied.`);
+            return applied;
+        }
+        const top = given as Record<string, unknown>;
+        for (const levelKey of Object.keys(top)) {
+            const levelPointer = `/${field}/${seg(levelKey)}`;
+            const leaves = top[levelKey];
+            if (levelKey === "default" || levelKey === "byLevel" || levelKey === "byResidence") {
+                this.captureModelled(levelPointer, leaves, code, `${levelPointer} is the spec shape of a coverage; it is kept and not applied.`);
+                continue;
+            }
+            if (typeof leaves !== "object" || leaves === null || Array.isArray(leaves)) {
+                this.captureModelled(levelPointer, leaves, code, `${levelPointer} is no map of ${what}; it is kept and not applied.`);
+                continue;
+            }
+            const level = guidOf(levelKey);
+            for (const guidKey of Object.keys(leaves)) {
+                const pointer = `${levelPointer}/${seg(guidKey)}`;
+                const value = (leaves as Record<string, unknown>)[guidKey];
+                const guid = guidOf(guidKey);
+                if (!holds(level, guid)) {
+                    this.captureModelled(pointer, value, code, `${what} ${guidKey} on level ${levelKey} is not in the calculator's data; the value is kept and not applied.`);
+                    continue;
+                }
+                if (typeof value !== "number" || !Number.isFinite(value)) {
+                    this.captureModelled(pointer, value, code, `${pointer} is no number; it is kept and not applied.`);
+                    continue;
+                }
+                const used = Math.min(100, Math.max(0, value));
+                if (used !== value) {
+                    this.add("approximated", clampCode,`${pointer} ${value} is outside 0 to 100; ${used} is used.`, { pointer, value, used });
+                }
+                let perLevel = applied.get(guid);
+                if (!perLevel) applied.set(guid, (perLevel = new Map()));
+                perLevel.set(level, used);
+            }
+        }
+        return applied;
+    }
+
+    // residenceEffects (R15, R15a, R15b): the share of a level's residences in range of an area effect. For an effect
+    // the file lists, the levels it does not list get 0 and the island effect is switched on when any level is above 0.
+    private residenceEffects(): void {
+        const applied = this.coverageLeaves("residenceEffects", "area-effect-not-applied", "area-effect-clamped", (level, g) => this.lk.areaEffects.get(g)?.has(level) === true, "Area effect");
+        for (const [g, listed] of applied) {
+            const levels = this.lk.areaEffects.get(g)!;
+            let any = false;
+            for (const level of levels) {
+                const value = listed.get(level) ?? 0;
+                this.store[keys.areaEffectCoverage(level, g)] = value;
+                if (value > 0) any = true;
+            }
+            this.add("approximated", "area-effect-applied", `Area effect ${g} reaches the listed share of each level's residences.`, { effect: g, levels: Object.fromEntries([...levels].map((l) => [l, listed.get(l) ?? 0])) });
+            if (!any) continue;
+            this.store[keys.islandEffectScaling(g)] = 1;
+            this.areaSwitched.add(g);
+            this.noteDlc(this.lk.effects.get(g)?.dlcUnlocks ?? [], "effects", g);
+        }
+    }
+
+    // publicCoverages and publicCoverage (R18): the share of a level's residences in range of a public building scales
+    // the supply of the public needs the building provides; the scalar applies to buildings that are not listed.
+    private publicCoverages(): void {
+        const applied = this.coverageLeaves("publicCoverages", "public-coverage-not-applied", "public-coverage-clamped", (level, g) => this.lk.publicBuildings.has(g) && this.lk.residenceLevels.has(level), "Public building");
+        for (const [g, listed] of applied) {
+            for (const [level, value] of listed) this.store[keys.publicBuildingCoverage(level, g)] = value;
+        }
+        const scalar: unknown = this.isl.publicCoverage;
+        if (scalar === undefined) return;
+        if (typeof scalar !== "number" || !Number.isFinite(scalar)) {
+            this.captureModelled("/publicCoverage", scalar, "public-coverage-not-applied", "/publicCoverage is no number; it is kept and not applied.");
+            return;
+        }
+        const used = Math.min(100, Math.max(0, scalar));
+        if (used !== scalar) this.add("approximated", "public-coverage-clamped", `publicCoverage ${scalar} is outside 0 to 100; ${used} is used.`, { value: scalar, used });
+        this.store[keys.publicCoverageDefault] = used;
+    }
+
+    // villaCoverage (R7): a number or the `default` of an object, clamped to 0..100; byLevel, byResidence and any other
+    // key of an object stay kept and unapplied.
+    private villaCoverage(): void {
+        const given: unknown = this.isl.villaCoverage;
+        if (given === undefined) return;
+        let value: unknown = given;
+        if (typeof given === "object" && given !== null && !Array.isArray(given)) {
+            const o = given as Record<string, unknown>;
+            for (const key of Object.keys(o)) {
+                if (key === "default") continue;
+                const pointer = `/villaCoverage/${seg(key)}`;
+                if (key === "byLevel" || key === "byResidence") {
+                    this.captureModelled(pointer, o[key], "villa-coverage-not-applied", `${pointer} is kept and not applied; the calculator applies one coverage for all residences.`);
+                } else {
+                    this.ext.captured.push({ pointer, kind: "unknown", value: o[key] });
+                    this.add("carried-through", "unknown-field", `${pointer} is not part of the format; kept and written back on export.`, { pointer });
+                }
+            }
+            value = o.default;
+            if (value === undefined) return;
+        }
+        if (typeof value !== "number" || !Number.isFinite(value)) {
+            this.add("approximated", "villa-coverage-invalid", "villaCoverage is no number; the calculator keeps 100.", { value });
+            return;
+        }
+        const used = Math.min(100, Math.max(0, value));
+        if (used !== value) {
+            this.add("approximated", "villa-coverage-clamped", `villaCoverage ${value} is outside 0 to 100; ${used} is used.`, { value, used });
+        }
+        this.store[keys.villaCoverage] = used;
+        this.add("approximated", "villa-coverage-applied", `villaCoverage ${used} scales the radius effect of residence items.`, { value: used });
     }
 
     // Island effects as given, with the active mythicEffect of socketed building items on top (KTD16).
@@ -365,6 +572,9 @@ class IslandPlanner {
                 continue;
             }
             values.set(g, given[key]);
+            if (this.areaSwitched.has(g) && given[key] !== 1) {
+                this.add("approximated", "area-effect-overridden", `Effect ${g} is stated as ${given[key]} in effects; that value wins over the switch-on by residenceEffects.`, { effect: g, value: given[key] });
+            }
         }
 
         const holders: ItemHolder[] = Array.isArray(isl.itemHolders) ? isl.itemHolders : [];
@@ -404,12 +614,23 @@ class IslandPlanner {
             values.set(e, Math.max(values.get(e) ?? 0, active.has(e) ? 1 : 0));
         }
 
+        // The one-way item write (R4): an item stored at Base or Boosted switches its island-wide effect on, unless the
+        // file states that effect itself (island, global or session entry, or an item record naming it as mythicEffect).
+        const effectsDoc = this.read.doc.effects;
+        const statedElsewhere = (g: number): boolean =>
+            effectsDoc?.global?.[String(g)] !== undefined ||
+            Object.values(effectsDoc?.bySession ?? {}).some((perSession) => perSession?.[String(g)] !== undefined);
+        for (const g of this.heroicWrites) {
+            if (given[String(g)] !== undefined || mentioned.has(g) || statedElsewhere(g)) continue;
+            values.set(g, 1);
+        }
+
         for (const [g, v] of values) {
             this.store[keys.islandEffectScaling(g)] = v;
             const info = this.lk.effects.get(g);
             if (v > 0 && info) {
                 this.noteDlc(info.dlcUnlocks, "effects", g);
-                if (active.has(g)) for (const id of this.dlcOf(info.dlcUnlocks)) this.settingsKeys[id] = "1";
+                if (active.has(g) && this.ticked("effects", g)) for (const id of this.dlcOf(info.dlcUnlocks)) this.settingsKeys[id] = "1";
             }
         }
     }
@@ -441,6 +662,8 @@ class IslandPlanner {
                 this.add("not-mapped", "module-attachments-per-instance", `${count} module attachments are per instance; they are kept, the calculator applies module state per factory type only.`, { count });
             } else if (pointer === "/itemHolders" || pointer === "/itemStorage") {
                 // counted per place in items()
+            } else if (pointer === "/appliedEffects") {
+                // applied and reported per entry by planEffects (R25); the list stays kept whole
             } else if (u.kind === "unknown") {
                 this.add("carried-through", "unknown-field", `${pointer} is not part of the format; kept and written back on export.`, { pointer });
             } else {
@@ -472,6 +695,8 @@ class IslandPlanner {
 
     private finishDlc(): void {
         for (const [dlc, use] of this.dlcUse) {
+            // A partial import switches on every DLC its ticked content needs (R13); a full import leaves it to DLC.used at load.
+            if (this.scope) this.settingsKeys[dlc] = "1";
             const what = [...use.items.map((g) => `item ${g}`), ...use.effects.map((g) => `effect ${g}`), ...use.buildings.map((g) => `building ${g}`)].join(", ");
             this.add("approximated", "dlc-enabled", `${dlc} is switched on because of ${what}.`, { dlc, items: use.items, effects: use.effects, buildings: use.buildings });
         }
@@ -497,8 +722,16 @@ export function documentItemReport(doc: ExchangeDocument): ReportEntry[] {
 
 export function planIslands(read: ReadOk, ctx: ImportContext): IslandsPlan {
     const lk = new Lookups(ctx);
-    const plan: IslandsPlan = { islands: [], orphans: [], report: [], settingsKeys: {}, document: {} };
+    const plan: IslandsPlan = { islands: [], skipped: [], orphans: [], report: [], settingsKeys: {}, document: {} };
     const taken = new Set<string>();
+    const scope = ctx.scope;
+    const matches = new Map<string, string | null>((ctx.matches ?? []).map((m) => [m.fileId, m.calcName]));
+    // Islands unticked: only matched islands are planned, under the calculator's name (KTD4). Islands ticked: the file's
+    // names are used and the names of calculator islands that stay are reserved.
+    const matchedNames = new Set<string>([...matches.values()].filter((n): n is string => n !== null));
+    if (scope && scope.islands && scope.keepIslands) {
+        for (const n of ctx.storedIslandNames ?? []) if (!matchedNames.has(n)) taken.add(n);
+    }
 
     read.doc.islands.forEach((isl: ExchangeIsland, index: number) => {
         const session = isl.session;
@@ -515,11 +748,28 @@ export function planIslands(read: ReadOk, ctx: ImportContext): IslandsPlan {
             return;
         }
 
-        const wanted = isl.name !== undefined && isl.name !== "" ? isl.name : isl.gameIsland?.name !== undefined && isl.gameIsland.name !== "" ? isl.gameIsland.name : isl.id;
+        const wanted = wantedName(isl);
+        const calcName = matches.get(isl.id) ?? null;
+
+        if (scope && !scope.islands) {
+            const counted = new IslandPlanner(isl, index, read, lk, wanted, scope);
+            counted.plan();
+            if (calcName === null) {
+                const values = Object.keys(counted.store).filter((k) => !k.startsWith("exchange.")).length;
+                plan.skipped.push({ id: isl.id, name: wanted, values, reason: "unmatched" });
+                return;
+            }
+            const matched: IslandPlan = { id: isl.id, name: calcName, key: calcName, store: counted.store, ext: counted.ext, report: counted.report, file: isl, matchedTo: calcName };
+            plan.islands.push(matched);
+            plan.report.push(...counted.report);
+            Object.assign(plan.settingsKeys, counted.settingsKeys);
+            return;
+        }
+
         const key = uniqueName(wanted, taken);
         taken.add(key);
 
-        const p = new IslandPlanner(isl, index, read, lk, wanted);
+        const p = new IslandPlanner(isl, index, read, lk, wanted, scope);
         p.plan();
         if (key !== wanted) {
             p.report.unshift({
@@ -531,6 +781,7 @@ export function planIslands(read: ReadOk, ctx: ImportContext): IslandsPlan {
             });
         }
         const result: IslandPlan = { id: isl.id, name: key, key, store: p.store, ext: p.ext, report: p.report, file: isl };
+        if (calcName !== null) result.matchedTo = calcName;
         plan.islands.push(result);
         plan.report.push(...p.report);
         Object.assign(plan.settingsKeys, p.settingsKeys);

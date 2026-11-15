@@ -247,9 +247,10 @@ export interface ExchangeIsland {
     rangeBuffs?: Record<GuidKey, number>;
     residenceItems?: ItemChoice[];
     islandItems?: ItemChoice[];
-    villaCoverage?: number;
-    residenceEffects?: Coverage;
-    publicCoverages?: Record<GuidKey, Coverage>;
+    villaCoverage?: number | Coverage;
+    residenceEffects?: Record<GuidKey, Record<GuidKey, number>> | Coverage;
+    publicCoverages?: Record<GuidKey, Record<GuidKey, number>> | Coverage;
+    publicCoverage?: number;
     notes?: Record<GuidKey, string>;
     harbour?: Record<string, unknown>;
     position?: Record<string, unknown>;
@@ -286,6 +287,7 @@ export interface ExchangeDocument {
 }
 
 import type { ApplyOptions, ApplyResult } from "./writer";
+import type { UndoOptions, UndoResult } from "./undo";
 
 // The functions registered on window.exchange (KTD12). Later units add their members here.
 export interface ExchangeApi {
@@ -298,10 +300,31 @@ export interface ExchangeApi {
     tables(): ExchangeTables;
     readExchange(text: string): ReadResult;
     planIslands(read: ReadOk): IslandsPlan;
-    planTrade(islands: IslandsPlan, read: ReadOk): TradePlan;
+    planTrade(islands: IslandsPlan, read: ReadOk, opts?: Pick<ImportContext, "recalcRoutes" | "keptRoutes">): TradePlan;
+    // Route derivation of derive-routes.ts: supplier sets from savegame routes, and the gate of the re-calculation toggle.
+    deriveImports(routes: TradeRoute[], visits?: Record<string, unknown>[]): TradeImport[];
+    hasShipRoutes(doc: { trade?: Pick<Trade, "routes"> }): boolean;
     planEffects(islands: IslandsPlan, read: ReadOk): EffectsPlan;
     planImport(text: string): ImportPlanResult;
+    // Plans an import of the ticked scopes and merges it into the stored data (scopes.ts, merge.ts).
+    planScopedImport(text: string, selection: ScopeSelection): ScopedImportResult;
     applyImport(plan: ImportPlan, opts?: ApplyOptions): ApplyResult;
+    // The pure merge over a stored snapshot given as an object (tests).
+    mergeScoped(stored: Record<string, string>, plan: ImportPlan, selection: ScopeSelection, matches: IslandMatch[]): MergeResult;
+    // Scope of a stored island key ("island"), top-level key ("top"), calculatorSettings key ("setting") or an
+    // exchange.ext pointer ("ext-island", "ext-document"); null when the key has none.
+    classifyKey(kind: "island" | "top" | "setting" | "ext-island" | "ext-document", key: string): ImportScope | null;
+    isDeviceSetting(key: string): boolean;
+    assignIslandIds(): string[];
+    readStoredIslands(): StoredIslandRecord[];
+    matchIslands(fileIslands: FileIslandRefRecord[], stored: StoredIslandRecord[], opts?: { defaultSession?: number; knownSessions?: Set<number> }): IslandMatch[];
+    undo: {
+        saveSnapshot(map: Map<string, string>, opts?: UndoOptions): UndoResult;
+        hasSnapshot(opts?: UndoOptions): boolean;
+        clearSnapshot(opts?: UndoOptions): void;
+        restoreSnapshot(opts?: UndoOptions): UndoResult;
+        snapshot(): Map<string, string>;
+    };
     // U9: reads localStorage (after flushing pending debounced saves) and returns the exchange document.
     buildDocument(): ExchangeDocument;
     exportDocument(): ExportResult;
@@ -311,7 +334,7 @@ export interface ExchangeApi {
 
 // Result of exportDocument (U9). `report` lists what the export dropped or approximated because the user changed the
 // data the preserved copy depended on (codes: module-attachments-dropped, import-entry-dropped, entry-pruned,
-// preserved-field-dropped, item-boost-dropped); kind is "approximated" for every entry.
+// preserved-field-dropped, item-boost-dropped, governor-amount-not-exported); kind is "approximated" for every entry.
 export interface ExportResult {
     document: ExchangeDocument;
     report: ReportEntry[];
@@ -490,6 +513,8 @@ export interface IslandPlan {
     report: ReportEntry[];
     // The island record of the file, for the trade and material units.
     file: ExchangeIsland;
+    // Name of the matched calculator island (scoped import); `key` equals it while Islands is unticked.
+    matchedTo?: string;
 }
 
 export interface OrphanIsland {
@@ -500,6 +525,8 @@ export interface OrphanIsland {
 
 export interface IslandsPlan {
     islands: IslandPlan[];
+    // File islands without a calculator match while Islands is unticked: planned for counting, written nowhere.
+    skipped: SkippedIsland[];
     orphans: OrphanIsland[];
     // All report lines: islands, orphans and the document-scope item places.
     report: ReportEntry[];
@@ -529,7 +556,9 @@ export type PreservedImportReason =
     | "non-player-supplier"
     | "self-supplier"
     | "unknown-product"
-    | "receiver-unavailable";
+    | "receiver-unavailable"
+    // An island supplier carried a planned amount that the import did not write as a floor (R19a); the entry keeps it.
+    | "amount-kept";
 
 // What the import wrote for one receiving island and product (CD10): the exporter restores a preserved entry
 // only while the stored state still equals this.
@@ -543,6 +572,9 @@ export interface TradeRestore {
     defaultSupplier: { type: string; id: string } | null;
     // Value the import relies on for the shared `passiveTrade.userSetAmount` key. The import never writes it; 0 means absent or 0.
     passiveUserSetAmount: number;
+    // Sum of the governor amounts the import wrote to `<product>.governorSupply` (t/min); 0 when it wrote none. Entries
+    // saved before the field existed lack it and read as 0.
+    governorSupply?: number;
 }
 
 export interface PreservedImport {
@@ -605,7 +637,7 @@ export interface SettingsExt {
     seasons?: Record<string, unknown>;
     // `settings.difficulty` without the need consumption id when that id was written.
     difficulty?: Record<string, unknown>;
-    // DLC numbers outside 1-3.
+    // DLC numbers that no entry of params.dlcs maps.
     dlcsUnknown?: number[];
 }
 
@@ -614,6 +646,8 @@ export interface EffectsPlan {
     globalEffects: Record<string, number>;
     // `session.<session>.effect.<effect>.scaling` -> scale: content of the top-level key `sessionSettings`.
     sessionSettings: Record<string, number>;
+    // Content of the key `volcano.unlocked` of `sessionSettings`; absent when the file states no unlocked volcano effect.
+    volcanoUnlocked?: number[];
     // DLC keys ("1"/"0") and `settings.needConsumption`: content of the top-level key `calculatorSettings`.
     calculatorSettings: Record<string, string>;
     // Additions to the island stores by island store key (construction materials, R50).
@@ -696,8 +730,12 @@ export interface ImportPlan {
     keyMap: Record<string, string>;
     report: ImportPlanReport;
     orphans: OrphanIsland[];
-    // The file's `computed` block for the comparison of U11; undefined when the file has none.
+    // The file's `computed` block; undefined when the file has none. Kept for tests and the export round trip.
     computed?: Computed;
+    // The planned islands in plan order (file id and final store key).
+    islands?: PlannedIsland[];
+    // File islands left out because no calculator island matched (scoped import with Islands unticked).
+    skipped?: SkippedIsland[];
     // Problems of the reader (coerced or dropped values) and of the key map validation (KTD1).
     problems: PlanProblem[];
 }
@@ -719,8 +757,87 @@ export type ImportParams = Pick<
     | "products"
     | "techs"
     | "needConsumptions"
+    | "buildingBuffs"
+    | "publicServices"
 >;
+
+// ---- Import scopes ----
+
+export type ImportScope = "islands" | "residences" | "production" | "trade" | "modifiers";
+
+// The five scope ticks and the three toggles of the Download dialog. The toggles only act while their scope is ticked.
+export interface ScopeSelection {
+    islands: boolean;
+    residences: boolean;
+    production: boolean;
+    trade: boolean;
+    modifiers: boolean;
+    // Calculator islands that are not in the file stay with all their data (only with Islands ticked).
+    keepIslands: boolean;
+    // Calculator routes the file does not replace stay (only with Trade ticked).
+    keepRoutes: boolean;
+    // Derive island supplier sets from the file's savegame route data (only with Trade ticked).
+    recalcRoutes: boolean;
+}
+
+// Result of matching one file island against the stored calculator islands (R10).
+export interface IslandMatch {
+    fileId: string;
+    // Name (= storage key) of the matched calculator island; null without a match.
+    calcName: string | null;
+    by: "id" | "triple" | "name" | null;
+}
+
+// Shapes of src/exchange/matching.ts as seen through window.exchange.
+export interface StoredIslandRecord {
+    name: string;
+    id: string | undefined;
+    session: number | undefined;
+    triple: { islandId: number; areaIndex: number } | undefined;
+}
+
+export interface FileIslandRefRecord {
+    id: string;
+    name: string;
+    session: number | undefined;
+    gameIsland: { sessionGuid: number | undefined; islandId: number; areaIndex: number } | undefined;
+}
+
+// A file island that no calculator island matched while Islands is unticked, or a stored store the merge could not read.
+export interface SkippedIsland {
+    id: string;
+    name: string;
+    // Number of planned values that were not written.
+    values: number;
+    reason: "unmatched" | "invalid-store";
+}
 
 export interface ImportContext {
     params: ImportParams;
+    // Partial selection of a scoped import; absent for a full import. Planning stays a pure function of the file.
+    scope?: ScopeSelection;
+    // Matches of the file islands against the stored calculator islands (scoped import only).
+    matches?: IslandMatch[];
+    // Names of the stored calculator islands (scoped import only); kept islands reserve their names.
+    storedIslandNames?: string[];
+    // Derive the island supplier sets from the file's savegame routes where they carry ships (R18). Effective only with Trade ticked.
+    recalcRoutes?: boolean;
+    // Stored calculator routes that survive the import (keep routes on): they take part in the default-supplier cycle and
+    // duplicate checks. Names are stored island names; the planner maps matched islands to their plan keys. The planner drops
+    // the routes of every (product, receiver) pair the file produces a route set for (R21).
+    keptRoutes?: StoredTradeRoute[];
 }
+
+// A planned island: file island id and the final key of its store.
+export interface PlannedIsland {
+    id: string;
+    key: string;
+}
+
+export interface MergeResult {
+    // Every top-level key the calculator holds after the import.
+    keyMap: Record<string, string>;
+    skipped: SkippedIsland[];
+}
+
+export type ScopedImportResult = (ImportPlan & { skipped: SkippedIsland[] }) | ReadError;

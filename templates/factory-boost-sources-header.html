@@ -1,0 +1,14 @@
+<!-- Header of the boost sources container. $data is the FactoryPresenter. Count and net are icon and number pairs;
+     the net is not claimed while the productivity row is hidden. -->
+<span class="boost-head ml-3">
+    <span class="boost-head-pair" data-bind="attr: {title: $root.texts.boostSourcesActiveCount.name()}">
+        <img class="icon-sm icon-light" src="../icons/icon_2d_reward_buff_0.webp" alt="">
+        <span data-bind="text: $data.instance().boostSources.count()"></span>
+    </span>
+    <!-- ko if: $data.isProductivityVisible() -->
+    <span class="boost-head-pair" data-bind="attr: {title: $root.texts.boostSourcesNet.name()}">
+        <img class="icon-sm" src="../icons/icon_2d_productivity_0.webp" alt="">
+        <span data-bind="text: formatNumber($data.instance().boostSources.net(), true) + ' %'"></span>
+    </span>
+    <!-- /ko -->
+</span>

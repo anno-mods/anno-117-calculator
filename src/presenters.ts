@@ -2,6 +2,7 @@ import { ACCURACY, BuildingsCalc, createFloatInput, EPSILON, formatNumber, ko } 
 import { AppliedBuff, IslandFertility, Product, ProductCategory } from './production';
 import { Factory, Module } from './factories';
 import { Island, Region } from './world';
+import { EffectBoostRow, openEffectOwner } from './factory-boost-sources';
 import { ExtraGoodSupplier, Supplier } from './suppliers';
 import { TradeRoute, TradeList } from './trade';
 import { ProductionChainView } from './views';
@@ -269,6 +270,19 @@ export class FactoryPresenter {
         if (!factory) return true;
         if (!factory.neededFertility) return true;
         return factory.fertilityFactor() > EPSILON;
+    }
+
+    /** True for a factory built on a river embankment (params flag `isRiverEmbankment`); the one place that reads it. */
+    get isRiverEmbankment(): boolean {
+        return this.factory.isRiverEmbankment;
+    }
+
+    /**
+     * Closes the factory dialog and opens the dialog that owns the effect of a permanent effect row
+     * (the Effects dialog, or the patron selection dialog for patron effects).
+     */
+    openEffectSource(row: EffectBoostRow): void {
+        openEffectOwner(row.effect, row.owner);
     }
 
     showFertilityCheckbox(): IslandFertility | undefined {
@@ -609,6 +623,7 @@ export class ProductPresenter {
                     sum += supplier.currentProduction();
             }
             sum += product.passiveTradeSupplier.currentProduction();
+            sum += product.governorSupply();
             return sum;
         };
 
@@ -902,7 +917,7 @@ export class ProductPresenter {
     }
 
     tradingAmountFormatted(): string{
-        return formatNumber(this.tradeList().amount() + this.instance().passiveTradeSupplier.currentProduction()) + ' t/min';
+        return formatNumber(this.tradeList().amount() + this.instance().passiveTradeSupplier.currentProduction() + this.instance().governorSupply()) + ' t/min';
     }
 }
 

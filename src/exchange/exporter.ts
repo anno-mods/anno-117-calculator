@@ -8,7 +8,8 @@
 import * as keys from "./keys";
 import { AREA_BUFF_GUIDS, NILE_FLOOD_EFFECT, NILE_FLOOD_SESSION, VOLCANO_EFFECTS, VOLCANO_SESSIONS, buildDiscoveries } from "./discoveries";
 import { buildMaterials, makeClassifier } from "./materials";
-import { generateExchangeIslandId, Storage } from "../world";
+import { assignIslandIds } from "./matching";
+import { isDeviceSetting } from "./scopes";
 import { ALL_ISLANDS, versionCalculator } from "../util";
 import {
     BuildingEntry,
@@ -32,11 +33,11 @@ type Json = Record<string, unknown>;
 const FORMAT = "anno117-exchange";
 const FORMAT_VERSION = "1.0";
 const EXTENSION = "calculator";
-// Keys of calculatorSettings that are not part of `ext.calculator.settings`: device preference.
-const DEVICE_SETTINGS = new Set(["language"]);
 const NEED_CONSUMPTION_KEY = "settings.needConsumption";
 // Pointer segments whose value is a list: a missing list is recreated as a list when a preserved entry returns into it.
-const LIST_KEYS = new Set(["items", "effects"]);
+const LIST_KEYS = new Set(["items", "effects", "residenceItems"]);
+// A preserved entry of the island's residenceItems list; these return in index order (see restoreIslandExt).
+const RE_RESIDENCE_ENTRY = /^\/residenceItems\/\d+$/;
 
 const RE_BUILDING = /^(\d+)\.buildings\.(constructed|planned|fullyUtilizeConstructed)$/;
 const RE_NEED_CHECKED = /^(\d+)\[(\d+)\]\.checked$/;
@@ -46,6 +47,9 @@ const RE_AQUEDUCT = /^(\d+)\.aqueductBuff\.checked$/;
 const RE_MODULE = /^(\d+)\.module\[(\d+)\]\.checked$/;
 const RE_ISLAND_EFFECT = /^island\.effect\.(\d+)\.scaling$/;
 const RE_FERTILITY = /^island\.fertility\.(\d+)\.checked$/;
+const RE_RESIDENCE_ITEM = /^residenceItem\.(\d+)\.state$/;
+const RE_AREA_COVERAGE = /^(\d+)\[(\d+)\]\.coverage$/;
+const RE_PUBLIC_COVERAGE = /^(\d+)\[(\d+)\]\.publicCoverage$/;
 const RE_NOTES = /^(\d+)\.notes$/;
 const RE_DEFAULT_SUPPLIER = /^(\d+)\.defaultSupplier\.(type|id)$/;
 const RE_GLOBAL_EFFECT = /^(\d+)\.scaling$/;
@@ -94,6 +98,14 @@ function readJson(key: string): unknown {
 function clone<T>(v: T): T {
     return v === undefined ? v : (JSON.parse(JSON.stringify(v)) as T);
 }
+
+// A supplier naming a governor and no island (the classification of import-trade.ts).
+function isGovernorSupplier(s: Supplier): boolean {
+    return typeof s.governor === "number" && s.island === undefined;
+}
+
+// Tolerance when comparing the stored governor supply with the imported sum (the input rounds, KTD7).
+const GOVERNOR_EPSILON = 1e-9;
 
 // ---- JSON pointer restore: a preserved field returns to its original core location ----
 
@@ -176,6 +188,12 @@ class Exporter {
     private readonly residences = new Set<number>(this.params.residenceBuildings.map((r) => r.guid));
     private readonly products = new Set<number>(this.params.products.map((p) => p.guid));
     private readonly effects = new Set<number>(this.params.effects.map((e) => e.guid));
+    private readonly itemGuids = new Set<number>(this.params.items.map((i) => i.guid));
+    private readonly publicBuildings = new Set<number>((this.params.publicServices ?? []).map((s) => s.guid));
+    // item GUID -> GUID of its island-wide effect, for items whose effect exists in params.effects
+    private readonly heroicOf = new Map<number, number>(
+        this.params.items.filter((i) => i.heroicEffect !== undefined && this.effects.has(i.heroicEffect)).map((i) => [i.guid, i.heroicEffect as number]),
+    );
     private readonly boostable = new Set<number>(this.params.items.filter((i) => (i.boostBuffs ?? []).length > 0).map((i) => i.guid));
     private readonly explicitFullyUtilize = new Set<number>();
     // product -> factories that output it (the import states R51 for them when the island receives the product)
@@ -211,30 +229,6 @@ class Exporter {
     }
 
     // ---- storage access ----
-
-    // Assigns missing island ids through the live islands (their Storage keeps the id), flushes the pending saves and
-    // returns the island names in the stored order.
-    private prepare(): string[] {
-        Storage.flushPending();
-        const listed = readJson("islandNames");
-        const names = Array.isArray(listed) ? listed.filter((n): n is string => typeof n === "string" && n !== ALL_ISLANDS) : [];
-        let assigned = false;
-        for (const name of names) {
-            const store = readJson(name);
-            if (isObj(store) && typeof store["exchange.islandId"] === "string" && store["exchange.islandId"] !== "") continue;
-            const live = window.view?.islands?.().find((i: { name(): string; isAllIslands(): boolean }) => !i.isAllIslands() && i.name() === name);
-            if (live) {
-                void live.exchangeIslandId;
-                assigned = true;
-            } else if (isObj(store)) {
-                // no live island (the state was replaced without a reload): write the id into the stored JSON
-                store["exchange.islandId"] = generateExchangeIslandId();
-                localStorage.setItem(name, JSON.stringify(store));
-            }
-        }
-        if (assigned) Storage.flushPending();
-        return names;
-    }
 
     private readDocumentExt(): void {
         const ext = readJson("exchange.ext");
@@ -277,7 +271,7 @@ class Exporter {
     // ---- entry point ----
 
     build(): ExchangeDocument {
-        const names = this.prepare();
+        const names = assignIslandIds();
         this.readDocumentExt();
         const routes = this.readRoutes();
         const defaultTargets = new Set<string>(routes.filter((r) => r.isDefault).map((r) => `${r.product}|${r.to}`));
@@ -359,6 +353,13 @@ class Exporter {
         const products: Record<string, { producer?: Guid | "none"; notes?: string }> = {};
         const defaults = new Map<number, { type?: string; id?: string }>();
         const factory = (g: number): FactoryEntry => (factories[String(g)] ??= {});
+        const residenceItems: ItemChoice[] = [];
+        let villaCoverage: number | undefined;
+        let publicCoverage: number | undefined;
+        const residenceEffects: Record<string, Record<string, number>> = {};
+        const publicCoverages: Record<string, Record<string, number>> = {};
+        // island effects named by the heroicEffect of an equipped item
+        const activated = new Set<number>();
 
         for (const key of Object.keys(store)) {
             const v = store[key];
@@ -399,6 +400,7 @@ class Exporter {
                 handled.add(key);
                 if (kind === "item") {
                     if (n >= 1) {
+                        this.noteHeroic(guid, activated);
                         const choice: ItemChoice = { item: guid };
                         if (n >= 2) {
                             if (this.boostable.has(guid)) choice.boosted = true;
@@ -433,6 +435,40 @@ class Exporter {
                     fertilities[m[1]] = f;
                     handled.add(key);
                 }
+            } else if ((m = RE_RESIDENCE_ITEM.exec(key))) {
+                const guid = parseInt(m[1], 10);
+                const n = toInt(v);
+                if (n === undefined || !this.itemGuids.has(guid)) continue;
+                handled.add(key);
+                if (n >= 1) {
+                    this.noteHeroic(guid, activated);
+                    const choice: ItemChoice = { item: guid };
+                    if (n >= 2) {
+                        if (this.boostable.has(guid)) choice.boosted = true;
+                        else this.note("item-boost-dropped", `Item ${guid} has no boosted variant; it is exported as equipped.`, id, { item: guid });
+                    }
+                    residenceItems.push(choice);
+                }
+            } else if (key === keys.villaCoverage) {
+                const n = toNum(v);
+                if (n === undefined) continue;
+                handled.add(key);
+                villaCoverage = Math.min(100, Math.max(0, n));
+            } else if (key === keys.publicCoverageDefault) {
+                const n = toNum(v);
+                if (n === undefined) continue;
+                handled.add(key);
+                publicCoverage = Math.min(100, Math.max(0, n));
+            } else if ((m = RE_AREA_COVERAGE.exec(key))) {
+                const n = toNum(v);
+                if (n === undefined || !this.effects.has(parseInt(m[2], 10))) continue;
+                handled.add(key);
+                (residenceEffects[m[1]] ??= {})[m[2]] = Math.min(100, Math.max(0, n));
+            } else if ((m = RE_PUBLIC_COVERAGE.exec(key))) {
+                const n = toNum(v);
+                if (n === undefined || !this.publicBuildings.has(parseInt(m[2], 10))) continue;
+                handled.add(key);
+                (publicCoverages[m[1]] ??= {})[m[2]] = Math.min(100, Math.max(0, n));
             } else if ((m = RE_DEFAULT_SUPPLIER.exec(key))) {
                 const g = parseInt(m[1], 10);
                 const entry = defaults.get(g) ?? {};
@@ -480,6 +516,12 @@ class Exporter {
             handled.add(keys.defaultSupplierId(g));
         }
 
+        // The governor supply of a product returns through the governor suppliers of its preserved import entry (R6, R8);
+        // without such an entry the stored value stays a raw key.
+        for (const kept of ext.preservedImports ?? []) {
+            if (kept.entry.suppliers?.some(isGovernorSupplier)) handled.add(keys.governorSupply(kept.restore.product));
+        }
+
         // R50, KTD13: end factories of construction materials and module buildings state fullyUtilize explicitly.
         for (const g of this.explicitFullyUtilize) {
             const entry = buildings[String(g)];
@@ -510,8 +552,16 @@ class Exporter {
             if (Object.keys(factories[key]).length === 0) delete factories[key];
         }
         if (Object.keys(factories).length) out.factories = factories;
+        // An equipped item switches its island-wide effect on at an import unless the file states the effect. An effect
+        // the calculator never switched has no stored value, so it is stated as 0 and the import leaves it off.
+        for (const g of activated) effects[String(g)] ??= 0;
         if (Object.keys(effects).length) out.effects = effects;
         if (Object.keys(products).length) out.products = products;
+        if (residenceItems.length) out.residenceItems = residenceItems;
+        if (villaCoverage !== undefined) out.villaCoverage = { default: villaCoverage };
+        if (Object.keys(residenceEffects).length) out.residenceEffects = residenceEffects;
+        if (Object.keys(publicCoverages).length) out.publicCoverages = publicCoverages;
+        if (publicCoverage !== undefined) out.publicCoverage = publicCoverage;
 
         // Everything the core format has no place for goes to ext.calculator.store, key by key.
         const raw: Json = {};
@@ -529,19 +579,35 @@ class Exporter {
         return { name, id, store, ext, out };
     }
 
+    private noteHeroic(item: number, into: Set<number>): void {
+        const effect = this.heroicOf.get(item);
+        if (effect !== undefined) into.add(effect);
+    }
+
     // The preserved island content returns to its original core locations (R13, R14, R55, R56).
     private restoreIslandExt(out: ExchangeIsland, store: Json, ext: IslandExt): void {
         const root = out as Json;
         // Unknown GUID entries first: their list indexes refer to the file's lists.
-        for (const g of ext.guids) this.restore(root, g.pointer, clone(g.value), out.id);
+        // Entries of residenceItems return last and in index order, so their original positions are rebuilt whichever
+        // list (unknown GUID or kept entry) they were captured in.
+        const residenceEntries: { pointer: string; value: unknown }[] = [];
+        for (const g of ext.guids) {
+            if (RE_RESIDENCE_ENTRY.test(g.pointer)) residenceEntries.push({ pointer: g.pointer, value: g.value });
+            else this.restore(root, g.pointer, clone(g.value), out.id);
+        }
         for (const c of ext.captured) {
-            if (c.pointer === "/moduleAttachments") {
+            if (RE_RESIDENCE_ENTRY.test(c.pointer)) {
+                residenceEntries.push({ pointer: c.pointer, value: c.value });
+            } else if (c.pointer === "/moduleAttachments") {
                 const kept = this.keptAttachments(c.value, store, ext, out.id);
                 if (kept.length) this.restore(root, c.pointer, kept, out.id);
             } else {
                 this.restore(root, c.pointer, clone(c.value), out.id);
             }
         }
+        const entryIndex = (p: string): number => parseInt(p.slice(p.lastIndexOf("/") + 1), 10);
+        residenceEntries.sort((a, b) => entryIndex(a.pointer) - entryIndex(b.pointer));
+        for (const e of residenceEntries) this.restore(root, e.pointer, clone(e.value), out.id);
         if (ext.minimumStock !== undefined) this.restore(root, "/minimumStock", clone(ext.minimumStock), out.id);
         if (ext.materials !== undefined) this.restore(root, "/materials", clone(ext.materials), out.id);
         if (out.gameIsland && ext.gameIsland) {
@@ -623,6 +689,19 @@ class Exporter {
                 sessionValues.set(`${m[1]}|${m[2]}`, v);
             }
         }
+        // With every volcano effect at 0 and a stored unlocked set, the three effects are exported at 0 so that a
+        // calculator round trip keeps the set (other readers treat scales of 0 as locked).
+        const unlockedSet = this.volcanoUnlocked(sessionStore);
+        const volcanoOff = VOLCANO_EFFECTS.every((e) => VOLCANO_SESSIONS.every((s) => (sessionValues.get(`${s}|${e}`) ?? 0) === 0));
+        if (unlockedSet.length && volcanoOff) {
+            for (const s of VOLCANO_SESSIONS) {
+                if (!this.params.sessions.some((p) => p.guid === s)) continue;
+                for (const e of VOLCANO_EFFECTS) {
+                    (bySession[String(s)] ??= {})[String(e)] ??= 0;
+                    sessionValues.set(`${s}|${e}`, 0);
+                }
+            }
+        }
         // Effect entries the calculator could not write at import return unless the calculator holds its own value.
         const fx = this.documentExt.effects;
         if (fx?.global) for (const k of Object.keys(fx.global)) if (globalOut[k] === undefined) globalOut[k] = fx.global[k];
@@ -671,19 +750,26 @@ class Exporter {
             const flag = stored[dlc.id] === undefined ? undefined : toFlag(stored[dlc.id]);
             if (flag === undefined) continue;
             dlcStored = true;
-            const m = /^DLC0*(\d+)_/.exec(dlc.id);
-            if (flag && m) dlcNumbers.push(parseInt(m[1], 10));
+            const n = keys.dlcNumber(dlc.id);
+            if (flag && n !== undefined) dlcNumbers.push(n);
         }
         const sx = this.documentExt.settings;
-        for (const n of sx?.dlcsUnknown ?? []) if (!dlcNumbers.includes(n)) dlcNumbers.push(n);
-        if (dlcStored || (sx?.dlcsUnknown ?? []).length) settings.dlcs = dlcNumbers.sort((a, b) => a - b);
+        // A kept number that params.dlcs now maps is decided by the stored flag.
+        const mappedNumbers = new Set<number>();
+        for (const dlc of this.params.dlcs) {
+            const n = keys.dlcNumber(dlc.id);
+            if (n !== undefined) mappedNumbers.add(n);
+        }
+        const keptNumbers = (sx?.dlcsUnknown ?? []).filter((n) => !mappedNumbers.has(n));
+        for (const n of keptNumbers) if (!dlcNumbers.includes(n)) dlcNumbers.push(n);
+        if (dlcStored || keptNumbers.length) settings.dlcs = dlcNumbers.sort((a, b) => a - b);
 
         const difficulty: Json = isObj(sx?.difficulty) ? clone(sx?.difficulty as Json) : {};
         const consumption = stored[NEED_CONSUMPTION_KEY];
         if (typeof consumption === "string" && consumption !== "") difficulty.needConsumption = consumption;
         if (Object.keys(difficulty).length) settings.difficulty = difficulty;
 
-        const volcano = this.volcanoSetting(sessionValues, sx?.volcano);
+        const volcano = this.volcanoSetting(sessionValues, sx?.volcano, unlockedSet);
         if (volcano) settings.volcano = volcano;
         const seasons = this.seasonsSetting(sessionValues, sx?.seasons);
         if (seasons) settings.seasons = seasons;
@@ -692,7 +778,7 @@ class Exporter {
         // calculator settings that are not DLC, difficulty or device preferences go to ext.calculator
         const rest: Json = {};
         for (const key of Object.keys(stored)) {
-            if (dlcIds.has(key) || key === NEED_CONSUMPTION_KEY || DEVICE_SETTINGS.has(key)) continue;
+            if (dlcIds.has(key) || key === NEED_CONSUMPTION_KEY || isDeviceSetting(key)) continue;
             rest[key] = stored[key];
         }
         this.calculatorSettingsRest = rest;
@@ -705,25 +791,42 @@ class Exporter {
     // block. A preserved setting the import could not apply (no level or no effect list, or switched off) stays as it
     // is. A complete one is updated only when the stored effects no longer say what it says (the user edited them).
     // Without a preserved setting the level and the unlocked effects are derived from the stored effects.
-    private volcanoSetting(values: Map<string, number>, preserved: Json | undefined): Json | undefined {
+    // A file never carries level 0: with every effect at 0 the setting is written as `enabled: false`, keeping a
+    // preserved level and effect list; the stored unlocked set becomes the effect list (a calculator round trip keeps
+    // it). A preserved switched-off setting is updated only when an effect is above 0 again.
+    private volcanoSetting(values: Map<string, number>, preserved: Json | undefined, unlockedSet: number[]): Json | undefined {
         const hasPreserved = isObj(preserved);
         const base: Json = hasPreserved ? clone(preserved) : {};
-        const complete = typeof base.level === "number" && Array.isArray(base.effects) && base.enabled !== false;
-        if (hasPreserved && !complete) return base;
+        const off = base.enabled === false;
+        const complete = typeof base.level === "number" && Array.isArray(base.effects) && !off;
+        if (hasPreserved && !complete && !off) return base;
         for (const session of VOLCANO_SESSIONS) {
             const levels = VOLCANO_EFFECTS.map((e) => values.get(`${session}|${e}`));
             if (!levels.some((v) => v !== undefined)) continue;
             const unlocked = VOLCANO_EFFECTS.filter((_e, i) => (levels[i] ?? 0) > 0);
             const level = Math.max(0, ...levels.map((v) => v ?? 0));
+            if (level === 0) {
+                if (!hasPreserved && unlockedSet.length === 0) return undefined;
+                base.enabled = false;
+                if (unlockedSet.length) base.effects = [...unlockedSet];
+                return base;
+            }
             const before = Array.isArray(base.effects) ? (base.effects as number[]) : undefined;
             const sameSet = before !== undefined && before.length === unlocked.length && unlocked.every((e) => before.includes(e));
             if (complete && base.level === level && sameSet) return base;
-            if (!hasPreserved && unlocked.length === 0) return undefined;
+            if (off) base.enabled = true;
             base.level = level;
             base.effects = sameSet ? before : unlocked;
             return base;
         }
         return hasPreserved ? base : undefined;
+    }
+
+    // The unlocked volcano effects the calculator stores in `sessionSettings` (`volcano.unlocked`), known ones only.
+    private volcanoUnlocked(sessionStore: unknown): number[] {
+        const raw = isObj(sessionStore) ? sessionStore[keys.VOLCANO_UNLOCKED_KEY] : undefined;
+        if (!Array.isArray(raw)) return [];
+        return VOLCANO_EFFECTS.filter((e) => raw.includes(e));
     }
 
     // Seasons in average mode are the Nile flood effect; a preserved phase mode stays as it is.
@@ -773,24 +876,36 @@ class Exporter {
         // preserved import entries (governor and non-player suppliers, cycles, ambiguous defaults, R52, CD10)
         const heldByPair = new Map<string, TradeImport>();
         const heldOrder: string[] = [];
+        // Governor suppliers of entries that no longer hold: they follow the island suppliers of the generated entry (KTD5).
+        const governorsByPair = new Map<string, { island: string; product: number; suppliers: Supplier[] }>();
         for (const b of built) {
             const list = Array.isArray(b.ext.preservedImports) ? b.ext.preservedImports : [];
             for (const kept of list) {
                 const pair = `${b.name}|${kept.restore.product}`;
-                if (heldByPair.has(pair)) continue;
+                if (heldByPair.has(pair) || governorsByPair.has(pair)) continue;
+                const amountsValid = this.governorAmountsValid(kept, b.store);
                 if (this.holds(kept, b.name, b.store, routes, names)) {
                     const entry = this.pruneEntry(kept.entry);
                     if (entry) {
+                        if (!amountsValid) this.stripGovernorAmounts(entry.suppliers, kept.restore.product, b);
                         heldByPair.set(pair, entry);
                         heldOrder.push(pair);
                     }
                 } else {
-                    this.note(
-                        "import-entry-dropped",
-                        `The preserved supplier data of product ${kept.restore.product} on ${b.name} is not exported: the routes or the default supplier changed since the import.`,
-                        b.id,
-                        { product: kept.restore.product, reasons: kept.reasons },
-                    );
+                    const governors = (kept.entry.suppliers ?? []).filter(isGovernorSupplier).map((s) => clone(s));
+                    if (governors.length) {
+                        for (const s of governors) delete s.default;
+                        if (!this.defaultMatches(kept, b.store) || !amountsValid) this.stripGovernorAmounts(governors, kept.restore.product, b);
+                        governorsByPair.set(pair, { island: b.id, product: kept.restore.product, suppliers: governors });
+                    }
+                    if (kept.reasons.some((r) => r !== "governor-supplier")) {
+                        this.note(
+                            "import-entry-dropped",
+                            `The preserved supplier data of product ${kept.restore.product} on ${b.name} is not exported: the routes or the default supplier changed since the import.`,
+                            b.id,
+                            { product: kept.restore.product, reasons: kept.reasons },
+                        );
+                    }
                 }
             }
         }
@@ -800,15 +915,30 @@ class Exporter {
         for (const [key, g] of groups) {
             const held = heldByPair.get(key);
             if (held) {
+                // A route the calculator holds that the preserved entry does not list (a route kept by a partial import,
+                // R17a) is exported next to the entry's own suppliers.
+                if (Array.isArray(held.suppliers)) {
+                    const listed = new Set(held.suppliers.map((s) => s.island).filter((i): i is string => typeof i === "string"));
+                    const hasDefault = held.suppliers.some((s) => s.default === true);
+                    for (const s of g.suppliers) {
+                        if (typeof s.island !== "string" || listed.has(s.island)) continue;
+                        const copy: Supplier = { ...s };
+                        if (hasDefault) delete copy.default;
+                        held.suppliers.push(copy);
+                    }
+                }
                 entries.push(held);
                 placed.add(key);
                 continue;
             }
-            const entry: TradeImport = { island: g.island, product: g.product, suppliers: g.suppliers };
+            const governors = governorsByPair.get(key);
+            const entry: TradeImport = { island: g.island, product: g.product, suppliers: governors ? [...g.suppliers, ...governors.suppliers] : g.suppliers };
             if (g.entered) entry.basis = "entered";
             entries.push(entry);
+            if (governors) placed.add(key);
         }
         for (const pair of heldOrder) if (!placed.has(pair)) entries.push(heldByPair.get(pair) as TradeImport);
+        for (const [pair, g] of governorsByPair) if (!placed.has(pair)) entries.push({ island: g.island, product: g.product, suppliers: g.suppliers });
         for (const kept of this.documentExt.preservedImports) {
             const entry = this.pruneEntry(kept.entry);
             if (entry) entries.push(entry);
@@ -836,13 +966,39 @@ class Exporter {
             if (i < 0) return false;
             used.add(i);
         }
+        if (!this.defaultMatches(kept, store)) return false;
+        return (toNum(store["passiveTrade.userSetAmount"]) ?? 0) === kept.restore.passiveUserSetAmount;
+    }
+
+    // The product's default supplier keys equal what the import wrote.
+    private defaultMatches(kept: PreservedImport, store: Json): boolean {
+        const product = kept.restore.product;
         const type = store[keys.defaultSupplierType(product)];
         const id = store[keys.defaultSupplierId(product)];
         const now = type !== undefined && id !== undefined ? { type: String(type), id: String(id) } : null;
         const was = kept.restore.defaultSupplier;
         if ((now === null) !== (was === null)) return false;
-        if (now && was && (now.type !== was.type || now.id !== was.id)) return false;
-        return (toNum(store["passiveTrade.userSetAmount"]) ?? 0) === kept.restore.passiveUserSetAmount;
+        return !(now && was && (now.type !== was.type || now.id !== was.id));
+    }
+
+    // R8: the stored governor supply is the value the import wrote.
+    private governorAmountsValid(kept: PreservedImport, store: Json): boolean {
+        const stored = toNum(store[keys.governorSupply(kept.restore.product)]) ?? 0;
+        return Math.abs(stored - (kept.restore.governorSupply ?? 0)) < GOVERNOR_EPSILON;
+    }
+
+    // R8: governor identity and unknown fields stay, the amounts go; the report names product and island.
+    private stripGovernorAmounts(suppliers: Supplier[] | undefined, product: number, b: BuiltIsland): void {
+        let stripped = 0;
+        for (const s of suppliers ?? []) {
+            if (isGovernorSupplier(s) && s.amount !== undefined) {
+                delete s.amount;
+                stripped++;
+            }
+        }
+        if (stripped > 0) {
+            this.note("governor-amount-not-exported", `The governor amounts of product ${product} on ${b.name} are not exported: the governor supply or the default supplier changed since the import.`, b.id, { product });
+        }
     }
 
     // KTD15: references to islands of the file that are gone are removed from a preserved entry.

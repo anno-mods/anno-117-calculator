@@ -126,9 +126,51 @@ test.describe('import plan: discoveries, effects, settings, materials (U7)', () 
         expect(codes(p)).not.toContain('volcano-effects-disagree');
     });
 
-    test('a volcano that is not enabled writes nothing', async ({ page }) => {
-        const p = await plan(page, doc({ settings: { volcano: { enabled: false, level: 1, effects: [] } } }));
-        expect(Object.keys(part(p, 'sessionSettings'))).toEqual([]);
+    test('a volcano that is not enabled writes 0 to its three effects in both sessions and keeps its effect list as the unlocked set', async ({ page }) => {
+        const p = await plan(page, doc({ settings: { volcano: { enabled: false, level: 3, effects: [OBSIDIAN_GATHERING] } } }));
+        const s = part(p, 'sessionSettings');
+        for (const session of [LATIUM, META]) {
+            for (const effect of [OBSIDIAN_GATHERING, OBSIDIAN_MINING, FERTILE_SOIL]) expect(s[sk(session, effect)]).toBe(0);
+        }
+        expect(s['volcano.unlocked']).toEqual([OBSIDIAN_GATHERING]);
+        expect(part(p, 'exchange.ext').settings.volcano.level).toBe(3);
+
+        const empty = await plan(page, doc({ settings: { volcano: { enabled: false, level: 1, effects: [] } } }));
+        expect('volcano.unlocked' in part(empty, 'sessionSettings')).toBe(false);
+    });
+
+    test('a volcano scale above 5 is written as 5 and reported with the original; other effects are not clamped', async ({ page }) => {
+        const p = await plan(
+            page,
+            doc({
+                settings: { volcano: { level: 7, effects: [OBSIDIAN_GATHERING] } },
+                effects: { bySession: { [LATIUM]: { [OBSIDIAN_MINING]: 9 }, [AEGYPTUS]: { [NILE_FLOOD]: 9 } } },
+            }),
+        );
+        const s = part(p, 'sessionSettings');
+        expect(s[sk(LATIUM, OBSIDIAN_GATHERING)]).toBe(5);
+        expect(s[sk(LATIUM, OBSIDIAN_MINING)]).toBe(5);
+        expect(s[sk(AEGYPTUS, NILE_FLOOD)]).toBe(9);
+        const entry = [...p.report.approximated].find((e) => e.code === 'volcano-level-clamped')!;
+        const clamped = entry.detail!.clamped as { session: number; effect: number; original: number }[];
+        expect(clamped).toContainEqual({ session: LATIUM, effect: OBSIDIAN_MINING, original: 9 });
+        expect(clamped).toContainEqual({ session: LATIUM, effect: OBSIDIAN_GATHERING, original: 7 });
+        expect(clamped.some((c) => c.effect === NILE_FLOOD)).toBe(false);
+        expect(part(p, 'exchange.ext').settings.volcano.level).toBe(7);
+    });
+
+    test('Covers AE3: durations stay in the ext; the unlocked set holds the effects above 0', async ({ page }) => {
+        const p = await plan(page, doc({ settings: { volcano: { level: 5, effects: [OBSIDIAN_GATHERING, OBSIDIAN_MINING], durations: { '1': 12 } } } }));
+        expect(part(p, 'exchange.ext').settings.volcano.durations).toEqual({ '1': 12 });
+        expect(part(p, 'sessionSettings')['volcano.unlocked']).toEqual([OBSIDIAN_GATHERING, OBSIDIAN_MINING]);
+    });
+
+    test('the unlocked set comes from effects.bySession when the file states volcano effects there', async ({ page }) => {
+        const p = await plan(
+            page,
+            doc({ effects: { bySession: { [LATIUM]: { [OBSIDIAN_GATHERING]: 5, [OBSIDIAN_MINING]: 5, [FERTILE_SOIL]: 0 } } } }),
+        );
+        expect(part(p, 'sessionSettings')['volcano.unlocked']).toEqual([OBSIDIAN_GATHERING, OBSIDIAN_MINING]);
     });
 
     test('seasons in average mode write 155616 in the Aegyptus session; phase mode writes nothing and reports', async ({ page }) => {
@@ -172,6 +214,51 @@ test.describe('import plan: discoveries, effects, settings, materials (U7)', () 
         expect(c['DLC02_The_Hippodrome']).toBe('0');
         expect(c['DLC03_Dawn_of_Delta']).toBe('1');
         expect(part(p, 'exchange.ext').settings.dlcsUnknown).toEqual([7]);
+        expect(codes(p)).toContain('dlcs-unknown');
+        const notListed = p.report.approximated.find((e) => e.code === 'dlc-not-listed')!;
+        expect(notListed.detail!.dlcs).toEqual(['DLC02_The_Hippodrome']);
+    });
+
+    test('an empty settings.dlcs writes "0" for every DLC and keeps no unknown numbers', async ({ page }) => {
+        const p = await plan(page, doc({ settings: { dlcs: [] } }));
+        const c = part(p, 'calculatorSettings');
+        expect([c['DLC01_Prophecies_of_Ash'], c['DLC02_The_Hippodrome'], c['DLC03_Dawn_of_Delta']]).toEqual(['0', '0', '0']);
+        expect(part(p, 'exchange.ext').settings?.dlcsUnknown).toBeUndefined();
+    });
+
+    test('Covers R1: a DLC number that a params.dlcs entry maps is written as a flag, not kept as unknown', async ({ page }) => {
+        const p = await page.evaluate((t: string) => {
+            const dlcs = window.params.dlcs;
+            const original = dlcs.slice();
+            dlcs.push({ ...dlcs[0], guid: 99999, id: 'DLC04_Test' });
+            try {
+                return window.exchange.planImport(t);
+            } finally {
+                dlcs.length = 0;
+                dlcs.push(...original);
+            }
+        }, doc({ settings: { dlcs: [4] } }));
+        if ('error' in p) throw new Error(p.error);
+        const c = part(p as Plan, 'calculatorSettings');
+        expect(c['DLC04_Test']).toBe('1');
+        expect(c['DLC01_Prophecies_of_Ash']).toBe('0');
+        expect(part(p as Plan, 'exchange.ext').settings?.dlcsUnknown).toBeUndefined();
+    });
+
+    test('a params.dlcs id without the number pattern is not written', async ({ page }) => {
+        const p = await page.evaluate((t: string) => {
+            const dlcs = window.params.dlcs;
+            const original = dlcs.slice();
+            dlcs.push({ ...dlcs[0], guid: 99998, id: 'Special_Pack' });
+            try {
+                return window.exchange.planImport(t);
+            } finally {
+                dlcs.length = 0;
+                dlcs.push(...original);
+            }
+        }, doc({ settings: { dlcs: [1] } }));
+        if ('error' in p) throw new Error(p.error);
+        expect('Special_Pack' in part(p as Plan, 'calculatorSettings')).toBe(false);
     });
 
     test('a file without settings.dlcs writes no DLC key', async ({ page }) => {
@@ -272,4 +359,87 @@ test.describe('import plan: discoveries, effects, settings, materials (U7)', () 
         for (const g of AREA_BUFFS) expect(ext.effects.global[String(g)]).toBe(1);
         expect(codes(p)).toContain('area-buff-ignored');
     });
-});
+
+    // ---- Modifiers: global effects, unknown GUIDs, range effects, wonders (U9) ----
+
+    const BAKERY = 3174;
+    const RANGE_EFFECT = 174824; // building effect with per-building state, DLC 67903
+    const effectKey = (type: number, effect: number) => `${type}[${effect}].scaling`;
+    const oneIsland = (extra: Record<string, any>) => [{ id: 'a', name: 'A', session: LATIUM, ...extra }];
+
+    test('Covers R23: a global effect that no researched discovery derives is applied as stated', async ({ page }) => {
+        const p = await plan(page, doc({ research: { researched: [] }, effects: { global: { 43620: 1, [PLAIN_EFFECT]: 1 } } }));
+        const g = part(p, 'globalEffects');
+        expect(g[gk(43620)]).toBe(1);
+        expect(g[gk(PLAIN_EFFECT)]).toBe(1);
+    });
+
+    test('Covers R24: an unknown global effect is kept in the ext and not written', async ({ page }) => {
+        const p = await plan(page, doc({ effects: { global: { 999001: 1 } } }));
+        expect(gk(999001) in part(p, 'globalEffects')).toBe(false);
+        expect(part(p, 'exchange.ext').effects.global['999001']).toBe(1);
+        expect(codes(p)).toContain('unknown-guid');
+    });
+
+    test('effect 183157 (Meta scope, island event, listed by no discovery) is applied when the file states it and is never derived', async ({ page }) => {
+        // The two candidate causes of the missing effect in the Marcia files: neither holds. The GUID classifies as a writable
+        // global effect and is no dormant area buff; no discovery lists it, so nothing can derive it from research.
+        const stated = await plan(page, doc({ effects: { global: { 183157: 1 } } }));
+        expect(part(stated, 'globalEffects')[gk(183157)]).toBe(1);
+        const researched = await page.evaluate(() => (window.params.techs as { effects: number[] }[]).some((t) => t.effects.includes(183157)));
+        expect(researched).toBe(false);
+        expect(AREA_BUFFS).not.toContain(183157);
+    });
+
+    test('Covers R25: appliedEffects writes 1 or 0 to the per-building state, notes the DLC, wins over factories[].effects and stays kept', async ({ page }) => {
+        const off = await plan(page, doc({}, oneIsland({ factories: { [BAKERY]: { effects: [RANGE_EFFECT] } }, appliedEffects: [{ type: BAKERY, effect: RANGE_EFFECT, applied: false, share: 1, method: 'x', scale: 1 }] })));
+        expect(part(off, 'A')[effectKey(BAKERY, RANGE_EFFECT)]).toBe(0);
+        const on = await plan(page, doc({}, oneIsland({ appliedEffects: [{ type: BAKERY, effect: RANGE_EFFECT, applied: true }] })));
+        expect(part(on, 'A')[effectKey(BAKERY, RANGE_EFFECT)]).toBe(1);
+        expect(codes(on)).toContain('dlc-enabled');
+        const kept = part(on, 'A')['exchange.ext'].captured.find((c: Record<string, any>) => c.pointer === '/appliedEffects');
+        expect(kept.value[0].effect).toBe(RANGE_EFFECT);
+    });
+
+    test('Covers R25: a fractional share is applied by the flag and approximated; entries without per-building state write nothing', async ({ page }) => {
+        const half = await plan(page, doc({}, oneIsland({ appliedEffects: [{ type: BAKERY, effect: RANGE_EFFECT, applied: true, share: 0.5 }] })));
+        expect(part(half, 'A')[effectKey(BAKERY, RANGE_EFFECT)]).toBe(1);
+        expect(codes(half)).toContain('applied-effect-approximated');
+
+        const none = await plan(
+            page,
+            doc({}, oneIsland({
+                appliedEffects: [
+                    { type: BAKERY, effect: 51635, applied: true }, // not an effect of the data
+                    { type: 3087, effect: RANGE_EFFECT, applied: true }, // a residence is no target
+                    { type: BAKERY, effect: 145095, applied: true }, // obsidian gathering has no per-building state
+                ],
+            })),
+        );
+        expect(Object.keys(part(none, 'A')).filter((k) => k.includes('[') && k.endsWith('.scaling'))).toEqual([]);
+        expect(codes(none).filter((c) => c === 'applied-effect-not-applied').length).toBe(3);
+    });
+
+    test('Covers R26, AE9: wonders are kept at their pointer, no wonder effect is stored, and Modifiers unticked keeps the stored part', async ({ page }) => {
+        const wonders = { 3621: { rank: 3, coverage: 80 }, 152714: { rank: 1 } };
+        const text = doc({}, oneIsland({ wonders }));
+        const p = await plan(page, text);
+        const s = part(p, 'A');
+        expect(s['exchange.ext'].captured.find((c: Record<string, any>) => c.pointer === '/wonders').value).toEqual(wonders);
+        expect(Object.keys(s).filter((k) => k.startsWith('island.effect.'))).toEqual([]);
+
+        // unticked Modifiers: the stored ext part stays (merge over a stored island that holds other wonders)
+        const merged = await page.evaluate(
+            ({ t }) => {
+                const ex = window.exchange;
+                const full = ex.planImport(t);
+                if ('error' in full) throw new Error(full.error);
+                const stored = { A: JSON.stringify({ 'exchange.ext': { originalName: 'A', captured: [{ pointer: '/wonders', kind: 'unmodelled', value: { 3621: { rank: 9 } } }], guids: [], moduleWritten: {} } }) };
+                const none = { islands: false, residences: true, production: false, trade: false, modifiers: false, keepIslands: false, keepRoutes: false, recalcRoutes: false };
+                const m = ex.mergeScoped(stored, full, none as never, [{ fileId: 'a', calcName: 'A', by: 'name' }]);
+                return JSON.parse(m.keyMap['A'])['exchange.ext'].captured;
+            },
+            { t: text },
+        );
+        expect(merged.find((c: Record<string, any>) => c.pointer === '/wonders').value).toEqual({ 3621: { rank: 9 } });
+    });});

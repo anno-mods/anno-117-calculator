@@ -19,6 +19,7 @@ import { PublicConsumerBuilding, Factory, Consumer } from './factories';
 import { ResidenceEffectView } from './views';
 import { Need, NeedCategory, RecipeList, } from './consumption';
 import { ExtraGoodSupplier } from './suppliers';
+import { isVillaItem } from './residence-items';
 
 declare const $: any;
 declare const view: any;
@@ -590,6 +591,20 @@ export class Island {
     public allFertilitiesSet: KnockoutComputed<boolean>;
     public fertilitiesExpanded: KnockoutObservable<boolean>;
     public items: Item[];
+    // Residence items (villa items) with one island-level state each; separate from `items`, so no factory dialog lists them
+    public residenceItems: Item[];
+    // Share of residences the villas reach, percent 0..100 (clamped on write)
+    public villaCoverage: KnockoutComputed<number>;
+    // Share of a level's residences in range of an area effect (percent, default 100), per (level, effect); stored as
+    // `<level>[<effect>].coverage`. Created on first request.
+    private areaCoverages: Map<string, KnockoutObservable<number>>;
+    // Share of a level's residences in range of a public building (percent); undefined while the building is not
+    // listed. Stored as `<level>[<building>].publicCoverage`. Created on first request.
+    private publicCoverages: Map<string, KnockoutObservable<number | undefined>>;
+    // Share for public buildings that are not listed per level (percent, default 100); stored as `publicCoverage`
+    public publicCoverageDefault: KnockoutComputed<number>;
+    // Public-building GUIDs that provide a need, by need GUID (params.publicServices.providedNeeds)
+    private publicProviders: Map<number, number[]>;
     public replaceInputItems: Item[];
     public extraGoodItems: Item[];
     public recipeLists: RecipeList[];
@@ -794,6 +809,34 @@ export class Island {
         this.factories = [];
         this.multiFactoryProducts = [];
         this.items = [];
+        this.residenceItems = [];
+        const villaCoverage = ko.observable(100);
+        this.villaCoverage = ko.pureComputed({
+            read: () => villaCoverage(),
+            write: (v: number) => {
+                const n = Number(v);
+                villaCoverage(isFinite(n) ? Math.min(100, Math.max(0, n)) : 100);
+            }
+        });
+        this.areaCoverages = new Map();
+        this.publicCoverages = new Map();
+        const publicCoverageDefault = ko.observable(100);
+        this.publicCoverageDefault = ko.pureComputed({
+            read: () => publicCoverageDefault(),
+            write: (v: number) => {
+                const n = Number(v);
+                publicCoverageDefault(isFinite(n) ? Math.min(100, Math.max(0, n)) : 100);
+            }
+        });
+        this.publicProviders = new Map();
+        for (const service of (params.publicServices || []))
+            for (const need of service.providedNeeds) {
+                const list = this.publicProviders.get(need);
+                if (list)
+                    list.push(service.guid);
+                else
+                    this.publicProviders.set(need, [service.guid]);
+            }
         this.replaceInputItems = [];
         this.extraGoodItems = [];
         this.recipeLists = [];
@@ -1068,6 +1111,9 @@ export class Island {
                 }
 
             }
+
+            // after the stored states are loaded, so a load never writes the island-wide effect (R4)
+            i.linkHeroicEffect();
         }
 
         this.extraGoodItems.sort((a, b) => (a ).name().localeCompare((b ).name()));
@@ -1099,6 +1145,8 @@ export class Island {
             if (localStorage) {
                 persistString(p, "notes");
                 persistFloat(p.passiveTradeSupplier, "userSetAmount", "passiveTrade.userSetAmount");
+                // Same key as keys.governorSupply in src/exchange/keys.ts
+                persistFloat(p, "governorSupply", p.guid + ".governorSupply");
 
                 // Restore default supplier from localStorage
                 const typeKey = p.guid + ".defaultSupplier.type";
@@ -1199,6 +1247,22 @@ export class Island {
             effect.applyBuffsToResidences(assetsMap);
         }
 
+        // Residence items: a second item pass, because residences did not exist in the first one. Radius buffs
+        // apply to the residence targets only and scale with villaCoverage; the island-wide effect of an item
+        // stays an island effect (Item.linkHeroicEffect).
+        const villaShare = ko.pureComputed(() => this.villaCoverage() / 100);
+        for (const item of (params.items || [])) {
+            if (!isVillaItem(item, params))
+                continue;
+            const sharedState = ko.observable(0);
+            const i = new Item(item, assetsMap, this.region, { sharedState, coverage: villaShare, residencesOnly: true });
+            if (!i.factories.length)
+                continue;
+            if (!assetsMap.has(i.guid))
+                assetsMap.set(i.guid, i);
+            this.residenceItems.push(i);
+        }
+
         for (let group of params.populationGroups) {
             
 
@@ -1240,6 +1304,14 @@ export class Island {
                 });
             }
             persistBuildings(b);
+        }
+
+        // Residence item states (int 0/1/2) and the villa share (percent), loaded after the links exist
+        persistFloat(this, "villaCoverage", "villaCoverage");
+        persistFloat(this, "publicCoverageDefault", "publicCoverage");
+        for (const i of this.residenceItems) {
+            persistInt({ state: i.slotStates.values().next().value }, "state", `residenceItem.${i.guid}.state`);
+            i.linkHeroicEffect();
         }
 
         for (let r of this.residenceBuildings) {
@@ -1328,6 +1400,77 @@ export class Island {
         });
     }
     
+
+    /**
+     * Share of a population level's residences in range of an area effect, in percent (0..100, default 100).
+     * One observable per (level, effect), shared by all residences of the level; it multiplies the buff values the
+     * effect puts on those residences and never the effect's own 0/1 scaling. The stored value
+     * `<level>[<effect>].coverage` loads when the observable is created.
+     */
+    areaEffectCoverage(levelGuid: number, effectGuid: number): KnockoutObservable<number> {
+        const key = `${levelGuid}[${effectGuid}].coverage`;
+        const known = this.areaCoverages.get(key);
+        if (known)
+            return known;
+
+        const value = ko.observable(100);
+        const obs: KnockoutObservable<number> = ko.pureComputed({
+            read: () => value(),
+            write: (v: number) => {
+                const n = Number(v);
+                value(isFinite(n) ? Math.min(100, Math.max(0, n)) : 100);
+            }
+        });
+        const stored = parseFloat(this.storage.getItem(key));
+        if (isFinite(stored))
+            obs(stored);
+        obs.subscribe((v: number) => this.storage.setItem(key, v));
+        this.areaCoverages.set(key, obs);
+        return obs;
+    }
+
+    /**
+     * Share of a population level's residences in range of a public building, in percent. Undefined while the
+     * building is not listed for the level (the island's `publicCoverageDefault` then applies).
+     */
+    publicCoverage(levelGuid: number, buildingGuid: number): KnockoutObservable<number | undefined> {
+        const key = `${levelGuid}[${buildingGuid}].publicCoverage`;
+        const known = this.publicCoverages.get(key);
+        if (known)
+            return known;
+
+        const value = ko.observable(undefined as number | undefined);
+        const obs: KnockoutObservable<number | undefined> = ko.pureComputed({
+            read: () => value(),
+            write: (v: number | undefined) => {
+                const n = Number(v);
+                value(v === undefined || !isFinite(n) ? undefined : Math.min(100, Math.max(0, n)));
+            }
+        });
+        const stored = parseFloat(this.storage.getItem(key));
+        if (isFinite(stored))
+            obs(stored);
+        obs.subscribe((v: number | undefined) => {
+            if (v !== undefined)
+                this.storage.setItem(key, v);
+        });
+        this.publicCoverages.set(key, obs);
+        return obs;
+    }
+
+    /**
+     * Share of supply (percent) of a public need on a population level: the largest listed coverage among the
+     * public buildings that provide the need, else `publicCoverageDefault`.
+     */
+    publicNeedCoverage(levelGuid: number, needGuid: number): number {
+        let best: number | undefined;
+        for (const building of (this.publicProviders.get(needGuid) || [])) {
+            const share = this.publicCoverage(levelGuid, building)();
+            if (share !== undefined && (best === undefined || share > best))
+                best = share;
+        }
+        return best !== undefined ? best : this.publicCoverageDefault();
+    }
 
     /**
      * Prepares the residence effect view for this island

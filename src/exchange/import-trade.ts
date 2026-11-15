@@ -1,5 +1,5 @@
 // Import plan for trade and suppliers (U6): `trade.imports` -> `tradeRoutes` entries and default supplier keys,
-// preserved parts (routes, visits, governor suppliers, harbours, minimum stock, original import entries) and report
+// governor amounts (`<product>.governorSupply`), preserved parts (routes, visits, governor suppliers, harbours, minimum stock, original import entries) and report
 // lines. Pure: no storage, no DOM (KTD1). Runs after planIslands, because `from`/`to` are the final unique island names.
 //
 // Stored route shape (src/trade.ts TradeRouteConfig): {productGUID, from, to, userSetAmount, isDefaultSupplier},
@@ -19,10 +19,12 @@ import {
     ReportKind,
     StoredTradeRoute,
     Supplier,
+    Trade,
     TradeImport,
     TradePlan,
     TradeRoute,
 } from "./types";
+import { deriveImports, hasShipRoutes } from "./derive-routes";
 
 type SupplierKind = "island" | "governor" | "unavailable" | "self";
 
@@ -54,12 +56,24 @@ class TradePlanner {
     private readonly result: TradePlan = { tradeRoutes: this.routes, islands: {}, document: { preservedImports: [] }, report: [] };
     private readonly pending: { island: IslandPlan; kept: PreservedImport }[] = [];
     private readonly utilized = new Set<string>();
+    // `product|receiving island key` pairs whose governor amounts an entry already applied (a repeated entry adds none).
+    private readonly governorPairs = new Set<string>();
+    // Scoped import: the island may hold the factory without the file saying so (Production unticked); the merge writes
+    // the setting only where the resulting island store has the factory built (R17).
+    private readonly scoped: boolean;
+    // Re-calculation toggle (R18) and the stored routes that stay (R21); the derivation runs only for a file with ships on its routes.
+    private readonly recalc: boolean;
+    private readonly keptInput: StoredTradeRoute[];
+    private derivedActive = false;
 
     constructor(
         private readonly plan: IslandsPlan,
         private readonly read: ReadOk,
         ctx: ImportContext,
     ) {
+        this.scoped = ctx.scope !== undefined;
+        this.recalc = ctx.recalcRoutes === true;
+        this.keptInput = ctx.keptRoutes ?? [];
         for (const isl of plan.islands) {
             this.byId.set(isl.id, isl);
             this.result.islands[isl.key] = { store: {}, ext: { preservedImports: [], guids: [] } };
@@ -84,9 +98,10 @@ class TradePlanner {
     run(): TradePlan {
         for (const isl of this.plan.islands) this.minimumStock(isl);
         for (const isl of this.plan.islands) this.products_(isl);
-        const trade = this.read.doc.trade;
-        const imports = trade?.imports;
-        (imports ?? []).forEach((e) => this.processImport(e));
+        this.derivedActive = this.recalc && hasShipRoutes(this.read.doc);
+        const imports = this.derivedActive ? this.effectiveImports() : (this.read.doc.trade?.imports ?? []);
+        this.seedKeptRoutes(imports);
+        imports.forEach((e) => this.processImport(e));
         this.routeReport();
         this.finish();
         return this.result;
@@ -135,6 +150,81 @@ class TradePlanner {
         }
     }
 
+    // ---- effective imports and kept routes ----
+
+    // R18, R20: with the derivation active the island suppliers, the residual and the entered floors come from the routes;
+    // governor, non-player and passive suppliers of the file's entries for the same island and product stay as listed.
+    private effectiveImports(): TradeImport[] {
+        const trade = this.read.doc.trade as Trade;
+        const derived = deriveImports(trade.routes ?? [], trade.visits ?? []);
+        const byPair = new Map<string, TradeImport[]>();
+        for (const e of trade.imports ?? []) {
+            const key = `${e.island}|${e.product}`;
+            const list = byPair.get(key) ?? [];
+            list.push(e);
+            byPair.set(key, list);
+        }
+        const nonIsland = (list: TradeImport[]): Supplier[] => list.flatMap((e) => (Array.isArray(e.suppliers) ? e.suppliers : [])).filter((s) => typeof s.island !== "string");
+
+        const out: TradeImport[] = [];
+        const used = new Set<string>();
+        for (const d of derived) {
+            const key = `${d.island}|${d.product}`;
+            used.add(key);
+            const file = byPair.get(key) ?? [];
+            // Island suppliers of an entry with basis "entered" carry their amount as a floor (R18).
+            const entered = new Map<string, number>();
+            for (const e of file) {
+                if (e.basis !== "entered") continue;
+                for (const s of Array.isArray(e.suppliers) ? e.suppliers : []) if (typeof s.island === "string" && amountOf(s) > 0) entered.set(s.island, amountOf(s));
+            }
+            const suppliers: Supplier[] = (d.suppliers ?? []).map((s) => {
+                const amount = typeof s.island === "string" ? entered.get(s.island) : undefined;
+                return amount === undefined ? s : { ...s, amount };
+            });
+            const hasDefault = suppliers.some((s) => s.default === true);
+            const extras = nonIsland(file).map((s) => {
+                if (!hasDefault || s.default !== true) return s;
+                const copy: Supplier = { ...s };
+                delete copy.default;
+                return copy;
+            });
+            out.push({ island: d.island, product: d.product, basis: entered.size > 0 ? "entered" : "planned", suppliers: [...suppliers, ...extras] });
+        }
+        for (const [key, list] of byPair) {
+            if (used.has(key)) continue;
+            const extras = nonIsland(list);
+            if (extras.length === 0) continue;
+            const first = list[0];
+            const entry: TradeImport = { island: first.island, product: first.product, suppliers: extras };
+            if (first.basis !== undefined) entry.basis = first.basis;
+            out.push(entry);
+        }
+        return out;
+    }
+
+    // R21, R14: stored routes that survive the import seed the duplicate and cycle checks. A (product, receiver) pair the
+    // file produces a route set for loses its stored routes, so only pairs the file does not mention remain.
+    private seedKeptRoutes(imports: TradeImport[]): void {
+        if (this.keptInput.length === 0) return;
+        const produced = new Set<string>();
+        for (const e of imports) {
+            const receiver = this.byId.get(e.island);
+            if (!receiver || !this.products.has(e.product)) continue;
+            const suppliers = Array.isArray(e.suppliers) ? e.suppliers : [];
+            if (suppliers.some((s) => this.classify(receiver, s).kind === "island")) produced.add(`${e.product}|${receiver.key}`);
+        }
+        const keyOf = new Map<string, string>();
+        for (const isl of this.plan.islands) if (isl.matchedTo !== undefined) keyOf.set(isl.matchedTo, isl.key);
+        for (const r of this.keptInput) {
+            const from = keyOf.get(r.from) ?? r.from;
+            const to = keyOf.get(r.to) ?? r.to;
+            if (produced.has(`${r.productGUID}|${to}`)) continue;
+            this.routeKeys.add(`${r.productGUID}|${from}|${to}`);
+            if (r.isDefaultSupplier) this.setDefault(r.productGUID, from, to);
+        }
+    }
+
     // ---- imports ----
 
     private preserve(receiver: IslandPlan | undefined, entry: TradeImport, reasons: PreservedImportReason[], preserved: Supplier[]): PreservedImport {
@@ -148,6 +238,7 @@ class TradePlanner {
                 routes: [],
                 defaultSupplier: null,
                 passiveUserSetAmount: 0,
+                governorSupply: 0,
             },
         };
         if (receiver) {
@@ -202,12 +293,37 @@ class TradePlanner {
         const selfs = cls.filter((c) => c.kind === "self");
         const islandSuppliers = cls.filter((c) => c.kind === "island");
 
+        let governorSum = 0;
         if (governors.length) {
             reasons.push("governor-supplier");
-            this.add("not-mapped", "governor-supplier", `${governors.length} governor supplier(s) of product ${e.product} on ${receiver.name} are kept and not applied; the calculator models no governor supplier.`, receiver.id, {
-                product: e.product,
-                governors: governors.map((c) => c.s.governor),
-            });
+            const supplying = governors.filter((c) => amountOf(c.s) > 0);
+            const idle = governors.filter((c) => amountOf(c.s) === 0);
+            const pair = `${e.product}|${receiver.key}`;
+            if (supplying.length && this.governorPairs.has(pair)) {
+                this.add("not-mapped", "duplicate-import-entry", `Product ${e.product} on ${receiver.name} already has governor supply from an earlier entry; the repeated governor amounts are ignored.`, receiver.id, {
+                    product: e.product,
+                    governors: supplying.map((c) => c.s.governor),
+                });
+            } else if (supplying.length) {
+                this.governorPairs.add(pair);
+                for (const c of supplying) {
+                    const amount = amountOf(c.s);
+                    governorSum += amount;
+                    this.add("approximated", "governor-supply-applied", `Governor ${c.s.governor} supplies ${amount} t/min of product ${e.product} to ${receiver.name}; it is applied as additional supply, not as a route.`, receiver.id, {
+                        governor: c.s.governor,
+                        product: e.product,
+                        island: receiver.name,
+                        amount,
+                    });
+                }
+                this.result.islands[receiver.key].store[keys.governorSupply(e.product)] = governorSum;
+            }
+            if (idle.length) {
+                this.add("not-mapped", "governor-supplier", `${idle.length} governor supplier(s) of product ${e.product} on ${receiver.name} carry no amount; they are kept and supply nothing.`, receiver.id, {
+                    product: e.product,
+                    governors: idle.map((c) => c.s.governor),
+                });
+            }
         }
         if (residual && residual.kind === "governor") {
             this.add("not-mapped", "governor-default", `The residual supplier of product ${e.product} on ${receiver.name} is a governor; no default route is written and the product's default supplier is left as it is.`, receiver.id, {
@@ -227,6 +343,7 @@ class TradePlanner {
 
         let written = 0;
         let cycle = false;
+        const amountKept: string[] = [];
         for (const c of islandSuppliers) {
             const from = this.byId.get(c.s.island as string) as IslandPlan;
             const routeKey = `${e.product}|${from.key}|${receiver.key}`;
@@ -253,11 +370,22 @@ class TradePlanner {
                 }
             }
             this.routeKeys.add(routeKey);
-            this.routes.push({ productGUID: e.product, from: from.key, to: receiver.key, userSetAmount: amountOf(c.s), isDefaultSupplier: isDefault });
+            // R19a: only the island suppliers of an entry with basis "entered" are floors; every other amount is a planner
+            // cap or share and stays in the preserved entry.
+            const entered = e.basis === "entered";
+            if (!entered && amountOf(c.s) > 0) amountKept.push(from.id);
+            this.routes.push({ productGUID: e.product, from: from.key, to: receiver.key, userSetAmount: entered ? amountOf(c.s) : 0, isDefaultSupplier: isDefault });
             if (isDefault) this.setDefault(e.product, from.key, receiver.key);
             written++;
         }
         if (cycle) reasons.push("cycle");
+        if (amountKept.length) {
+            reasons.push("amount-kept");
+            this.add("carried-through", "import-amount-kept", `The planned amounts of ${amountKept.length} supplier(s) of product ${e.product} on ${receiver.name} are written as floor 0 and kept in the entry (R19a).`, receiver.id, {
+                product: e.product,
+                suppliers: amountKept,
+            });
+        }
 
         // Non-player and unknown/orphan islands: passive-trade default when no island supplier remains (R52).
         const out = this.result.islands[receiver.key];
@@ -281,7 +409,7 @@ class TradePlanner {
         }
 
         if (written > 0 || degraded) this.localProducer(receiver, e.product);
-        if (reasons.length) this.preserve(receiver, e, reasons, preserved);
+        if (reasons.length) this.preserve(receiver, e, reasons, preserved).restore.governorSupply = governorSum;
     }
 
     // The residual supplier of KTD9 / R54.
@@ -318,8 +446,10 @@ class TradePlanner {
         const buildings = receiver.file.buildings ?? {};
         for (const f of this.factoriesOf.get(product) ?? []) {
             const entry = buildings[String(f)];
-            if (!entry || typeof entry.built !== "number" || entry.built <= 0 || entry.fullyUtilize === false) continue;
+            const builtInFile = !!entry && typeof entry.built === "number" && entry.built > 0;
+            if (entry?.fullyUtilize === false || (!builtInFile && !this.scoped)) continue;
             this.result.islands[receiver.key].store[keys.buildingsFullyUtilize(f)] = "1";
+            if (!builtInFile) continue;
             const id = `${receiver.key}|${f}`;
             if (this.utilized.has(id)) continue;
             this.utilized.add(id);
@@ -344,6 +474,16 @@ class TradePlanner {
         const routes = trade.routes ?? [];
         const visits = trade.visits ?? [];
         const harbours = trade.governorHarbours ?? [];
+        if (this.derivedActive) {
+            this.add("approximated", "routes-derived", `The supplier sets, residual suppliers and floors of ${routes.length} routes are derived from the route data; governor, non-player and passive suppliers come from the imports (R18, R20).`, undefined, {
+                routes: routes.length,
+                visits: visits.length,
+            });
+            if (harbours.length) {
+                this.add("carried-through", "governor-harbours", `${harbours.length} governor harbours are kept unchanged and not applied.`, undefined, { harbours: harbours.length });
+            }
+            return;
+        }
         if (routes.length || visits.length) {
             this.add("carried-through", "routes-preserved", `${routes.length} routes and ${visits.length} visits are kept unchanged; the calculator derives no imports from them.`, undefined, {
                 routes: routes.length,

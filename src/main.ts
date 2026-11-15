@@ -16,11 +16,14 @@ import { ConstantsConfig, NeedConsumptionConfig, TextConfig } from './types.conf
 import { Storage as SubStorage, Island, Region, Session } from './world';
 import { Effect, ProductCategory, Fertility, AreaBuff } from './production';
 import { isAggregating, compareAggregateDemands } from './aggregate';
+import { VillaItemsViewModel } from './villa-items';
+import { DlcSettings } from './dlc-settings';
 import './exchange';
 import { ExchangeReportDialog } from './exchange/report-dialog';
-import type { ImportPlan, ReportEntry } from './exchange/types';
-import { compareHandOff, ComputedDifference } from './exchange/computed';
-import { COMPUTED_SESSION_KEY } from './exchange/writer';
+import { ImportScopesViewModel } from './exchange/import-scopes-ui';
+import type { ReportEntry } from './exchange/types';
+import { JUST_IMPORTED_KEY } from './exchange/writer';
+import { saveSnapshot, hasSnapshot, clearSnapshot } from './exchange/undo';
 
 
 declare const $: any;
@@ -92,6 +95,8 @@ window.view = {
     regions: [] as Region[],
     sessions: [] as Session[],
     needAttributes: [] as NamedElement[],
+    // Created in the bootstrap, once the need attributes exist.
+    villaItems: null as VillaItemsViewModel | null,
     assetsMap: new Map() as AssetsMap,
     literalsMap: new Map() as LiteralsMap,
     productsToTraders: new Map(),
@@ -113,6 +118,10 @@ window.view = {
     viewMode: null,
     islandManager: null,
     exchangeReport: new ExchangeReportDialog(() => window.view.texts),
+    // Created in the bootstrap, once the sessions exist.
+    dlcSettings: null as DlcSettings | null,
+    // Created in the bootstrap, once the settings storage exists.
+    importScopes: null as ImportScopesViewModel | null,
     // Debug settings for Knockout binding debugging
     debug: {
         enabled: ko.observable(false),
@@ -362,32 +371,24 @@ function exportExchange(): void {
 }
 
 /**
- * After the reload that follows an exchange import: compares the file's `computed` block (handed over in
- * sessionStorage by applyImport) with the calculator's own results and lists the differences in the report dialog.
- * Runs at the end of bootstrapping, when every island exists and its persisted state is loaded; pending Knockout
- * tasks are flushed first. Informational only: nothing is blocked and the key is always consumed.
+ * After the reload that follows an exchange import: opens the Download dialog, which then offers Undo. The flag is
+ * consumed. Runs at the end of bootstrapping.
  */
-function showComputedDifferences(): void {
-    let differences: ComputedDifference[] = [];
+function openDownloadDialogAfterImport(): void {
     try {
-        if (!window.sessionStorage.getItem(COMPUTED_SESSION_KEY))
+        if (!window.sessionStorage.getItem(JUST_IMPORTED_KEY))
             return;
-        ko.tasks.runEarly();
-        differences = compareHandOff(window.sessionStorage, COMPUTED_SESSION_KEY);
+        window.sessionStorage.removeItem(JUST_IMPORTED_KEY);
     } catch (e) {
-        console.error('Comparison with the computed values of the file failed:', e);
         return;
     }
-    if (differences.length === 0)
-        return;
-
-    window.view.exchangeReport.showDifferences(differences);
-    $('#exchange-report-dialog').modal('show');
+    $('#download-dialog').modal('show');
 }
 
 /**
- * Installs the change listener of #exchange-selector: reads the file, plans the import and opens the confirmation
- * dialog. Nothing is written before Confirm.
+ * Installs the change listener of #exchange-selector: reads the file and imports it at once with the ticked scopes.
+ * No confirmation and no report: a snapshot of all stored data is kept for Undo, then the import replaces the ticked
+ * scopes and the page reloads. Only a file that cannot be read at all shows a message.
  */
 function installImportExchangeListener(): void {
     $('#exchange-selector').on('change', (event: JQuery.ChangeEvent) => {
@@ -404,18 +405,21 @@ function installImportExchangeListener(): void {
         fileReader.onload = function (ev: ProgressEvent<FileReader>) {
             input.value = '';
             const text = (ev.target as FileReader).result as string;
-            const plan = window.exchange.planImport(text);
+            SubStorage.flushPending();
+            const plan = window.exchange.planScopedImport(text, window.view.importScopes.selection());
             if ('error' in plan) {
                 dialog.invalid(plan.error);
                 return;
             }
-            dialog.showImport(plan, (confirmed: ImportPlan) => {
-                const result = window.exchange.applyImport(confirmed);
-                if (!result.ok)
-                    console.error('Exchange import failed:', result.error);
-                return result.ok;
-            });
-            showExchangeReportDialog();
+            // A failed snapshot does not stop the import; saveSnapshot then leaves no record and Undo is not offered.
+            SubStorage.flushPending();
+            saveSnapshot(window.exchange.undo.snapshot());
+            const result = window.exchange.applyImport(plan);
+            if (!result.ok) {
+                console.error('Exchange import failed:', result.error);
+                clearSnapshot();
+                window.view.importScopes.undoAvailable(hasSnapshot());
+            }
         };
 
         fileReader.onerror = function (err: ProgressEvent<FileReader>) {
@@ -528,6 +532,10 @@ function init(_isFirstRun: boolean, configVersion: string | null): void {
         }
     }
 
+    window.view.importScopes = new ImportScopesViewModel(() => window.view.texts);
+    if (settingsStorage)
+        window.view.importScopes.persist(settingsStorage);
+
     window.view.settings.languages = params.languages;
 
     for (let attr of (params.needConsumptions as NeedConsumptionConfig[])) {
@@ -626,6 +634,7 @@ function init(_isFirstRun: boolean, configVersion: string | null): void {
         window.view.assetsMap.set(s.guid, s);
         window.view.sessions.push(s);
     }
+    window.view.dlcSettings = new DlcSettings(window.view.sessions, sessionStorage);
 
     window.view.needAttributes = [];
     // Set up attributes: Population, Money, Happiness, Health, FireSafety, Belief, Knowledge, Prestige
@@ -701,7 +710,8 @@ function init(_isFirstRun: boolean, configVersion: string | null): void {
         recipeLists: recipeListPresenters
     };
     window.view.presenter.residence = new ResidencePresenter(allIslands.needCategories, allIslands.populationLevels[0]);
-    
+    window.view.villaItems = new VillaItemsViewModel(window.view.needAttributes);
+
 
     // Set up view mode for first run
     if (_isFirstRun)
@@ -858,5 +868,5 @@ $(document).ready(function () {
     // Install import config listener (must occur after template binding)
     installImportConfigListener();
     installImportExchangeListener();
-    showComputedDifferences();
+    openDownloadDialogAfterImport();
 });

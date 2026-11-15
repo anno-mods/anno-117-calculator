@@ -49,15 +49,15 @@ function isl(id: string, extra: Record<string, any> = {}): Record<string, any> {
     return { id, name: id.toUpperCase(), session: LATIUM, ...extra };
 }
 
-async function planFull(page: Page, text: string): Promise<{ trade: TradePlan; islands: any }> {
-    return page.evaluate((t: string) => {
+async function planFull(page: Page, text: string, opts: Record<string, any> = {}): Promise<{ trade: TradePlan; islands: any }> {
+    return page.evaluate(({ t, o }) => {
         const ex = window.exchange;
         const r = ex.readExchange(t);
         if ('error' in r) throw new Error(r.error);
         const islands = ex.planIslands(r);
-        const trade = ex.planTrade(islands, r);
+        const trade = ex.planTrade(islands, r, o as never);
         return { trade, islands };
-    }, text);
+    }, { t: text, o: opts });
 }
 
 async function plan(page: Page, text: string): Promise<TradePlan> {
@@ -143,11 +143,11 @@ test.describe('import plan: trade (U6)', () => {
         expect(p.tradeRoutes.map((r) => [r.from, r.isDefaultSupplier])).toEqual([['A', false], ['B', true]]);
     });
 
-    test('no default flag and no share: all routes ordinary, product default left alone, minimum zero routes written (R54)', async ({ page }) => {
+    test('no default flag and no share: all routes ordinary, product default left alone, minimum zero routes written, a planned amount is kept and no floor (R54, R19a)', async ({ page }) => {
         const p = await plan(page, doc([isl('a'), isl('b'), isl('c')], { imports: [imp('c', DATES, [{ island: 'a' }, { island: 'b', amount: 3 }])] }));
         expect(p.tradeRoutes).toEqual([
             { productGUID: DATES, from: 'A', to: 'C', userSetAmount: 0, isDefaultSupplier: false },
-            { productGUID: DATES, from: 'B', to: 'C', userSetAmount: 3, isDefaultSupplier: false },
+            { productGUID: DATES, from: 'B', to: 'C', userSetAmount: 0, isDefaultSupplier: false },
         ]);
         expect(Object.keys(p.islands['C'].store).filter((k) => k.includes('defaultSupplier'))).toEqual([]);
     });
@@ -201,7 +201,7 @@ test.describe('import plan: trade (U6)', () => {
     test('governor flagged default next to an island supplier with a share: governor is the residual, nothing is the default route (R54)', async ({ page }) => {
         const entry = imp('b', BREAD, [{ governor: 4711, default: true }, { island: 'a', share: 1, amount: 3 }]);
         const p = await plan(page, doc([isl('a'), isl('b')], { imports: [entry] }));
-        expect(p.tradeRoutes).toEqual([{ productGUID: BREAD, from: 'A', to: 'B', userSetAmount: 3, isDefaultSupplier: false }]);
+        expect(p.tradeRoutes).toEqual([{ productGUID: BREAD, from: 'A', to: 'B', userSetAmount: 0, isDefaultSupplier: false }]);
         expect(Object.keys(p.islands['B'].store).filter((k) => k.includes('defaultSupplier'))).toEqual([]);
         expect(Object.keys(p.islands['B'].store).filter((k) => k.includes('passiveTrade'))).toEqual([]);
         expect(codes(p.report)).toContain('governor-default');
@@ -209,7 +209,7 @@ test.describe('import plan: trade (U6)', () => {
         expect(kept.length).toBe(1);
         expect(kept[0].entry).toEqual(entry);
         expect(kept[0].preserved).toEqual([{ governor: 4711, default: true }]);
-        expect(kept[0].restore.routes).toEqual([{ from: 'A', to: 'B', userSetAmount: 3, isDefaultSupplier: false }]);
+        expect(kept[0].restore.routes).toEqual([{ from: 'A', to: 'B', userSetAmount: 0, isDefaultSupplier: false }]);
 
         const zero = await plan(page, doc([isl('a'), isl('b')], { imports: [imp('b', BREAD, [{ governor: 4711, default: true }, { island: 'a', share: 1 }])] }));
         expect(zero.tradeRoutes[0].userSetAmount).toBe(0);
@@ -240,6 +240,67 @@ test.describe('import plan: trade (U6)', () => {
         expect(codes(p.report)).toContain('governor-harbours');
     });
 
+    test('governor amount next to an island supplier: governor supply key, one route, one applied report line (AE1, R1, R5)', async ({ page }) => {
+        const entry = imp('b', BREAD, [{ island: 'a', amount: 2 }, { governor: 777, amount: 4 }]);
+        const p = await plan(page, doc([isl('a'), isl('b')], { imports: [entry] }));
+        expect(p.islands['B'].store[`${BREAD}.governorSupply`]).toBe(4);
+        expect(p.tradeRoutes.length).toBe(1);
+        expect(p.tradeRoutes[0].from).toBe('A');
+        const applied = p.report.filter((r) => r.code === 'governor-supply-applied');
+        expect(applied.length).toBe(1);
+        expect(applied[0].kind).toBe('approximated');
+        expect(applied[0].detail).toMatchObject({ governor: 777, product: BREAD, amount: 4 });
+        expect(p.report.map((r) => r.code)).not.toContain('governor-supplier');
+        const kept = p.islands['B'].ext.preservedImports;
+        expect(kept.length).toBe(1);
+        expect(kept[0].restore.governorSupply).toBe(4);
+    });
+
+    test('governor without amount supplies nothing and stays preserved (AE2, R2)', async ({ page }) => {
+        const entry = imp('b', BREAD, [{ island: 'a', amount: 2 }, { governor: 777 }, { governor: 778, amount: 0 }]);
+        const p = await plan(page, doc([isl('a'), isl('b')], { imports: [entry] }));
+        expect(Object.keys(p.islands['B'].store).filter((k) => k.includes('governorSupply'))).toEqual([]);
+        expect(codes(p.report)).toContain('governor-supplier');
+        expect(codes(p.report)).not.toContain('governor-supply-applied');
+        const kept = p.islands['B'].ext.preservedImports;
+        expect(kept[0].entry).toEqual(entry);
+        expect(kept[0].restore.governorSupply).toBe(0);
+    });
+
+    test('governor flagged default with an amount: supply applied, no route, no default key (AE3, R3, R4)', async ({ page }) => {
+        const p = await plan(page, doc([isl('a'), isl('b')], { imports: [imp('b', BREAD, [{ governor: 777, amount: 4, default: true }])] }));
+        expect(p.islands['B'].store).toEqual({ [`${BREAD}.governorSupply`]: 4 });
+        expect(p.tradeRoutes).toEqual([]);
+        expect(codes(p.report)).toContain('governor-default');
+        expect(codes(p.report)).toContain('governor-supply-applied');
+    });
+
+    test('two governors on one entry supply the sum with two report lines', async ({ page }) => {
+        const p = await plan(page, doc([isl('a'), isl('b')], { imports: [imp('b', BREAD, [{ governor: 1, amount: 3 }, { governor: 2, amount: 1.5 }])] }));
+        expect(p.islands['B'].store[`${BREAD}.governorSupply`]).toBe(4.5);
+        expect(p.report.filter((r) => r.code === 'governor-supply-applied').length).toBe(2);
+    });
+
+    test('ambiguous default with a governor writes no governor supply', async ({ page }) => {
+        const p = await plan(page, doc([isl('a'), isl('b')], { imports: [imp('b', BREAD, [{ governor: 4711, amount: 2, default: true }, { island: 'a', default: true }])] }));
+        expect(Object.keys(p.islands['B'].store).filter((k) => k.includes('governorSupply'))).toEqual([]);
+        expect(codes(p.report)).not.toContain('governor-supply-applied');
+    });
+
+    test('a repeated entry for the same island and product adds no governor amount', async ({ page }) => {
+        const imports = [imp('b', BREAD, [{ governor: 1, amount: 3 }]), imp('b', BREAD, [{ governor: 2, amount: 5 }])];
+        const p = await plan(page, doc([isl('a'), isl('b')], { imports }));
+        expect(p.islands['B'].store[`${BREAD}.governorSupply`]).toBe(3);
+        expect(p.report.filter((r) => r.code === 'governor-supply-applied').length).toBe(1);
+        expect(codes(p.report)).toContain('duplicate-import-entry');
+    });
+
+    test('governor amount for an unknown product or an unavailable receiver writes no key', async ({ page }) => {
+        const imports = [imp('b', 999999999, [{ governor: 1, amount: 3 }]), imp('ghost', BREAD, [{ governor: 1, amount: 3 }])];
+        const p = await plan(page, doc([isl('b')], { imports }));
+        expect(p.islands['B'].store).toEqual({});
+    });
+
     test('a non-player supplier alone becomes the passive-trade default; the original supplier stays in ext (R52, CD10)', async ({ page }) => {
         const entry = imp('b', BREAD, [{ island: 'npc-island', share: 1 }]);
         const p = await plan(page, doc([isl('b')], { imports: [entry] }));
@@ -257,6 +318,7 @@ test.describe('import plan: trade (U6)', () => {
             routes: [],
             defaultSupplier: { type: 'passive_trade', id: 'passive' },
             passiveUserSetAmount: 0,
+            governorSupply: 0,
         });
         expect(codes(p.report)).toContain('non-player-passive');
     });
@@ -276,20 +338,20 @@ test.describe('import plan: trade (U6)', () => {
         expect(codes(p.report)).toContain('non-player-kept');
     });
 
-    test('a two-island cycle keeps the second route as an ordinary route with its amount and reports it', async ({ page }) => {
+    test('a two-island cycle keeps the second route as an ordinary route and reports it', async ({ page }) => {
         const first = imp('b', BREAD, [{ island: 'a', default: true }]);
         const second = imp('a', BREAD, [{ island: 'b', default: true, amount: 5 }]);
         const p = await plan(page, doc([isl('a'), isl('b')], { imports: [first, second] }));
         expect(p.tradeRoutes).toEqual([
             { productGUID: BREAD, from: 'A', to: 'B', userSetAmount: 0, isDefaultSupplier: true },
-            { productGUID: BREAD, from: 'B', to: 'A', userSetAmount: 5, isDefaultSupplier: false },
+            { productGUID: BREAD, from: 'B', to: 'A', userSetAmount: 0, isDefaultSupplier: false },
         ]);
         expect(codes(p.report)).toContain('default-cycle');
         const kept = p.islands['A'].ext.preservedImports;
         expect(kept.length).toBe(1);
         expect(kept[0].reasons).toContain('cycle');
         expect(kept[0].entry).toEqual(second);
-        expect(kept[0].restore.routes).toEqual([{ from: 'B', to: 'A', userSetAmount: 5, isDefaultSupplier: false }]);
+        expect(kept[0].restore.routes).toEqual([{ from: 'B', to: 'A', userSetAmount: 0, isDefaultSupplier: false }]);
         expect(p.islands['B'].ext.preservedImports).toEqual([]);
     });
 
@@ -436,5 +498,86 @@ test.describe('import plan: trade (U6)', () => {
         expect(p.islands['B'].ext.preservedImports.map((k) => k.entry)).toEqual([unknownProduct]);
         expect(p.document.preservedImports.map((k) => k.entry)).toEqual([toOrphan, toNobody]);
         expect(codes(p.report)).toEqual(expect.arrayContaining(['unknown-guid', 'import-receiver-unavailable']));
+    });
+
+    // ---- route derivation, amounts as floor 0, kept routes (U8) ----
+
+    const station = (island: string, slots: Record<string, any>[]) => ({ island, slots });
+    const ship = [{ type: 1001, slots: 4, count: 1 }];
+    // Ostia loads Bread, Roma unloads it; the file's own entry for Roma lists Ostia (entered 0.5) and Capua.
+    const savegame = (basis: string, ships: Record<string, any>[] = ship) =>
+        doc([isl('roma'), isl('ostia'), isl('capua')], {
+            routes: [{ id: 'r1', stations: [station('ostia', [{ product: BREAD, mode: 'load', slot: 0, amount: 10 }]), station('roma', [{ product: BREAD, mode: 'unload', slot: 0, amount: 10 }])], ships }],
+            imports: [imp('roma', BREAD, [{ island: 'ostia', amount: 0.5 }, { island: 'capua' }], { basis })],
+        });
+
+    test('Covers AE5: the re-calculation toggle takes the supplier set, the default and the floors from the route; an entered amount stays a floor', async ({ page }) => {
+        const on = await plan(page, savegame('entered')).then(() => planFull(page, savegame('entered'), { recalcRoutes: true }));
+        expect(on.trade.tradeRoutes).toEqual([{ productGUID: BREAD, from: 'OSTIA', to: 'ROMA', userSetAmount: 0.5, isDefaultSupplier: true }]);
+        expect(codes(on.trade.report)).toContain('routes-derived');
+        expect(codes(on.trade.report)).not.toContain('routes-not-derived');
+
+        const planned = await planFull(page, savegame('planned'), { recalcRoutes: true });
+        expect(planned.trade.tradeRoutes).toEqual([{ productGUID: BREAD, from: 'OSTIA', to: 'ROMA', userSetAmount: 0, isDefaultSupplier: true }]);
+
+        const off = await planFull(page, savegame('entered'));
+        expect(off.trade.tradeRoutes.map((r) => `${r.from}:${r.userSetAmount}:${r.isDefaultSupplier}`)).toEqual(['OSTIA:0.5:false', 'CAPUA:0:false']);
+    });
+
+    test('Covers R18, R19: toggle on and no ship on any route: trade.imports is the input', async ({ page }) => {
+        const none = await planFull(page, savegame('entered', []), { recalcRoutes: true });
+        expect(none.trade.tradeRoutes.map((r) => r.from)).toEqual(['OSTIA', 'CAPUA']);
+        expect(codes(none.trade.report)).not.toContain('routes-derived');
+        const zero = await planFull(page, savegame('entered', [{ type: 1, count: 0 }]), { recalcRoutes: true });
+        expect(zero.trade.tradeRoutes.map((r) => r.from)).toEqual(['OSTIA', 'CAPUA']);
+    });
+
+    test('Covers R20: governor and non-player suppliers of the entry stay next to the derived island suppliers', async ({ page }) => {
+        const text = doc([isl('roma'), isl('ostia')], {
+            routes: [{ id: 'r1', stations: [station('ostia', [{ product: BREAD, mode: 'load', slot: 0, amount: 10 }]), station('roma', [{ product: BREAD, mode: 'unload', slot: 0, amount: 10 }])], ships: ship }],
+            imports: [imp('roma', BREAD, [{ island: 'ostia', default: true }, { governor: 4711, amount: 2 }])],
+        });
+        const { trade } = await planFull(page, text, { recalcRoutes: true });
+        expect(trade.tradeRoutes).toEqual([{ productGUID: BREAD, from: 'OSTIA', to: 'ROMA', userSetAmount: 0, isDefaultSupplier: true }]);
+        expect(trade.islands['ROMA'].store[`${BREAD}.governorSupply`]).toBe(2);
+        const kept = trade.islands['ROMA'].ext.preservedImports;
+        expect(kept.length).toBe(1);
+        expect(kept[0].reasons).toContain('governor-supplier');
+        expect(kept[0].preserved).toEqual([{ governor: 4711, amount: 2 }]);
+        expect(kept[0].entry.suppliers.map((s: Record<string, any>) => s.island ?? s.governor)).toEqual(['ostia', 4711]);
+    });
+
+    test('Covers AE6: a planner supplier amount is written as floor 0, kept in the entry, and the default stays as in the file', async ({ page }) => {
+        const entry = imp('b', BREAD, [{ island: 'a', default: true, amount: 0.38 }, { governor: 4711, amount: 1.5 }], { basis: undefined });
+        delete entry.basis;
+        const { trade } = await planFull(page, doc([isl('a'), isl('b')], { imports: [entry] }));
+        expect(trade.tradeRoutes).toEqual([{ productGUID: BREAD, from: 'A', to: 'B', userSetAmount: 0, isDefaultSupplier: true }]);
+        const kept = trade.islands['B'].ext.preservedImports;
+        expect(kept.length).toBe(1);
+        expect(kept[0].reasons).toEqual(expect.arrayContaining(['amount-kept', 'governor-supplier']));
+        expect(kept[0].entry).toEqual(entry);
+        expect(kept[0].restore.routes).toEqual([{ from: 'A', to: 'B', userSetAmount: 0, isDefaultSupplier: true }]);
+        expect(trade.islands['B'].store[`${BREAD}.governorSupply`]).toBe(1.5);
+        expect(codes(trade.report)).toEqual(expect.arrayContaining(['import-amount-kept', 'governor-supply-applied']));
+    });
+
+    test('an entered amount is a floor and creates no amount-kept entry', async ({ page }) => {
+        const { trade } = await planFull(page, doc([isl('a'), isl('b')], { imports: [imp('b', BREAD, [{ island: 'a', default: true, amount: 0.38 }], { basis: 'entered' })] }));
+        expect(trade.tradeRoutes[0].userSetAmount).toBe(0.38);
+        expect(trade.islands['B'].ext.preservedImports).toEqual([]);
+    });
+
+    test('Covers R14: a kept default route closes a cycle with a plan default route; a kept route of a produced pair is not seen', async ({ page }) => {
+        const text = doc([isl('a'), isl('b')], { imports: [imp('b', BREAD, [{ island: 'a', default: true }])] });
+        // Kept: B supplies A (default). The plan makes A the default supplier of B: a cycle.
+        const kept = [{ productGUID: BREAD, from: 'B', to: 'A', userSetAmount: 0, isDefaultSupplier: true }];
+        const cyc = await planFull(page, text, { keptRoutes: kept });
+        expect(cyc.trade.tradeRoutes).toEqual([{ productGUID: BREAD, from: 'A', to: 'B', userSetAmount: 0, isDefaultSupplier: false }]);
+        expect(codes(cyc.trade.report)).toContain('default-cycle');
+        // Kept: another supplier of the produced pair (Bread, B) is replaced by the file, so it cannot make a duplicate default.
+        const same = [{ productGUID: BREAD, from: 'C', to: 'B', userSetAmount: 0, isDefaultSupplier: true }];
+        const dup = await planFull(page, text, { keptRoutes: same });
+        expect(dup.trade.tradeRoutes[0].isDefaultSupplier).toBe(true);
+        expect(codes(dup.trade.report)).not.toContain('duplicate-import-entry');
     });
 });

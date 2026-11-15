@@ -67,6 +67,7 @@ test.describe('Consumption modifier wiring (mythical items)', () => {
                 // buffs() that reads b.buff.population unconditionally, so the synthetic buff needs a
                 // minimal `buff` stub even though this test only exercises consumptionModifierInPercent.
                 buff: { population: 0 },
+                needPopulation: () => 0, // read by ResidenceNeed.residents
                 consumptionModifierInPercent: () => -25,
                 goodConsumptionUpgrade: () => [],
             };
@@ -114,6 +115,7 @@ test.describe('Consumption modifier wiring (mythical items)', () => {
             const fakeBuff = {
                 // See note above: minimal `buff` stub required by ResidenceBuilding.residents.
                 buff: { population: 0 },
+                needPopulation: () => 0, // read by ResidenceNeed.residents
                 consumptionModifierInPercent: () => 0,
                 goodConsumptionUpgrade: () => [{ product: breadProduct, amountInPercent: -20 }],
             };

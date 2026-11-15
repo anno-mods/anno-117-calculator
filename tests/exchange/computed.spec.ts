@@ -4,7 +4,7 @@ import * as path from 'path';
 import Ajv2020 from 'ajv/dist/2020';
 import { seedOnce, appReady } from '../helpers/exchange';
 
-// U11: the `computed` block of the export and the comparison after an import (R17, AE5).
+// U11: the `computed` block of the export (R17). An import shows no comparison with the file's values (R5).
 
 const VENDOR = path.join(__dirname, '..', '..', 'vendor', 'anno117-exchange');
 const LATIUM = 3245;
@@ -91,48 +91,5 @@ test.describe('computed block (U11)', () => {
         const s = await summary(page);
         const values = Object.values(s.islands['a'] ? s.islands['a'].buildingsRequired : (Object.values(s.islands)[0] as Json).buildingsRequired) as number[];
         expect(values.some((v) => Math.abs(v - Math.round(v)) > 1e-6)).toBe(true);
-    });
-
-    test('import of a file whose computed residents differ by 5 % lists the island and both values and does not block (AE5)', async ({ page }) => {
-        // Learn what the calculator computes for this state, then import the same state with a 5 % deviation.
-        await load(page, JSON.stringify(tradeFixture()));
-        const own = await summary(page);
-        const bId = await page.evaluate(() => window.exchange.islandId('B'));
-        const real = own.islands[bId].residents[String(NEED_LEVEL)] as number;
-        expect(real).toBeGreaterThan(0);
-
-        const doc = tradeFixture();
-        doc.islands[1].id = bId;
-        doc.computed = { islands: { [bId]: { residents: { [String(NEED_LEVEL)]: real * 1.05 } } } };
-        await load(page, JSON.stringify(doc));
-
-        const section = page.locator('#exchange-computed-differences');
-        await expect(section).toBeVisible();
-        const text = await section.innerText();
-        expect(text).toContain('B');
-        // values are shown with at most two decimals
-        expect(text).toContain(String(Number((real * 1.05).toFixed(2))));
-        expect(text).toContain(String(Number(real.toFixed(2))));
-        // the key is consumed and the app stays usable
-        expect(await page.evaluate(() => sessionStorage.getItem('exchange.computed'))).toBeNull();
-        await page.locator('#exchange-close-button').click();
-        await expect(page.locator('#exchange-report-dialog')).toBeHidden();
-        expect(await page.evaluate(() => !!window.view.island())).toBe(true);
-    });
-
-    test('differences below tolerance produce no entry', async ({ page }) => {
-        await load(page, JSON.stringify(tradeFixture()));
-        const own = await summary(page);
-        const bId = await page.evaluate(() => window.exchange.islandId('B'));
-        const real = own.islands[bId].residents[String(NEED_LEVEL)] as number;
-
-        const doc = tradeFixture();
-        doc.islands[1].id = bId;
-        doc.computed = { islands: { [bId]: { residents: { [String(NEED_LEVEL)]: real * 1.005 } } } };
-        await load(page, JSON.stringify(doc));
-
-        await expect(page.locator('#exchange-computed-differences')).toHaveCount(0);
-        expect(await page.evaluate(() => sessionStorage.getItem('exchange.computed'))).toBeNull();
-        expect(await page.evaluate(() => window.view.exchangeReport.differences().length)).toBe(0);
     });
 });

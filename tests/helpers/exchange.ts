@@ -65,16 +65,19 @@ export interface ImportOutcome {
     plan?: Json;
 }
 
-/** planImport + applyImport(reload:false) of `text`, then a page reload so the app runs on the imported state. */
-export async function importText(page: Page, text: string): Promise<ImportOutcome> {
+/**
+ * planImport (or, with a `selection`, planScopedImport) + applyImport(reload:false) of `text`, then a page reload so the
+ * app runs on the imported state.
+ */
+export async function importText(page: Page, text: string, selection?: Json): Promise<ImportOutcome> {
     await settle(page);
-    const res = await page.evaluate((t: string) => {
+    const res = await page.evaluate(({ t, s }: { t: string; s?: Json }) => {
         const ex = window.exchange;
-        const plan = ex.planImport(t);
+        const plan = s ? ex.planScopedImport(t, s as never) : ex.planImport(t);
         if ('error' in plan) return { ok: false, error: plan.error as string };
         const r = ex.applyImport(plan, { reload: false });
         return { ok: r.ok as boolean, error: r.error as string | undefined, plan: { report: plan.report, problems: plan.problems, keyMap: plan.keyMap } };
-    }, text);
+    }, { t: text, s: selection });
     if (res.ok) {
         await page.reload();
         await appReady(page);

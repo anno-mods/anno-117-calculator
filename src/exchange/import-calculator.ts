@@ -8,13 +8,12 @@
 // suppliers the core format cannot express, ...). Core mappings win over these raw keys.
 // Every other key of the calculator's block is kept and returned unchanged (R13).
 
+import { isDeviceSetting } from "./scopes";
 import { IslandsPlan, ReadOk, ReportEntry, StoredTradeRoute } from "./types";
 
 const DOCUMENT_KNOWN = new Set(["collapsibleStates", "darkMode", "statisticsCollections", "allIslands", "routes", "settings", "areaBuffs"]);
 // Raw keys of an island store the core mapping owns; a raw copy must never write them.
 const PROTECTED_ISLAND_KEYS = /^(exchange\.|session$|gameConnector\.)/;
-// Device preference inside calculatorSettings (main.ts): survives an import untouched.
-const DEVICE_SETTINGS = new Set(["language"]);
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
     return typeof v === "object" && v !== null && !Array.isArray(v);
@@ -99,7 +98,7 @@ export function planCalculator(islands: IslandsPlan, read: ReadOk): CalculatorIm
                     // Object.fromEntries defines own properties, so a "__proto__" key neither hits the prototype nor vanishes.
                     plan.settings = Object.fromEntries([
                         ...Object.entries(plan.settings),
-                        ...Object.entries(v).filter(([s]) => !DEVICE_SETTINGS.has(s)),
+                        ...Object.entries(v).filter(([s]) => !isDeviceSetting(s)),
                     ]);
                 } else {
                     drop("ext.calculator.settings is not an object; it is ignored.", { key: k });

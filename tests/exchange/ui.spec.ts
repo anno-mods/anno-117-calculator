@@ -4,7 +4,7 @@ import * as path from 'path';
 import Ajv2020 from 'ajv/dist/2020';
 import { seedOnce, appReady } from '../helpers/exchange';
 
-// U10: export and import buttons, report dialog.
+// U10: export and import buttons, export report dialog. Scope block and Undo: import-scopes-ui.spec.ts.
 
 const VENDOR = path.join(__dirname, '..', '..', 'vendor', 'anno117-exchange');
 const VALID = path.join(VENDOR, 'fixtures', 'valid');
@@ -76,66 +76,42 @@ test.describe('exchange interface (U10)', () => {
         expect(errors).toEqual([]);
     });
 
-    test('a valid file opens the dialog with scope, island count and carried-through list; Cancel changes nothing', async ({ page }) => {
-        const errors = collectErrors(page);
+    test('a valid file imports at once, shows no report and opens the Download dialog with Undo (AE23, R5)', async ({ page }) => {
         await open(page);
         const before = await snapshot(page);
         await openDownloadDialog(page);
-        await page.setInputFiles('#exchange-selector', path.join(VALID, 'item-locations.json'));
-        const dialog = page.locator('#exchange-report-dialog');
-        await expect(dialog).toBeVisible();
-        await expect(dialog.locator('#exchange-replace-warning')).toContainText(/settings/i);
-        await expect(dialog.locator('#exchange-replace-warning')).toContainText(/trade/i);
-        await expect(dialog.locator('#exchange-replace-warning')).toContainText(/preserved/i);
-        await expect(dialog.locator('#exchange-replace-warning')).toContainText(/language/i);
-        const expected = await page.evaluate((p) => {
-            const plan = window.exchange.planImport(p);
-            return { islands: plan.report.counts.islands, carried: plan.report.carriedThrough.length, firstMessage: plan.report.carriedThrough[0]?.message };
-        }, fs.readFileSync(path.join(VALID, 'item-locations.json'), 'utf-8'));
-        await expect(dialog.locator('#exchange-count-islands')).toContainText(String(expected.islands));
-        expect(expected.carried).toBeGreaterThan(0);
-        await expect(dialog.locator('#exchange-carried li')).not.toHaveCount(0);
-        await expect(dialog.locator('#exchange-carried')).toContainText(expected.firstMessage as string);
-        await expect(dialog.locator('#exchange-confirm-button')).toBeVisible();
-        await dialog.locator('#exchange-cancel-button').click();
-        await expect(dialog).not.toBeVisible();
-        expect(await snapshot(page)).toBe(before);
-        expect(errors).toEqual([]);
-    });
-
-    test('Confirm replaces the stored data and reloads (AE23)', async ({ page }) => {
-        await open(page);
-        const before = await snapshot(page);
-        await openDownloadDialog(page);
-        await page.setInputFiles('#exchange-selector', path.join(VALID, 'minimal-third-party.json'));
-        const dialog = page.locator('#exchange-report-dialog');
-        await expect(dialog).toBeVisible();
         const reloaded = page.waitForEvent('load');
-        await dialog.locator('#exchange-confirm-button').click();
+        await page.setInputFiles('#exchange-selector', path.join(VALID, 'minimal-third-party.json'));
         await reloaded;
         await appReady(page);
         expect(await snapshot(page)).not.toBe(before);
         const names = await page.evaluate(() => window.view.islands().map((i: Record<string, any>) => i.name()));
         expect(names.length).toBeGreaterThan(1);
+        await expect(page.locator('#exchange-report-dialog')).not.toBeVisible();
+        await expect(page.locator('#download-dialog')).toBeVisible();
+        await expect(page.locator('#import-undo-button')).toBeVisible();
     });
 
-    test('a failed write shows the failure message and keeps the page', async ({ page }) => {
+    test('a failed write keeps the page and the stored data and offers no Undo', async ({ page }) => {
         await open(page);
         await openDownloadDialog(page);
-        await page.setInputFiles('#exchange-selector', path.join(VALID, 'minimal-third-party.json'));
-        const dialog = page.locator('#exchange-report-dialog');
-        await expect(dialog).toBeVisible();
+        const before = await snapshot(page);
         await page.evaluate(() => {
             const orig = Storage.prototype.setItem;
-            Storage.prototype.setItem = function () {
-                Storage.prototype.setItem = orig;
-                throw new DOMException('The quota has been exceeded.', 'QuotaExceededError');
+            Storage.prototype.setItem = function (key: string, value: string) {
+                if (this === window.localStorage && key === 'versionCalculator') {
+                    Storage.prototype.setItem = orig;
+                    throw new DOMException('The quota has been exceeded.', 'QuotaExceededError');
+                }
+                return orig.call(this, key, value);
             };
         });
-        await dialog.locator('#exchange-confirm-button').click();
-        await expect(dialog.locator('#exchange-failed-message')).toBeVisible();
+        await page.setInputFiles('#exchange-selector', path.join(VALID, 'minimal-third-party.json'));
+        await page.waitForTimeout(500);
+        expect(await snapshot(page)).toBe(before);
+        await expect(page.locator('#import-undo-button')).toHaveCount(0);
+        await expect(page.locator('#exchange-report-dialog')).not.toBeVisible();
     });
-
     test('export downloads Anno117CalculatorExchange.json that validates', async ({ page }) => {
         await open(page);
         await openDownloadDialog(page);
