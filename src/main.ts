@@ -10,6 +10,7 @@ if (typeof require !== 'undefined') {
 import { AssetsMap, LiteralsMap } from './types';
 import { DarkMode, ResidencePresenter } from './views';
 import { CategoryPresenter } from './presenters';
+import { isPermanentOnlyEffect } from './permanent-only-effects';
 import { PopulationGroupPresenter } from './population-presenters';
 import { PublicServicePresenter, PublicRecipeBuildingPresenter, RecipeListPresenter } from './public-building-presenters';
 import { ConstantsConfig, NeedConsumptionConfig, TextConfig } from './types.config';
@@ -73,6 +74,7 @@ window.view = {
         const search = window.view.effectsFilter.search().trim().toLowerCase();
         const source = window.view.effectsFilter.source();
         return island().availableEffects().filter((e: Effect) => {
+            if (isPermanentOnlyEffect(e.guid)) return false;
             if (source !== 'all' && e.source !== source) return false;
             if (search && !e.name().toLowerCase().includes(search)) return false;
             if (e.buffs.length > 0 && e.buffs.every((b) => b.hasNoDisplayableEffect())) return false;

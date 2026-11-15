@@ -1,6 +1,7 @@
 import { ACCURACY, ko } from './util';
 import { AppliedBuff } from './buffs';
 import { Effect, Item, Fertility, isProductionRelevantBuff } from './production';
+import { isPermanentOnlyEffect } from './permanent-only-effects';
 import type { ExtraGoodProduction } from './buffs';
 import type { Workforce } from './population';
 import type { Product } from './production';
@@ -82,6 +83,10 @@ export class EffectBoostRow {
     /** The toggle's view of `state`: any stored value other than 1 reads as Off (a corrupt save contributes nothing). */
     public readonly toggle: KnockoutComputed<number> | undefined;
     public readonly owner: EffectOwner;
+    /** True for effects that no other dialog lists: the row carries their on/off switch. */
+    public readonly permanentOnly: boolean;
+    /** On/off state of the effect (`scaling() > 0`); the switch of a permanent-only row. */
+    public readonly enabled: KnockoutComputed<boolean>;
     public readonly sourceText: KnockoutComputed<string>;
     public readonly applied: KnockoutComputed<AppliedBuff[]>;
     public readonly activeBuff: KnockoutComputed<BuffValues>;
@@ -103,7 +108,13 @@ export class EffectBoostRow {
             write: (v: number) => state(v ? 1 : 0),
         }) : undefined;
         this.owner = resolveEffectOwner(target, effect);
-        const scaled = this.state == null;
+        this.permanentOnly = isPermanentOnlyEffect(effect.guid);
+        this.enabled = ko.pureComputed({
+            read: () => effect.scaling() > 0,
+            write: (v: boolean) => effect.scaling(v ? 1 : 0),
+        });
+        // a switched-off permanent-only row shows the raw values the effect would add, like an item row at Off
+        const scaled = this.state == null && !this.permanentOnly;
 
         this.sourceText = ko.pureComputed(() => effect.getSourceText());
         this.applied = ko.pureComputed(() => target.buffs().filter(b => b.parent === effect));
@@ -218,7 +229,9 @@ export class FactoryBoostSources {
             const effects: Effect[] = [];
             for (const b of consumer.buffs()) {
                 const p = b.parent;
-                if (p instanceof Effect && p.slotStates == null && !p.effectDuration && p.scaling() > 0
+                // a permanent-only effect is listed while it is available, also switched off, so the row can switch it on
+                if (p instanceof Effect && p.slotStates == null && !p.effectDuration
+                    && (p.scaling() > 0 || (isPermanentOnlyEffect(p.guid) && p.available()))
                     && changesProductionOf(b) && effects.indexOf(p) === -1)
                     effects.push(p);
             }
@@ -228,7 +241,7 @@ export class FactoryBoostSources {
         this.hasAny = ko.pureComputed(() => this.itemRows().length > 0 || this.rangeRows().length > 0 || this.permanentRows().length > 0);
 
         this.count = ko.pureComputed(() => {
-            let n = this.permanentRows().length;
+            let n = this.permanentRows().filter(r => r.effect.scaling() > 0).length;
             for (const b of this.itemRows())
                 if (itemState(b)() > 0)
                     n++;
@@ -247,7 +260,8 @@ export class FactoryBoostSources {
                 if (r.state!() === 1)
                     sum += pointsOf(r.activeBuff());
             for (const r of this.permanentRows())
-                sum += pointsOf(r.activeBuff());
+                if (r.effect.scaling() > 0)
+                    sum += pointsOf(r.activeBuff());
             return sum;
         });
 

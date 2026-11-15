@@ -4,6 +4,7 @@ import type { Effect } from "./production";
 import type { Session } from "./world";
 import { VOLCANO_EFFECTS, VOLCANO_SESSIONS } from "./exchange/discoveries";
 import { VOLCANO_UNLOCKED_KEY } from "./exchange/keys";
+import { HARVEST_SEASON_EFFECT } from "./permanent-only-effects";
 
 // DLC-specific view-model code (plan 2026-11-12-003, R11b). Everything that names a DLC or its content lives here and in
 // templates/dlc-settings.html; the settings dialog only includes that template for each DLC row. A later DLC-specific
@@ -113,6 +114,21 @@ export class DlcSettings {
 
     constructor(sessions: Session[], store: KeyValueStore | undefined) {
         this.volcano = DlcSettings.createVolcano(sessions, store);
+        DlcSettings.switchOnHarvestSeasonWithItsDlc(sessions);
+    }
+
+    // Shemu / Achet (the harvest season effect) has no switch of its own outside the Permanent effects group of the
+    // factory dialog. Activating its DLC switches it on in every session that has it; loading a saved state and later
+    // manual changes are left alone, because only a change of the DLC flag fires the subscription.
+    private static switchOnHarvestSeasonWithItsDlc(sessions: Session[]): void {
+        const effects = sessions
+            .map((s) => s.effects.find((e) => e.guid === HARVEST_SEASON_EFFECT))
+            .filter((e): e is Effect => e != null);
+        const dlc = effects[0]?.dlcs?.length === 1 ? effects[0].dlcs[0] : undefined;
+        if (!dlc) return;
+        dlc.checked.subscribe((checked: boolean) => {
+            if (checked) for (const e of effects) e.scaling(1);
+        });
     }
 
     // Master view mode: the volcano at level 5.

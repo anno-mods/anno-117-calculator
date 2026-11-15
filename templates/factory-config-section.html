@@ -253,12 +253,20 @@
                                                 <span class="badge badge-secondary ml-1" data-bind="text: '&times;' + $data.stack()"></span>
                                                 <!-- /ko -->
                                                 <span class="boost-source-line text-muted small ml-2" data-bind="text: $data.sourceLine()"></span>
+                                                <!-- ko if: $data.permanentOnly -->
+                                                <span class="custom-control custom-checkbox ml-2 d-inline-block boost-source-switch">
+                                                    <input type="checkbox" class="custom-control-input" data-bind="checked: $data.enabled, attr: {id: 'fc-permanent-' + $data.guid + '-enabled'}">
+                                                    <label class="custom-control-label" data-bind="attr: {for: 'fc-permanent-' + $data.guid + '-enabled', title: $data.name(), 'aria-label': $data.name()}"></label>
+                                                </span>
+                                                <!-- /ko -->
+                                                <!-- ko ifnot: $data.permanentOnly -->
                                                 <button type="button" class="btn btn-link btn-sm p-0 ml-2 boost-source-link"
                                                         data-bind="click: () => $parent.openEffectSource($data),
                                                                    attr: {title: $data.owner === 'patron' ? $root.texts.openPatronDialog.name() : $root.texts.openEffectsDialog.name(),
                                                                           'aria-label': $data.owner === 'patron' ? $root.texts.openPatronDialog.name() : $root.texts.openEffectsDialog.name()}">
                                                     <span class="fa fa-external-link" aria-hidden="true"></span>
                                                 </button>
+                                                <!-- /ko -->
                                             </div>
                                         </td>
                                         <td data-bind="template: { name: 'factory-buff-values', data: $data }"></td>
