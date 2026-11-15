@@ -28,9 +28,7 @@ const describeLevel = (page: Page, levelGuid: number) => page.evaluate((guid) =>
     const columns = presenter.needColumns();
     return {
         columnIds: columns.attributes.map((a: any) => a.id),
-        weight: columns.weight,
         dlc: columns.dlc,
-        building: columns.building,
         coverage: columns.coverage,
         paramsAttributeIds: w.params.needAttributes.map((a: any) => a.id),
         needs: needs.map((n: any) => ({
@@ -112,7 +110,6 @@ test.describe('needs table columns (U7)', () => {
         await loadIsland(page);
         for (const level of await levelsOfIsland(page)) {
             const d = await describeLevel(page, level);
-            expect(d.weight).toBe(d.needs.some((n: any) => n.config.supplyWeight !== 0));
             expect(d.dlc).toBe(d.needs.some((n: any) => (n.config.dlcUnlocks || []).length > 0));
             for (const need of d.needs) {
                 expect(need.weight).toBe(need.config.supplyWeight);
@@ -132,7 +129,6 @@ test.describe('needs table columns (U7)', () => {
                 }, { product: need.config.needProduct });
                 expect(need.buildings.map((b: any) => b.guid).sort(), `need ${need.guid}`).toEqual([...expected].sort());
             }
-            expect(d.building).toBe(d.needs.some((n: any) => n.buildings.length > 0));
         }
     });
 

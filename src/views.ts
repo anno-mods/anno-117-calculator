@@ -620,10 +620,8 @@ export interface NeedAttributeCell {
 export interface NeedColumns {
     /** Attributes with a value other than 0 on at least one visible need, in the order of params.needAttributes. */
     attributes: NamedElement[];
-    weight: boolean;
     dlc: boolean;
-    building: boolean;
-    /** Share of supply of public needs; renders only when params.publicServices exists. */
+    /** Share of supply of public needs, shown above the t/min of the need; renders only when params.publicServices exists. */
     coverage: boolean;
 }
 
@@ -894,6 +892,8 @@ export class ResidencePresenter{
     public needCategories: NeedCategoryPresenter[];
     public visibleNeedCategories: KnockoutObservableArray<NeedCategoryPresenter>;
     public needColumns: KnockoutComputed<NeedColumns>;
+    /** One total per rendered attribute column (empty text for 0). */
+    public needTotals: KnockoutComputed<string[]>;
     public effectCoverage: KnockoutObservableArray<ResidenceEffectCoverage>;
     public populationBuffs: KnockoutComputed<RangeEffect[]>;
     public populationBuffsId: string;
@@ -1058,11 +1058,22 @@ export class ResidencePresenter{
             const hasPublicData = (window.params.publicServices || []).length > 0;
             return {
                 attributes: (window.view.needAttributes as NamedElement[]).filter(a => needs.some(n => n.attributeValue(a) !== 0)),
-                weight: needs.some(n => n.supplyWeight !== 0),
                 dlc: needs.some(n => n.dlcs.length > 0),
-                building: needs.some(n => n.supplyBuildings().length > 0),
                 coverage: hasPublicData && needs.some(n => n.coverage() !== undefined),
             };
+        });
+
+        // Totals per attribute column over the needs that are switched on (all visible needs while aggregating):
+        // Population sums the residents of the needs, every other attribute sums the raw values.
+        this.needTotals = ko.pureComputed((): string[] => {
+            const needs = this.visibleNeedCategories().flatMap(c => c.visiblePopulationLevelNeeds())
+                .filter(n => this.isAggregateMode() || n.checked());
+            return this.needColumns().attributes.map(attribute => {
+                const total = attribute.id === 'Population'
+                    ? needs.reduce((sum, n) => sum + n.residents(), 0)
+                    : needs.reduce((sum, n) => sum + n.attributeValue(attribute), 0);
+                return total === 0 ? '' : formatNumber(total, attribute.id !== 'Population');
+            });
         });
     }
 

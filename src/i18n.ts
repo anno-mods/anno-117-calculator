@@ -2358,19 +2358,19 @@ export const texts: Record<string, Record<string, string>> = {
         japanese: "値なし",
         korean: "값 없음"
     },
-    needColSupplyWeight: {
-        english: "Weight",
-        french: "Poids",
-        polish: "Waga",
-        spanish: "Peso",
-        italian: "Peso",
-        german: "Gewicht",
-        brazilian: "Peso",
-        russian: "Вес",
-        simplified_chinese: "权重",
-        traditional_chinese: "權重",
-        japanese: "重み",
-        korean: "가중치"
+    needTotals: {
+        english: "Total of the needs that are switched on",
+        french: "Total des besoins activés",
+        polish: "Suma włączonych potrzeb",
+        spanish: "Total de las necesidades activadas",
+        italian: "Totale dei bisogni attivati",
+        german: "Summe der aktivierten Bedürfnisse",
+        brazilian: "Total das necessidades ativadas",
+        russian: "Сумма включённых потребностей",
+        simplified_chinese: "已启用需求的合计",
+        traditional_chinese: "已啟用需求的合計",
+        japanese: "有効な需要の合計",
+        korean: "활성화된 요구의 합계"
     },
     needColDlc: {
         english: "DLC",
@@ -2385,20 +2385,6 @@ export const texts: Record<string, Record<string, string>> = {
         traditional_chinese: "DLC",
         japanese: "DLC",
         korean: "DLC"
-    },
-    needColSupplyBuilding: {
-        english: "Supply building",
-        french: "Bâtiment d'approvisionnement",
-        polish: "Budynek zaopatrzenia",
-        spanish: "Edificio de suministro",
-        italian: "Edificio di approvvigionamento",
-        german: "Versorgungsgebäude",
-        brazilian: "Edifício de abastecimento",
-        russian: "Здание снабжения",
-        simplified_chinese: "供应建筑",
-        traditional_chinese: "供應建築",
-        japanese: "供給建物",
-        korean: "공급 건물"
     },
     needColCoverage: {
         english: "Share of residences in range of the supply building",

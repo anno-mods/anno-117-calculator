@@ -50,13 +50,13 @@ const readTable = (page: Page) => page.evaluate(() => {
     const rows = needTables.flatMap((t) => Array.from(t.querySelectorAll('tbody tr'))).map((tr) => ({
         cells: Array.from(tr.children).length,
         attributes: Array.from(tr.querySelectorAll('td.need-attribute-cell')).map((td) => ({ title: td.getAttribute('title'), text: (td.textContent || '').replace(/\s+/g, ' ').trim() })),
-        weight: tr.querySelector('td.need-weight-cell') ? (tr.querySelector('td.need-weight-cell')!.textContent || '').trim() : null,
         dlcIcons: Array.from(tr.querySelectorAll('td.need-dlc-cell img')).map((i) => i.getAttribute('title')),
-        buildingIcons: Array.from(tr.querySelectorAll('td.need-building-cell img')).map((i) => i.getAttribute('title')),
-        coverage: tr.querySelector('td.need-coverage-cell') ? (tr.querySelector('td.need-coverage-cell')!.textContent || '').trim() : null,
+        coverage: tr.querySelector('.need-coverage') ? (tr.querySelector('.need-coverage')!.textContent || '').trim() : null,
+        amount: tr.querySelector('.need-amount') ? (tr.querySelector('.need-amount')!.textContent || '').trim() : null,
         checkbox: tr.querySelectorAll('input[type="checkbox"]').length,
     }));
-    return { head, rows, scrollsPage: document.documentElement.scrollWidth > window.innerWidth };
+    const totals = Array.from(dialog.querySelectorAll('tr.need-totals td.need-attribute-cell')).map((td) => (td.textContent || '').trim());
+    return { head, rows, totals, scrollsPage: document.documentElement.scrollWidth > window.innerWidth };
 });
 
 test.describe('population level dialog: needs table (U7)', () => {
@@ -77,19 +77,17 @@ test.describe('population level dialog: needs table (U7)', () => {
             const columns = presenter.needColumns();
             return {
                 attributes: columns.attributes.map((a: any) => ({ id: a.id, name: a.name(), icon: a.icon })),
-                weight: columns.weight,
                 dlc: columns.dlc,
-                building: columns.building,
                 coverage: columns.coverage,
                 needs: presenter.visibleNeedCategories().flatMap((c: any) => c.visiblePopulationLevelNeeds()).map((n: any) => ({
                     guid: n.guid,
                     values: w.params.needAttributes.map((a: any) => w.params.needs.find((x: any) => x.guid === n.guid).needAttributes[a.id]),
                     ids: w.params.needAttributes.map((a: any) => a.id),
-                    weight: n.supplyWeight,
                 })),
             };
         });
-        const columnCount = 1 + expected.attributes.length + [expected.weight, expected.dlc, expected.building, expected.coverage].filter(Boolean).length + 1;
+        // name, attributes, optional DLC, the %-and-t/min column, the effects button
+        const columnCount = 1 + expected.attributes.length + (expected.dlc ? 1 : 0) + 1 + 1;
         expect(table.head.length).toBe(columnCount);
 
         // header marks: attribute icon and name, then the optional columns
@@ -98,12 +96,9 @@ test.describe('population level dialog: needs table (U7)', () => {
             expect(table.head[1 + i].imgSrc).toBe(a.icon);
         });
         let next = 1 + expected.attributes.length;
-        if (expected.weight) { expect(table.head[next].text.length).toBeGreaterThan(0); next++; }
-        // static icons of the template are hashed by the build, so the marks are checked by image and title
-        const texts = await page.evaluate(() => ({ dlc: (window as any).view.texts.needColDlc.name(), building: (window as any).view.texts.needColSupplyBuilding.name() }));
-        if (expected.dlc) { expect(table.head[next].imgSrc).not.toBeNull(); expect(table.head[next].title).toBe(texts.dlc); next++; }
-        if (expected.building) { expect(table.head[next].imgSrc).not.toBeNull(); expect(table.head[next].title).toBe(texts.building); next++; }
-        if (expected.coverage) { expect(table.head[next].text).toBe('%'); next++; }
+        const texts = await page.evaluate(() => ({ dlc: (window as any).view.texts.needColDlc.name() }));
+        if (expected.dlc) { expect(table.head[next].title).toBe(texts.dlc); next++; }
+        expect(table.head[next].text).toBe(expected.coverage ? '% / t/min' : 't/min');
         for (const h of table.head.slice(1, -1)) expect(h.title).not.toBe('');
 
         expect(table.rows.length).toBe(expected.needs.length);
@@ -118,10 +113,10 @@ test.describe('population level dialog: needs table (U7)', () => {
                 else if (a.id === 'Population') expect(text).not.toBe('');
                 else expect(text.replace(/\s/g, '')).toBe((raw > 0 ? '+' : '-') + String(Math.abs(raw)));
             });
-            if (expected.weight) expect(row.weight).toBe(need.weight !== 0 ? String(need.weight) : '');
             expect(row.checkbox).toBe(1);
         });
-        expect(expected.weight).toBe(true);
+        // one total per attribute column
+        expect(table.totals.length).toBe(expected.attributes.length);
         expect(table.scrollsPage).toBe(false);
         expect(detector.hasBindingError(), detector.getFormattedBindingErrors().join('\n')).toBe(false);
     });
@@ -131,7 +126,7 @@ test.describe('population level dialog: needs table (U7)', () => {
         await openLevel(page, LIBERTI_LEVEL);
         const missing = await page.evaluate(() => {
             const out: string[] = [];
-            document.querySelectorAll('#population-level-config-dialog tr.need-column-icons th, #population-level-config-dialog td.need-dlc-cell img, #population-level-config-dialog td.need-building-cell img').forEach((e, i) => {
+            document.querySelectorAll('#population-level-config-dialog tr.need-column-icons th, #population-level-config-dialog td.need-dlc-cell img').forEach((e, i) => {
                 if (e.tagName === 'TH' && e === e.parentElement!.firstElementChild) return;
                 if (e.tagName === 'TH' && e === e.parentElement!.lastElementChild) return;
                 if (!e.getAttribute('title')) out.push(e.tagName + ' ' + i);
@@ -141,29 +136,47 @@ test.describe('population level dialog: needs table (U7)', () => {
         expect(missing).toEqual([]);
     });
 
-    test('a public need shows its public buildings and the coverage; goods needs show their factories', async ({ page }) => {
+    test('a public need shows its coverage above the t/min; every need with consumption shows t/min', async ({ page }) => {
         await load(page);
         await openLevel(page, LIBERTI_LEVEL);
         const t = await readTable(page);
         const kinds = await page.evaluate(() => {
             const w = window as any;
-            return w.view.presenter.residence.visibleNeedCategories().flatMap((c: any) => c.visiblePopulationLevelNeeds()).map((n: any) => ({ isBuilding: n.isBuilding, buildings: n.supplyBuildings().length }));
+            return w.view.presenter.residence.visibleNeedCategories().flatMap((c: any) => c.visiblePopulationLevelNeeds()).map((n: any) => ({ isBuilding: n.isBuilding, amount: n.amount() }));
         });
         kinds.forEach((k: any, i: number) => {
-            expect(t.rows[i].buildingIcons.length).toBe(k.buildings);
             if (k.isBuilding) expect(t.rows[i].coverage).toBe('100 %');
-            else expect(t.rows[i].coverage).toBe('');
+            else expect(t.rows[i].coverage).toBeNull();
+            expect(t.rows[i].amount === null, `row ${i}`).toBe(!k.amount);
         });
-        expect(kinds.some((k: any) => k.isBuilding && k.buildings > 0)).toBe(true);
-        expect(kinds.some((k: any) => !k.isBuilding && k.buildings > 0)).toBe(true);
+        expect(kinds.some((k: any) => k.isBuilding)).toBe(true);
     });
 
-    test('without public-building data the coverage column does not exist and public needs have no building cell content', async ({ page }) => {
+    test('the totals row sums the needs that are switched on per attribute column', async ({ page }) => {
+        await load(page);
+        await openLevel(page, LIBERTI_LEVEL);
+        const expected = await page.evaluate(() => {
+            const p = (window as any).view.presenter.residence;
+            const needs = p.visibleNeedCategories().flatMap((c: any) => c.visiblePopulationLevelNeeds()).filter((n: any) => n.checked());
+            return p.needColumns().attributes.map((a: any) => a.id === 'Population'
+                ? needs.reduce((s: number, n: any) => s + n.residents(), 0)
+                : needs.reduce((s: number, n: any) => s + n.attributeValue(a), 0));
+        });
+        const t = await readTable(page);
+        expect(t.totals.length).toBe(expected.length);
+        expected.forEach((v: number, i: number) => {
+            if (v === 0) expect(t.totals[i]).toBe('');
+            else expect(t.totals[i]).not.toBe('');
+        });
+        expect(expected.some((v: number) => v !== 0)).toBe(true);
+    });
+
+    test('without public-building data the % is not shown, only the t/min', async ({ page }) => {
         await load(page, { patch: 'window.params.publicServices = [];' });
         await openLevel(page, LIBERTI_LEVEL);
         const t = await readTable(page);
         expect(t.rows.every((r) => r.coverage === null)).toBe(true);
-        expect(t.head.some((h) => h.text === '%')).toBe(false);
+        expect(t.head.some((h) => h.text === '% / t/min')).toBe(false);
         expect(detector.hasBindingError(), detector.getFormattedBindingErrors().join('\n')).toBe(false);
     });
 

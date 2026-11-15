@@ -64,10 +64,8 @@
                         <!-- ko foreach: $data.needColumns().attributes -->
                         <col style="width: 5%;" />
                         <!-- /ko -->
-                        <!-- ko if: $data.needColumns().weight --><col style="width: 7%;" /><!-- /ko -->
                         <!-- ko if: $data.needColumns().dlc --><col style="width: 7%;" /><!-- /ko -->
-                        <!-- ko if: $data.needColumns().building --><col style="width: 12%;" /><!-- /ko -->
-                        <!-- ko if: $data.needColumns().coverage --><col style="width: 7%;" /><!-- /ko -->
+                        <col style="width: 10%;" />
                         <col />
                     </colgroup>
                     <thead>
@@ -75,7 +73,6 @@
                             <td colspan="30">
                                 <span data-bind="text: $root.texts.needs.name()"></span>
                                 <external-link params="subpage: 'production'"></external-link>
-                                <external-link params="subpage: 'attributes'"></external-link>
                             </td>
                         </tr>
                         <tr class="need-column-icons">
@@ -85,12 +82,26 @@
                                 <img class="icon-sm icon-light" data-bind="attr: {src: $data.icon ? $data.icon : null, alt: $data.name(), title: $data.name()}" />
                             </th>
                             <!-- /ko -->
-                            <!-- ko if: $data.needColumns().coverage -->
-                            <th scope="col" class="text-center" data-bind="attr: {title: $root.texts.needColCoverage.name()}">
-                                <span aria-hidden="true">%</span>
+                            <!-- ko if: $data.needColumns().dlc -->
+                            <th scope="col" class="text-center" data-bind="attr: {title: $root.texts.needColDlc.name()}">
+                                <span class="fa fa-puzzle-piece" aria-hidden="true"></span>
                             </th>
                             <!-- /ko -->
+                            <th scope="col" class="text-center" data-bind="attr: {title: $root.texts.needColCoverage.name()}">
+                                <span aria-hidden="true" data-bind="text: $data.needColumns().coverage ? '% / t/min' : 't/min'"></span>
+                            </th>
                             <th scope="col"></th>
+                        </tr>
+                        <tr class="need-totals">
+                            <th scope="row" class="text-center" data-bind="attr: {title: $root.texts.needTotals.name()}">
+                                <span aria-hidden="true">&Sigma;</span>
+                            </th>
+                            <!-- ko foreach: $data.needTotals() -->
+                            <td class="need-attribute-cell"><strong data-bind="text: $data"></strong></td>
+                            <!-- /ko -->
+                            <!-- ko if: $data.needColumns().dlc --><td></td><!-- /ko -->
+                            <td></td>
+                            <td></td>
                         </tr>
                     </thead>
                 </table>
@@ -114,7 +125,8 @@
                                 <!-- ko foreach: $root.presenter.residence.needColumns().attributes -->
                                 <col style="width: 5%;" />
                                 <!-- /ko -->
-                                <!-- ko if: $root.presenter.residence.needColumns().coverage --><col style="width: 7%;" /><!-- /ko -->
+                                <!-- ko if: $root.presenter.residence.needColumns().dlc --><col style="width: 7%;" /><!-- /ko -->
+                                <col style="width: 10%;" />
                                 <col />
                             </colgroup>
                             <tbody data-bind="foreach: $data.visiblePopulationLevelNeeds()">
@@ -133,9 +145,6 @@
                                     <!-- ko template: { name: 'need-attribute-cells', data: $data } --><!-- /ko -->
                                     <td>
                                         <div class="inline-list" style="justify-content: right">
-                                            <div data-bind="if: $data.amount">
-                                                <span data-bind="text: formatNumber($data.amount()) + ' t/min'"></span>
-                                            </div>
                                             <button class="btn btn-light btn-sm ml-2" data-bind="click: () => {$data.prepareResidenceEffectView()}" data-toggle="modal" data-target="#residence-effect-dialog">
                                                 <img class="icon-sm icon-light" src="../icons/icon_marketplace_2d_light.png" />
                                             </button>
@@ -153,10 +162,8 @@
                                 <!-- ko foreach: $root.presenter.residence.needColumns().attributes -->
                                 <col style="width: 5%;" />
                                 <!-- /ko -->
-                                <!-- ko if: $root.presenter.residence.needColumns().weight --><col style="width: 7%;" /><!-- /ko -->
                                 <!-- ko if: $root.presenter.residence.needColumns().dlc --><col style="width: 7%;" /><!-- /ko -->
-                                <!-- ko if: $root.presenter.residence.needColumns().building --><col style="width: 12%;" /><!-- /ko -->
-                                <!-- ko if: $root.presenter.residence.needColumns().coverage --><col style="width: 7%;" /><!-- /ko -->
+                                <col style="width: 10%;" />
                                 <col />
                             </colgroup>
                             <tbody data-bind="foreach: $data.visiblePopulationLevelNeeds()">
@@ -170,9 +177,6 @@
                                     <!-- ko template: { name: 'need-attribute-cells', data: $data } --><!-- /ko -->
                                     <td>
                                         <div class="inline-list" style="justify-content: right">
-                                            <div data-bind="if: $data.amount">
-                                                <span data-bind="text: formatNumber($data.amount()) + ' t/min'"></span>
-                                            </div>
                                             <button class="btn btn-light btn-sm ml-2" data-bind="click: () => {$data.prepareResidenceEffectView()}" data-toggle="modal" data-target="#residence-effect-dialog">
                                                 <img class="icon-sm icon-light" src="../icons/icon_marketplace_2d_light.png" />
                                             </button>

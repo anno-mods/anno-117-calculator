@@ -9,9 +9,6 @@
     <!-- /ko -->
 </td>
 <!-- /ko -->
-<!-- ko if: $root.presenter.residence.needColumns().weight -->
-<td class="need-weight-cell" data-bind="text: $data.supplyWeight !== 0 ? formatNumber($data.supplyWeight) : ''"></td>
-<!-- /ko -->
 <!-- ko if: $root.presenter.residence.needColumns().dlc -->
 <td class="need-dlc-cell">
     <!-- ko foreach: $data.dlcs -->
@@ -19,13 +16,11 @@
     <!-- /ko -->
 </td>
 <!-- /ko -->
-<!-- ko if: $root.presenter.residence.needColumns().building -->
-<td class="need-building-cell">
-    <!-- ko foreach: $data.supplyBuildings() -->
-    <img class="icon-sm" data-bind="attr: {src: $data.icon ? $data.icon : null, title: $data.name(), alt: $data.name()}" />
+<td class="need-coverage-cell text-right">
+    <!-- ko if: $root.presenter.residence.needColumns().coverage && $data.coverage() !== undefined -->
+    <div class="need-coverage" data-bind="text: formatNumber($data.coverage()) + ' %'"></div>
+    <!-- /ko -->
+    <!-- ko if: $data.amount -->
+    <div class="need-amount" data-bind="text: formatNumber($data.amount()) + ' t/min'"></div>
     <!-- /ko -->
 </td>
-<!-- /ko -->
-<!-- ko if: $root.presenter.residence.needColumns().coverage -->
-<td class="need-coverage-cell" data-bind="text: $data.coverage() !== undefined ? formatNumber($data.coverage()) + ' %' : ''"></td>
-<!-- /ko -->
