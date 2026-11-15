@@ -7,14 +7,14 @@ test.describe('Patron consumption modifier (Isis-Bubastis Feline Grace)', () => 
     const ISIS_BUBASTIS_PATRON_GUID = 153578;
     const SARDINES_NEED_GUID = 2665;
 
-    test('Isis-Bubastis patron at devotion 250 decreases Liberti consumption by 1%', async ({ page }) => {
+    test('Isis-Bubastis patron at devotion 500 decreases Liberti consumption by 5%', async ({ page }) => {
         const configLoader = new ConfigLoader();
 
-        // Create Latium island with 1000 Liberti buildings constructed, devotion 250, and Isis-Bubastis patron selected
+        // Create Latium island with 1000 Liberti buildings constructed, devotion 500, and Isis-Bubastis patron selected
         // We also pass calculatorSettings to activate the Dawn of Delta DLC
         const config = configLoader.createIslandConfig('Latium', LATIUM_SESSION, {
             [`${LIBERTI_RESIDENCE_GUID}.buildings.constructed`]: '1000',
-            devotion: '250',
+            devotion: '500',
             selectedPatron: String(ISIS_BUBASTIS_PATRON_GUID),
         }, {
             "DLC03_Dawn_of_Delta": "1"
@@ -26,7 +26,7 @@ test.describe('Patron consumption modifier (Isis-Bubastis Feline Grace)', () => 
 
         await page.waitForTimeout(300);
 
-        // Get consumption under the patron effect (devotion 250)
+        // Get consumption under the patron effect (devotion 500)
         const consumptionWithPatron = await page.evaluate(({ residenceGuid, needGuid }) => {
             const island = (window as any).view.island();
             const residence = island.assetsMap.get(residenceGuid);
@@ -50,7 +50,7 @@ test.describe('Patron consumption modifier (Isis-Bubastis Feline Grace)', () => 
             return need.amount();
         }, { residenceGuid: LIBERTI_RESIDENCE_GUID, needGuid: SARDINES_NEED_GUID });
 
-        // Consumption must decrease by exactly 1% (i.e. to 99% of baseline)
-        expect(consumptionWithPatron).toBeCloseTo(baselineConsumption * 0.99, 5);
+        // Consumption must decrease by exactly 5% (the first Feline Grace milestone at devotion 500; to 95% of baseline)
+        expect(consumptionWithPatron).toBeCloseTo(baselineConsumption * 0.95, 5);
     });
 });

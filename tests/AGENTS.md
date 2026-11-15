@@ -129,7 +129,6 @@ The Playwright `webServer` uses `http-server -p 8080`. On this machine port 8080
 | **Effect**    | 43600 | CeresPopulationEffect |
 | **Effect**    | 166475| Sláinga Gaileanga (mythical-item, targets Aldermen 6472, adds need 174425) |
 | **Effect**    | 159339| Amphitheatre Splendour IV (island-event, targets Liberti 3087, adds Bread need 2689) |
-| **Effect**    | 140883| Bread Sentries (island-event, goodConsumptionUpgrade Bread +20%) |
 | **Buff**      | 166476| Sláinga buff (additionalNeedsDemand [174425] -> Necklaces 2146) |
 | **Buff**      | 159338| Amphitheatre Splendour IV buff (additionalNeedsDemand [2689] -> Bread 2137) |
 | **Effect**    | 156267| Hippodrome "Privilege of the Public Horse" (island-event, DLC2 67903, targets Equites 3142 + Patricians 3145, adds horse need 174983) |
@@ -141,6 +140,7 @@ The Playwright `webServer` uses `http-server -p 8080`. On this machine port 8080
 ## Formulas Reference
 - **Productivity (Boost)**: `((100 + sum(baseProductivityUpgrades)) * (100 + sum(productivityUpgrades))) / 100` (Division at end to avoid rounding artifacts like 315.01%)
 - **Factory Throughput**: `buildings.utilized * boost * 60 / cycleTime`
+- **Fuel (coal) demand**: `buildings.utilized * 60 / (fuelProductionTime * (1 + sum(fuelDurationPercent)/100))`; independent of cycle time and productivity (see `tests/computed/fuel-consumption.spec.ts`)
 - **Residence Need**: `buildings.constructed * needConsumptionRate * consumptionFactor`
 - **Residence Residents**: `buildings.constructed * need.residents` (summed for checked needs)
 - **Extra Goods**: `requiredInputAmount * (scaling * defaultAmount / additionalOutputCycle)`
@@ -189,4 +189,5 @@ Feature description: `docs/exchange-format.md`. The specs call the pure function
 - `tests/computed/hippodrome-need-gating.spec.ts` — DLC-gated hippodrome horse need: demand on/off, tile-production reconvergence, `activateAllNeeds`/user-controlled `checked`.
 - `tests/computed/mythical-item-needs.spec.ts`, `tests/computed/mythical-item-effect-display.spec.ts`, `tests/computed/mythical-item-consumption-modifier.spec.ts` — Sláinga (item) + Amphitheatre (monument) gating and buff wiring.
 - `tests/computed/base-needs-not-locked.spec.ts` — base-game consumption never hidden at startup.
+- `tests/computed/base-products-not-dlc-locked.spec.ts` — data guard (no browser): no product ungated in `params-base.js`, and no product with a base-game factory, carries `dlcUnlocks` in `params.js`. `Product.available` is "any listed DLC checked", so a stray DLC tag removes a base-game good for every player without that DLC.
 - `tests/binding/population-need-gating.spec.ts` — presenter hides gated needs until effect active.

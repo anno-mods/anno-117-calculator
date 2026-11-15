@@ -95,8 +95,8 @@ test.describe('statistics.html grouped Islands sidebar (U4)', () => {
   });
 
   test('happy path: the "All Islands" checkbox shows checked once every arrived island is checked via the DOM', async ({ page }) => {
-    await seedIsland(page, 'IslandA', 1, 0);
-    await seedIsland(page, 'IslandB', 2, 0);
+    await seedIsland(page, 'IslandA', 1, 0, 999999999);
+    await seedIsland(page, 'IslandB', 2, 0, 999999999);
 
     const allIslandsCheckbox = page.locator('#statistics-collections-list li', { hasText: 'All Islands' }).locator('input[type="checkbox"]');
     await expect(allIslandsCheckbox).not.toBeChecked(); // only A is checked so far (R24 bootstrap)
@@ -108,7 +108,7 @@ test.describe('statistics.html grouped Islands sidebar (U4)', () => {
   });
 
   test('regression: existing Collections-list rendering ("All Islands" first, checkbox visible) is unaffected by the rewiring', async ({ page }) => {
-    await seedIsland(page, 'IslandA', 1, 0);
+    await seedIsland(page, 'IslandA', 1, 0, 999999999);
 
     const collectionRows = page.locator('#statistics-collections-list li');
     await expect(collectionRows).toHaveCount(1);

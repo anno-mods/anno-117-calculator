@@ -17,6 +17,7 @@ function samplePayload(overrides: Partial<{ areaName: string; entries: any[] }> 
     version: 1,
     areaName: overrides.areaName ?? 'Latium',
     // KD3/R1/R2: islandId/areaIndex are the hard identity key - required or the message is dropped.
+    sessionGuid: 3245,
     islandId: 1,
     areaIndex: 0,
     timeStamp: 12345,

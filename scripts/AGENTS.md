@@ -164,7 +164,15 @@ module.exports = { main };
 
 **Prebuild hooks** in package.json:
 - `prebuild`: Runs automatically before `build` command
-- Current prebuild: `npm run generate-sitemap`
+- Current prebuild: `npm run check-base-product-dlc-locks && npm run generate-sitemap`
+
+### check-base-product-dlc-locks.js
+
+**Purpose**: Build gate. Fails `npm run build` (exit 1) when `js/params.js` locks a base-game asset behind a DLC: any asset (product, need, item, effect, ...) that is ungated in `js/params-base.js` but carries `dlcUnlocks` now, or a product with a base-game factory that carries `dlcUnlocks`. `Product.available` and `Need.available` are "any listed DLC checked", so such an asset (and the consumption of a need) disappears for every player without the DLC. A need cannot be judged by its residences: DLC residences have no `dlcUnlocks` either, so only the comparison with `params-base.js` applies to needs.
+
+**Output**: grouped by asset type, one line per asset, `guid english_name dlc_it_locks`, e.g. `2138 Wine DLC03_Dawn_of_Delta(67904)`.
+
+**Fix**: in the asset extractor (see `../asset-extractor/docs/handoff-base-products-dlc-locked.md`), then regenerate `js/params.js`. The detection is in `scripts/lib/dlc-locked-products.js`, shared with `tests/computed/base-products-not-dlc-locked.spec.ts`.
 
 **Adding new prebuild steps**:
 ```json

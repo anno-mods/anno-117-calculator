@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { installMockEventSource } from '../helpers';
+// Messages use sessionGuid 999999999, which resolves to no session, so every island renders in the flat
+// ungrouped list (one <li> per island, no session heading row).
 
 // Binding tests for U5 (Collections/Islands sidebar DOM + click/Ctrl-click wiring) in
 // statistics.html / src/statistics.ts, driven through the shared mock EventSource
@@ -14,7 +16,7 @@ async function seedIsland(page: import('@playwright/test').Page, areaName: strin
   await page.evaluate(({ areaName, islandId, areaIndex }) => {
     const instances = (window as any).__mockEventSourceInstances;
     const instance = instances[instances.length - 1];
-    instance.onmessage({ data: JSON.stringify({ version: 1, areaName, islandId, areaIndex, entries: [] }) });
+    instance.onmessage({ data: JSON.stringify({ version: 1, areaName, islandId, areaIndex, sessionGuid: 999999999, entries: [] }) });
   }, { areaName, islandId, areaIndex });
 }
 
@@ -73,7 +75,7 @@ test.describe('statistics.html Collections/Islands sidebar (U5)', () => {
     await expect(getCheckbox('IslandC')).not.toBeChecked();
 
     const checkedKeys = await page.evaluate(() => (window as any).statisticsView.checkedKeys());
-    expect(checkedKeys).toEqual([{ islandId: 2, areaIndex: 0 }]);
+    expect(checkedKeys).toEqual([{ sessionGuid: 999999999, islandId: 2, areaIndex: 0 }]);
   });
 
   test('happy path (R6): Ctrl-clicking an island checkbox multi-selects without deselecting others', async ({ page }) => {
@@ -91,7 +93,7 @@ test.describe('statistics.html Collections/Islands sidebar (U5)', () => {
 
     const checkedKeys = await page.evaluate(() => (window as any).statisticsView.checkedKeys());
     expect(checkedKeys.sort((a: any, b: any) => a.islandId - b.islandId)).toEqual([
-      { islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }
+      { sessionGuid: 999999999, islandId: 1, areaIndex: 0 }, { sessionGuid: 999999999, islandId: 2, areaIndex: 0 }
     ]);
   });
 
@@ -115,7 +117,7 @@ test.describe('statistics.html Collections/Islands sidebar (U5)', () => {
 
     const checkedKeys = await page.evaluate(() => (window as any).statisticsView.checkedKeys());
     expect(checkedKeys.sort((a: any, b: any) => a.islandId - b.islandId)).toEqual([
-      { islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }
+      { sessionGuid: 999999999, islandId: 1, areaIndex: 0 }, { sessionGuid: 999999999, islandId: 2, areaIndex: 0 }
     ]);
   });
 
@@ -148,7 +150,7 @@ test.describe('statistics.html Collections/Islands sidebar (U5)', () => {
     await expect(islandACheckbox).toBeChecked();
 
     const checkedKeys = await page.evaluate(() => (window as any).statisticsView.checkedKeys());
-    expect(checkedKeys).toEqual([{ islandId: 1, areaIndex: 0 }]);
+    expect(checkedKeys).toEqual([{ sessionGuid: 999999999, islandId: 1, areaIndex: 0 }]);
 
     // "All Islands" row (session-grouping plan, KTD2): clicking it while unchecked (only A is
     // checked so far) checks every arrived island; clicking it again while fully checked is a
@@ -230,7 +232,7 @@ test.describe('statistics.html Collections/Islands sidebar (U5)', () => {
     await expect(islandRows.filter({ hasText: 'IslandB' }).locator('input[type="checkbox"]')).toBeChecked();
     const checkedKeys = await page.evaluate(() => (window as any).statisticsView.checkedKeys());
     expect(checkedKeys.sort((a: any, b: any) => a.islandId - b.islandId)).toEqual([
-      { islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }
+      { sessionGuid: 999999999, islandId: 1, areaIndex: 0 }, { sessionGuid: 999999999, islandId: 2, areaIndex: 0 }
     ]);
   });
 

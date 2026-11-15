@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { installMockEventSource } from '../helpers';
+// Messages use sessionGuid 999999999, which resolves to no session, so every island renders in the flat
+// ungrouped list (one <li> per island, no session heading row).
 
 // Binding tests for the U4 page shell (header, category tabs, dense row table) in
 // statistics.html / src/statistics.ts, driven through the shared mock EventSource
@@ -16,6 +18,7 @@ function samplePayload() {
   return JSON.stringify({
     version: 1,
     areaName: 'Latium',
+    sessionGuid: 999999999,
     islandId: 1,
     areaIndex: 0,
     timeStamp: 1,
@@ -133,7 +136,7 @@ test.describe('statistics.html table (U4: header, tabs, table)', () => {
       (window as any).statisticsFeed.connect();
       const instances = (window as any).__mockEventSourceInstances;
       instances[instances.length - 1].onmessage({
-        data: JSON.stringify({ version: 1, areaName: 'Latium', islandId: 1, areaIndex: 0, entries: [] })
+        data: JSON.stringify({ version: 1, areaName: 'Latium', sessionGuid: 999999999, islandId: 1, areaIndex: 0, entries: [] })
       });
     });
 
@@ -185,6 +188,7 @@ test.describe('statistics.html table (U4: header, tabs, table)', () => {
     const payload = JSON.stringify({
       version: 1,
       areaName: 'Latium',
+      sessionGuid: 999999999,
       islandId: 1,
       areaIndex: 0,
       timeStamp: 1,

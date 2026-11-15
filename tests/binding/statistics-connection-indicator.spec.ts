@@ -11,6 +11,7 @@ function samplePayload() {
   return JSON.stringify({
     version: 1,
     areaName: 'Latium',
+    sessionGuid: 3245,
     islandId: 1,
     areaIndex: 0,
     timeStamp: 1,

@@ -311,7 +311,7 @@
           "type": "object",
           "properties": {
             "warehouse": { "type": "integer" },
-            "spots": { "type": "integer", "minimum": 0 },
+            "tradingSpots": { "type": "integer", "minimum": 0 },
             "item": { "type": "object", "properties": { "item": { "type": "integer" }, "boosted": { "type": "boolean" } } }
           }
         },

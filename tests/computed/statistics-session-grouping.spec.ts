@@ -94,9 +94,9 @@ test.describe('statistics session grouping (U2) and group toggles (U3)', () => {
 
       const result = await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        view.onIslandClick({ islandId: 1, areaIndex: 0 }, true);
-        view.onIslandClick({ islandId: 2, areaIndex: 0 }, true);
-        return view.isGroupChecked([{ islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }])();
+        view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, true);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 2, areaIndex: 0 }, true);
+        return view.isGroupChecked([{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }])();
       });
       expect(result).toBe(true);
     });
@@ -108,12 +108,12 @@ test.describe('statistics session grouping (U2) and group toggles (U3)', () => {
 
       const result = await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        view.onIslandClick({ islandId: 3, areaIndex: 0 }, false); // C checked alone first
-        view.onGroupToggle([{ islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }]);
+        view.onIslandClick({ sessionGuid: 6627, islandId: 3, areaIndex: 0 }, false); // C checked alone first
+        view.onGroupToggle([{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }]);
         return view.checkedKeys().slice().sort((a: any, b: any) => a.islandId - b.islandId);
       });
       expect(result).toEqual([
-        { islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }, { islandId: 3, areaIndex: 0 }
+        { sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }, { sessionGuid: 6627, islandId: 3, areaIndex: 0 }
       ]);
     });
 
@@ -124,13 +124,13 @@ test.describe('statistics session grouping (U2) and group toggles (U3)', () => {
 
       const result = await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        const latiumKeys = [{ islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }];
+        const latiumKeys = [{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }];
         view.onGroupToggle(latiumKeys); // check Latium
-        view.onIslandClick({ islandId: 3, areaIndex: 0 }, true); // also check C
+        view.onIslandClick({ sessionGuid: 6627, islandId: 3, areaIndex: 0 }, true); // also check C
         view.onGroupToggle(latiumKeys); // uncheck Latium again
         return view.checkedKeys().slice();
       });
-      expect(result).toEqual([{ islandId: 3, areaIndex: 0 }]);
+      expect(result).toEqual([{ sessionGuid: 6627, islandId: 3, areaIndex: 0 }]);
     });
 
     test('happy path (AE4): two disjoint groups, and All Islands, can all show checked at once', async ({ page }) => {
@@ -141,9 +141,9 @@ test.describe('statistics session grouping (U2) and group toggles (U3)', () => {
 
       const result = await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        const latiumKeys = [{ islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }];
-        const albionKeys = [{ islandId: 3, areaIndex: 0 }, { islandId: 4, areaIndex: 0 }];
-        const allKeys = view.feed.islands().map((i: any) => ({ islandId: i.islandId(), areaIndex: i.areaIndex() }));
+        const latiumKeys = [{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }];
+        const albionKeys = [{ sessionGuid: 6627, islandId: 3, areaIndex: 0 }, { sessionGuid: 6627, islandId: 4, areaIndex: 0 }];
+        const allKeys = view.feed.islands().map((i: any) => ({ sessionGuid: i.sessionIdentity(), islandId: i.islandId(), areaIndex: i.areaIndex() }));
         view.onGroupToggle(latiumKeys);
         view.onGroupToggle(albionKeys);
         return {
@@ -160,12 +160,12 @@ test.describe('statistics session grouping (U2) and group toggles (U3)', () => {
 
       const result = await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        const keys = [{ islandId: 1, areaIndex: 0 }];
+        const keys = [{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }];
         view.onGroupToggle(keys); // check
         view.onGroupToggle(keys); // attempt to uncheck the only checked island - vetoed
         return view.checkedKeys().slice();
       });
-      expect(result).toEqual([{ islandId: 1, areaIndex: 0 }]);
+      expect(result).toEqual([{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }]);
     });
 
     test('edge case (AE7, KD7): a fully-checked group cannot be unchecked via its own heading, ever', async ({ page }) => {
@@ -174,7 +174,7 @@ test.describe('statistics session grouping (U2) and group toggles (U3)', () => {
 
       const result = await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        const keys = [{ islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }];
+        const keys = [{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }];
         view.onGroupToggle(keys); // check both
         view.onGroupToggle(keys); // attempt uncheck - vetoed, all checked islands are this group's
         const afterFirstAttempt = view.checkedKeys().slice();
@@ -199,9 +199,9 @@ test.describe('statistics session grouping (U2) and group toggles (U3)', () => {
 
       const result = await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        view.collections.push({ id: 'c1', name: 'Iron Triangle', members: [{ islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }] });
+        view.collections.push({ id: 'c1', name: 'Iron Triangle', members: [{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }] });
         view.onCollectionCheck('c1'); // A, B checked, c1 active
-        view.onGroupToggle([{ islandId: 3, areaIndex: 0 }, { islandId: 4, areaIndex: 0 }]); // toggle Albion
+        view.onGroupToggle([{ sessionGuid: 6627, islandId: 3, areaIndex: 0 }, { sessionGuid: 6627, islandId: 4, areaIndex: 0 }]); // toggle Albion
         const collection = view.collections().find((c: any) => c.id === 'c1');
         return {
           activeCollectionId: view.activeCollectionId(),
@@ -210,9 +210,9 @@ test.describe('statistics session grouping (U2) and group toggles (U3)', () => {
         };
       });
       expect(result.activeCollectionId).toBeUndefined();
-      expect(result.collectionMembers).toEqual([{ islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }]);
+      expect(result.collectionMembers).toEqual([{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }]);
       expect(result.checkedKeys).toEqual([
-        { islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }, { islandId: 3, areaIndex: 0 }, { islandId: 4, areaIndex: 0 }
+        { sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }, { sessionGuid: 6627, islandId: 3, areaIndex: 0 }, { sessionGuid: 6627, islandId: 4, areaIndex: 0 }
       ]);
     });
 
@@ -222,15 +222,15 @@ test.describe('statistics session grouping (U2) and group toggles (U3)', () => {
 
       const result = await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false);
         view.createCollection('My Group');
-        view.onIslandClick({ islandId: 2, areaIndex: 0 }, true); // ctrl-click edits active collection in place
+        view.onIslandClick({ sessionGuid: 3245, islandId: 2, areaIndex: 0 }, true); // ctrl-click edits active collection in place
         const collection = view.collections().find((c: any) => c.name === 'My Group');
         return { activeCollectionId: view.activeCollectionId(), members: collection.members };
       });
       expect(result.activeCollectionId).toBe(result.members[0] && result.activeCollectionId); // sanity: still a real id
       expect(result.members.sort((a: any, b: any) => a.islandId - b.islandId)).toEqual([
-        { islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }
+        { sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }
       ]);
     });
   });
@@ -242,7 +242,7 @@ test.describe('statistics session grouping (U2) and group toggles (U3)', () => {
 
       const result = await page.evaluate(async () => {
         const view = (window as any).statisticsView;
-        const allKeysBefore = view.feed.islands().map((i: any) => ({ islandId: i.islandId(), areaIndex: i.areaIndex() }));
+        const allKeysBefore = view.feed.islands().map((i: any) => ({ sessionGuid: i.sessionIdentity(), islandId: i.islandId(), areaIndex: i.areaIndex() }));
         view.onGroupToggle(allKeysBefore); // fully check All Islands
         const checkedBefore = view.checkedKeys().slice();
 
@@ -253,15 +253,15 @@ test.describe('statistics session grouping (U2) and group toggles (U3)', () => {
         return {
           checkedBefore,
           checkedAfter: view.checkedKeys().slice().sort((a: any, b: any) => a.islandId - b.islandId),
-          allIslandsChecked: view.isGroupChecked(view.feed.islands().map((i: any) => ({ islandId: i.islandId(), areaIndex: i.areaIndex() })))()
+          allIslandsChecked: view.isGroupChecked(view.feed.islands().map((i: any) => ({ sessionGuid: i.sessionIdentity(), islandId: i.islandId(), areaIndex: i.areaIndex() })))()
         };
       });
 
       expect(result.checkedBefore.sort((a: any, b: any) => a.islandId - b.islandId)).toEqual([
-        { islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }
+        { sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }
       ]);
       expect(result.checkedAfter).toEqual([
-        { islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }, { islandId: 3, areaIndex: 0 }
+        { sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }, { sessionGuid: 3245, islandId: 3, areaIndex: 0 }
       ]);
       expect(result.allIslandsChecked).toBe(true);
     });
@@ -273,23 +273,23 @@ test.describe('statistics session grouping (U2) and group toggles (U3)', () => {
 
       const result = await page.evaluate(async () => {
         const view = (window as any).statisticsView;
-        const latiumKeys = [{ islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }];
+        const latiumKeys = [{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }];
         view.onGroupToggle(latiumKeys); // fully check Latium only; Albion (3) stays unchecked
 
         const instances = (window as any).__mockEventSourceInstances;
         const instance = instances[instances.length - 1];
         instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'LatiumC', islandId: 4, areaIndex: 0, sessionGuid: 3245, entries: [] }) });
 
-        const newLatiumKeys = [{ islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }, { islandId: 4, areaIndex: 0 }];
+        const newLatiumKeys = [{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }, { sessionGuid: 3245, islandId: 4, areaIndex: 0 }];
         return {
           checkedKeys: view.checkedKeys().slice().sort((a: any, b: any) => a.islandId - b.islandId),
           latiumChecked: view.isGroupChecked(newLatiumKeys)(),
-          albionChecked: view.isGroupChecked([{ islandId: 3, areaIndex: 0 }])()
+          albionChecked: view.isGroupChecked([{ sessionGuid: 6627, islandId: 3, areaIndex: 0 }])()
         };
       });
 
       expect(result.checkedKeys).toEqual([
-        { islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }, { islandId: 4, areaIndex: 0 }
+        { sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }, { sessionGuid: 3245, islandId: 4, areaIndex: 0 }
       ]);
       expect(result.latiumChecked).toBe(true);
       expect(result.albionChecked).toBe(false);
@@ -300,7 +300,7 @@ test.describe('statistics session grouping (U2) and group toggles (U3)', () => {
       await seedMessage(page, 'LatiumB', 2, 0, 3245);
       await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        const allKeys = view.feed.islands().map((i: any) => ({ islandId: i.islandId(), areaIndex: i.areaIndex() }));
+        const allKeys = view.feed.islands().map((i: any) => ({ sessionGuid: i.sessionIdentity(), islandId: i.islandId(), areaIndex: i.areaIndex() }));
         view.onGroupToggle(allKeys);
       });
 
@@ -313,7 +313,7 @@ test.describe('statistics session grouping (U2) and group toggles (U3)', () => {
 
       const result = await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        const allKeys = view.feed.islands().map((i: any) => ({ islandId: i.islandId(), areaIndex: i.areaIndex() }));
+        const allKeys = view.feed.islands().map((i: any) => ({ sessionGuid: i.sessionIdentity(), islandId: i.islandId(), areaIndex: i.areaIndex() }));
         return view.isGroupChecked(allKeys)();
       });
       expect(result).toBe(true);

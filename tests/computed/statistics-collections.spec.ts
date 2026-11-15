@@ -13,7 +13,7 @@ import { installMockEventSource } from '../helpers';
 // silently dropped by StatisticsFeed.handleMessage.
 
 function islandMessage(areaName: string, islandId: number, areaIndex: number) {
-  return JSON.stringify({ version: 1, areaName, islandId, areaIndex, entries: [] });
+  return JSON.stringify({ version: 1, areaName, islandId, areaIndex, sessionGuid: 3245, entries: [] });
 }
 
 test.describe('statistics collections/checked-islands state (U2)', () => {
@@ -29,9 +29,9 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
     await page.evaluate(() => {
       const instances = (window as any).__mockEventSourceInstances;
       const instance = instances[instances.length - 1];
-      instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'IslandA', islandId: 1, areaIndex: 0, entries: [] }) });
-      instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'IslandB', islandId: 2, areaIndex: 0, entries: [] }) });
-      instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'IslandC', islandId: 3, areaIndex: 0, entries: [] }) });
+      instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'IslandA', sessionGuid: 3245, islandId: 1, areaIndex: 0, entries: [] }) });
+      instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'IslandB', sessionGuid: 3245, islandId: 2, areaIndex: 0, entries: [] }) });
+      instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'IslandC', sessionGuid: 3245, islandId: 3, areaIndex: 0, entries: [] }) });
     });
   }
 
@@ -39,64 +39,64 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
     await seedThreeIslands(page);
     const result = await page.evaluate(() => {
       const view = (window as any).statisticsView;
-      view.onIslandClick({ islandId: 2, areaIndex: 0 }, false);
+      view.onIslandClick({ sessionGuid: 3245, islandId: 2, areaIndex: 0 }, false);
       return view.checkedKeys();
     });
-    expect(result).toEqual([{ islandId: 2, areaIndex: 0 }]);
+    expect(result).toEqual([{ sessionGuid: 3245, islandId: 2, areaIndex: 0 }]);
   });
 
   test('happy path (R6): Ctrl-click adds an unchecked island, then removes it again', async ({ page }) => {
     await seedThreeIslands(page);
     const result = await page.evaluate(() => {
       const view = (window as any).statisticsView;
-      view.onIslandClick({ islandId: 1, areaIndex: 0 }, false); // seed with A checked
-      view.onIslandClick({ islandId: 2, areaIndex: 0 }, true); // ctrl-add B
+      view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false); // seed with A checked
+      view.onIslandClick({ sessionGuid: 3245, islandId: 2, areaIndex: 0 }, true); // ctrl-add B
       const afterAdd = view.checkedKeys().slice();
-      view.onIslandClick({ islandId: 2, areaIndex: 0 }, true); // ctrl-remove B
+      view.onIslandClick({ sessionGuid: 3245, islandId: 2, areaIndex: 0 }, true); // ctrl-remove B
       const afterRemove = view.checkedKeys().slice();
       return { afterAdd, afterRemove };
     });
-    expect(result.afterAdd).toEqual([{ islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }]);
-    expect(result.afterRemove).toEqual([{ islandId: 1, areaIndex: 0 }]);
+    expect(result.afterAdd).toEqual([{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }]);
+    expect(result.afterRemove).toEqual([{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }]);
   });
 
   test('happy path (R20): calling the ctrl-branch on a focused/unchecked key adds it without deselecting others', async ({ page }) => {
     await seedThreeIslands(page);
     const result = await page.evaluate(() => {
       const view = (window as any).statisticsView;
-      view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
+      view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false);
       // R20: keyboard activation uses the ctrl-equivalent toggle-in-place path, same as onIslandClick(key, true).
-      view.onIslandClick({ islandId: 3, areaIndex: 0 }, true);
+      view.onIslandClick({ sessionGuid: 3245, islandId: 3, areaIndex: 0 }, true);
       return view.checkedKeys();
     });
-    expect(result).toEqual([{ islandId: 1, areaIndex: 0 }, { islandId: 3, areaIndex: 0 }]);
+    expect(result).toEqual([{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 3, areaIndex: 0 }]);
   });
 
   test('edge case (AE8): a Ctrl-click that would drop the checked count to zero is a no-op', async ({ page }) => {
     await seedThreeIslands(page);
     const result = await page.evaluate(() => {
       const view = (window as any).statisticsView;
-      view.onIslandClick({ islandId: 1, areaIndex: 0 }, false); // only A checked
-      view.onIslandClick({ islandId: 1, areaIndex: 0 }, true); // ctrl-click the only checked island
+      view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false); // only A checked
+      view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, true); // ctrl-click the only checked island
       return view.checkedKeys();
     });
-    expect(result).toEqual([{ islandId: 1, areaIndex: 0 }]); // unchanged - no-op
+    expect(result).toEqual([{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }]); // unchanged - no-op
   });
 
   test('edge case (AE14): checking a collection with no arrived members is a no-op', async ({ page }) => {
     await seedThreeIslands(page);
     const result = await page.evaluate(() => {
       const view = (window as any).statisticsView;
-      view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
+      view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false);
       view.collections.push({
         id: 'ghost-collection',
         name: 'Ghost',
-        members: [{ islandId: 99, areaIndex: 0 }] // never arrived
+        members: [{ sessionGuid: 3245, islandId: 99, areaIndex: 0 }] // never arrived
       });
       view.onCollectionCheck('ghost-collection');
       return { checkedKeys: view.checkedKeys(), activeCollectionId: view.activeCollectionId() };
     });
-    expect(result.checkedKeys).toEqual([{ islandId: 1, areaIndex: 0 }]);
+    expect(result.checkedKeys).toEqual([{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }]);
     expect(result.activeCollectionId).toBeUndefined();
   });
 
@@ -107,19 +107,19 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       view.collections.push({
         id: 'c1',
         name: 'Iron Triangle',
-        members: [{ islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }]
+        members: [{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }]
       });
       view.onCollectionCheck('c1');
-      view.onIslandClick({ islandId: 3, areaIndex: 0 }, true); // ctrl-add C while c1 active
+      view.onIslandClick({ sessionGuid: 3245, islandId: 3, areaIndex: 0 }, true); // ctrl-add C while c1 active
       const collection = view.collections().find((c: any) => c.id === 'c1');
       return { checkedKeys: view.checkedKeys(), members: collection.members, activeCollectionId: view.activeCollectionId() };
     });
     expect(result.activeCollectionId).toBe('c1');
     expect(result.checkedKeys.sort((a: any, b: any) => a.islandId - b.islandId)).toEqual([
-      { islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }, { islandId: 3, areaIndex: 0 }
+      { sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }, { sessionGuid: 3245, islandId: 3, areaIndex: 0 }
     ]);
     expect(result.members.sort((a: any, b: any) => a.islandId - b.islandId)).toEqual([
-      { islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }, { islandId: 3, areaIndex: 0 }
+      { sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }, { sessionGuid: 3245, islandId: 3, areaIndex: 0 }
     ]);
   });
 
@@ -130,19 +130,19 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       view.collections.push({
         id: 'c1',
         name: 'Has Pending',
-        members: [{ islandId: 1, areaIndex: 0 }, { islandId: 99, areaIndex: 0 }] // 99 never arrives
+        members: [{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 99, areaIndex: 0 }] // 99 never arrives
       });
       view.onCollectionCheck('c1'); // only island 1 arrives -> checkedKeys = [1]
-      view.onIslandClick({ islandId: 2, areaIndex: 0 }, true); // ctrl-add B
+      view.onIslandClick({ sessionGuid: 3245, islandId: 2, areaIndex: 0 }, true); // ctrl-add B
       const collection = view.collections().find((c: any) => c.id === 'c1');
       return { checkedKeys: view.checkedKeys(), members: collection.members };
     });
     expect(result.checkedKeys.sort((a: any, b: any) => a.islandId - b.islandId)).toEqual([
-      { islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }
+      { sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }
     ]);
     // Pending member (99) survives untouched, arrived member (1) kept, newly checked (2) added.
     expect(result.members.sort((a: any, b: any) => a.islandId - b.islandId)).toEqual([
-      { islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }, { islandId: 99, areaIndex: 0 }
+      { sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }, { sessionGuid: 3245, islandId: 99, areaIndex: 0 }
     ]);
   });
 
@@ -153,19 +153,19 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       view.collections.push({
         id: 'c1',
         name: 'A B and pending C',
-        members: [{ islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }, { islandId: 99, areaIndex: 0 }]
+        members: [{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }, { sessionGuid: 3245, islandId: 99, areaIndex: 0 }]
       });
       view.onCollectionCheck('c1'); // arrived subset -> checkedKeys = [1, 2]
       // Plain click on a third arrived island D (not in c1) - deselects c1, checks D alone.
-      view.onIslandClick({ islandId: 3, areaIndex: 0 }, false);
+      view.onIslandClick({ sessionGuid: 3245, islandId: 3, areaIndex: 0 }, false);
       const collection = view.collections().find((c: any) => c.id === 'c1');
       return { checkedKeys: view.checkedKeys(), members: collection.members, activeCollectionId: view.activeCollectionId() };
     });
     expect(result.activeCollectionId).toBeUndefined();
-    expect(result.checkedKeys).toEqual([{ islandId: 3, areaIndex: 0 }]);
+    expect(result.checkedKeys).toEqual([{ sessionGuid: 3245, islandId: 3, areaIndex: 0 }]);
     // Membership entirely untouched by the plain click - A(1), B(2), and pending 99 all survive.
     expect(result.members.sort((a: any, b: any) => a.islandId - b.islandId)).toEqual([
-      { islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }, { islandId: 99, areaIndex: 0 }
+      { sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }, { sessionGuid: 3245, islandId: 99, areaIndex: 0 }
     ]);
   });
 
@@ -181,7 +181,7 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
 
     const result = await page.evaluate((allIslandsId) => {
       const view = (window as any).statisticsView;
-      view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
+      view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false);
       const checkedBefore = view.checkedKeys().slice();
       view.onCollectionCheck(allIslandsId);
       const afterCheck = { active: view.activeCollectionId(), checked: view.checkedKeys().slice() };
@@ -200,7 +200,7 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
     await seedThreeIslands(page);
     const result = await page.evaluate(() => {
       const view = (window as any).statisticsView;
-      view.collections.push({ id: 'c1', name: 'Pair', members: [{ islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }] });
+      view.collections.push({ id: 'c1', name: 'Pair', members: [{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }] });
       view.onCollectionCheck('c1');
       const checkedBefore = view.checkedKeys().slice();
       view.onCollectionUncheck('c1');
@@ -217,12 +217,12 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       view.collections.push({
         id: 'c1',
         name: 'Mixed',
-        members: [{ islandId: 2, areaIndex: 0 }, { islandId: 42, areaIndex: 0 }] // 42 never arrives
+        members: [{ sessionGuid: 3245, islandId: 2, areaIndex: 0 }, { sessionGuid: 3245, islandId: 42, areaIndex: 0 }] // 42 never arrives
       });
       view.onCollectionCheck('c1');
       return { checkedKeys: view.checkedKeys(), activeCollectionId: view.activeCollectionId() };
     });
-    expect(result.checkedKeys).toEqual([{ islandId: 2, areaIndex: 0 }]);
+    expect(result.checkedKeys).toEqual([{ sessionGuid: 3245, islandId: 2, areaIndex: 0 }]);
     expect(result.activeCollectionId).toBe('c1');
   });
 
@@ -236,20 +236,20 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
         const instance = instances[instances.length - 1];
         instance.onmessage({
           data: JSON.stringify({
-            version: 1, areaName: 'IslandA', islandId: 1, areaIndex: 0,
+            version: 1, areaName: 'IslandA', sessionGuid: 3245, islandId: 1, areaIndex: 0,
             entries: [{ productGuid: 2138, generation: 10, consumption: 4, perfectGeneration: 20, perfectConsumption: 8, buildings: 3 }]
           })
         });
         instance.onmessage({
           data: JSON.stringify({
-            version: 1, areaName: 'IslandB', islandId: 2, areaIndex: 0,
+            version: 1, areaName: 'IslandB', sessionGuid: 3245, islandId: 2, areaIndex: 0,
             entries: [{ productGuid: 2138, generation: 77, consumption: 33, perfectGeneration: 100, perfectConsumption: 40, buildings: 9 }]
           })
         });
 
         const view = (window as any).statisticsView;
-        view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
-        view.onIslandClick({ islandId: 2, areaIndex: 0 }, true);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 2, areaIndex: 0 }, true);
 
         const row = view.filteredRows().find((r: any) => r.productGuid === 2138);
         return {
@@ -270,7 +270,7 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
         const instance = instances[instances.length - 1];
         instance.onmessage({
           data: JSON.stringify({
-            version: 1, areaName: 'IslandA', islandId: 1, areaIndex: 0,
+            version: 1, areaName: 'IslandA', sessionGuid: 3245, islandId: 1, areaIndex: 0,
             entries: [{ productGuid: 2138, generation: 10, consumption: 4, perfectGeneration: 20, perfectConsumption: 8, buildings: 3 }]
           })
         });
@@ -286,7 +286,7 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
           buildings: oldRow.buildings()
         };
 
-        view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false);
         const newRow = view.filteredRows().find((r: any) => r.productGuid === 2138);
         const newActual = {
           generation: newRow.generation(), consumption: newRow.consumption(),
@@ -307,7 +307,7 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
         const instance = instances[instances.length - 1];
         instance.onmessage({
           data: JSON.stringify({
-            version: 1, areaName: 'IslandA', islandId: 1, areaIndex: 0,
+            version: 1, areaName: 'IslandA', sessionGuid: 3245, islandId: 1, areaIndex: 0,
             entries: [
               { productGuid: 2138, generation: 10, consumption: 4, perfectGeneration: 20, perfectConsumption: 8, buildings: 3 },
               { productGuid: 2137, generation: 6, consumption: 2, perfectGeneration: 12, perfectConsumption: 4, buildings: 2 }
@@ -316,14 +316,14 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
         });
         instance.onmessage({
           data: JSON.stringify({
-            version: 1, areaName: 'IslandB', islandId: 2, areaIndex: 0,
+            version: 1, areaName: 'IslandB', sessionGuid: 3245, islandId: 2, areaIndex: 0,
             entries: [{ productGuid: 2138, generation: 77, consumption: 33, perfectGeneration: 100, perfectConsumption: 40, buildings: 9 }]
           })
         });
 
         const view = (window as any).statisticsView;
-        view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
-        view.onIslandClick({ islandId: 2, areaIndex: 0 }, true);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 2, areaIndex: 0 }, true);
 
         const rows = view.filteredRows();
         const breadRows = rows.filter((r: any) => r.productGuid === 2137);
@@ -355,7 +355,7 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
         const instance = instances[instances.length - 1];
         instance.onmessage({
           data: JSON.stringify({
-            version: 1, areaName: 'IslandA', islandId: 1, areaIndex: 0,
+            version: 1, areaName: 'IslandA', sessionGuid: 3245, islandId: 1, areaIndex: 0,
             entries: [
               { productGuid: 2138, generation: 10, consumption: 4, perfectGeneration: 20, perfectConsumption: 8, buildings: 3 },
               { productGuid: 2137, generation: 6, consumption: 2, perfectGeneration: 12, perfectConsumption: 4, buildings: 2 }
@@ -364,7 +364,7 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
         });
 
         const view = (window as any).statisticsView;
-        view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false);
 
         const before = view.filteredRows();
         const wineRowBefore = before.find((r: any) => r.productGuid === 2138);
@@ -373,7 +373,7 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
         // Only Wine's (2138) values change on this tick - Bread (2137) is untouched.
         instance.onmessage({
           data: JSON.stringify({
-            version: 1, areaName: 'IslandA', islandId: 1, areaIndex: 0,
+            version: 1, areaName: 'IslandA', sessionGuid: 3245, islandId: 1, areaIndex: 0,
             entries: [
               { productGuid: 2138, generation: 99, consumption: 44, perfectGeneration: 20, perfectConsumption: 8, buildings: 3 },
               { productGuid: 2137, generation: 6, consumption: 2, perfectGeneration: 12, perfectConsumption: 4, buildings: 2 }
@@ -430,11 +430,11 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
 
         const view = (window as any).statisticsView;
 
-        view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
+        view.onIslandClick({ sessionGuid: s0, islandId: 1, areaIndex: 0 }, false);
         const singleAreaName = view.areaName();
         const singleSessionInfo = view.sessionInfo();
 
-        view.onIslandClick({ islandId: 2, areaIndex: 0 }, true);
+        view.onIslandClick({ sessionGuid: s0, islandId: 2, areaIndex: 0 }, true);
         const multiAreaName = view.areaName();
         const multiSessionInfo = view.sessionInfo();
 
@@ -459,20 +459,20 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
         const instance = instances[instances.length - 1];
         instance.onmessage({
           data: JSON.stringify({
-            version: 1, areaName: 'IslandA', islandId: 1, areaIndex: 0,
+            version: 1, areaName: 'IslandA', sessionGuid: 3245, islandId: 1, areaIndex: 0,
             entries: [{ productGuid: 2138, generation: 10, consumption: 4, perfectGeneration: 20, perfectConsumption: 8, buildings: 3 }]
           })
         });
         instance.onmessage({
           data: JSON.stringify({
-            version: 1, areaName: 'IslandB', islandId: 2, areaIndex: 0,
+            version: 1, areaName: 'IslandB', sessionGuid: 3245, islandId: 2, areaIndex: 0,
             entries: [{ productGuid: 999999999, generation: 3, consumption: 1, perfectGeneration: 10, perfectConsumption: 10, buildings: 1 }]
           })
         });
 
         const view = (window as any).statisticsView;
-        view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
-        view.onIslandClick({ islandId: 2, areaIndex: 0 }, true);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 2, areaIndex: 0 }, true);
 
         return view.categories();
       });
@@ -488,8 +488,8 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
     await seedThreeIslands(page);
     const result = await page.evaluate(() => {
       const view = (window as any).statisticsView;
-      view.collections.push({ id: 'a', name: 'A', members: [{ islandId: 1, areaIndex: 0 }] });
-      view.collections.push({ id: 'b', name: 'B', members: [{ islandId: 2, areaIndex: 0 }] });
+      view.collections.push({ id: 'a', name: 'A', members: [{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }] });
+      view.collections.push({ id: 'b', name: 'B', members: [{ sessionGuid: 3245, islandId: 2, areaIndex: 0 }] });
       view.onCollectionCheck('a');
       const activeAfterA = view.activeCollectionId();
       view.onCollectionCheck('b');
@@ -499,9 +499,9 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
     });
     expect(result.activeAfterA).toBe('a');
     expect(result.activeAfterB).toBe('b');
-    expect(result.checkedAfterB).toEqual([{ islandId: 2, areaIndex: 0 }]);
+    expect(result.checkedAfterB).toEqual([{ sessionGuid: 3245, islandId: 2, areaIndex: 0 }]);
     // R9's switch to B must not corrupt A's own stored membership.
-    expect(result.collectionAMembers).toEqual([{ islandId: 1, areaIndex: 0 }]);
+    expect(result.collectionAMembers).toEqual([{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }]);
   });
 
   // U4 of the plan: createCollection/deleteCollection CRUD, and localStorage persistence/restore
@@ -513,8 +513,8 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       await seedThreeIslands(page);
       const result = await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
-        view.onIslandClick({ islandId: 2, areaIndex: 0 }, true);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 2, areaIndex: 0 }, true);
         const checkedBefore = view.checkedKeys().slice();
         view.createCollection('My Pair');
         const collections = view.collections();
@@ -531,7 +531,7 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       expect(result.newCollection.name).toBe('My Pair');
       expect(result.newCollection.id).toBe(result.activeCollectionId);
       expect(result.newCollection.members.sort((a: any, b: any) => a.islandId - b.islandId)).toEqual([
-        { islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }
+        { sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }
       ]);
     });
 
@@ -539,10 +539,10 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       await seedThreeIslands(page);
       const result = await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false);
         view.createCollection('Same Name');
         const firstId = view.activeCollectionId();
-        view.onIslandClick({ islandId: 2, areaIndex: 0 }, false);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 2, areaIndex: 0 }, false);
         view.createCollection('Same Name');
         const secondId = view.activeCollectionId();
         return { firstId, secondId, collections: view.collections() };
@@ -557,7 +557,7 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       await seedThreeIslands(page);
       const result = await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false);
         const activeBefore = view.activeCollectionId();
         view.createCollection('   ');
         return { activeAfter: view.activeCollectionId(), collections: view.collections(), activeBefore };
@@ -581,8 +581,8 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       await seedThreeIslands(page);
       const result = await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
-        view.onIslandClick({ islandId: 2, areaIndex: 0 }, true);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 2, areaIndex: 0 }, true);
         view.createCollection('ToDelete');
         const id = view.activeCollectionId();
         const checkedBefore = view.checkedKeys().slice();
@@ -603,10 +603,10 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       await seedThreeIslands(page);
       const result = await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false);
         view.createCollection('Collection A');
         const idA = view.activeCollectionId();
-        view.onIslandClick({ islandId: 2, areaIndex: 0 }, false);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 2, areaIndex: 0 }, false);
         view.createCollection('Collection B');
         const idB = view.activeCollectionId();
         const checkedBefore = view.checkedKeys().slice();
@@ -631,11 +631,11 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       const result = await page.evaluate(() => {
         const instances = (window as any).__mockEventSourceInstances;
         const instance = instances[instances.length - 1];
-        instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'IslandA', islandId: 1, areaIndex: 0, entries: [] }) });
+        instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'IslandA', sessionGuid: 3245, islandId: 1, areaIndex: 0, entries: [] }) });
         const view = (window as any).statisticsView;
         return { checkedKeys: view.checkedKeys(), activeCollectionId: view.activeCollectionId() };
       });
-      expect(result.checkedKeys).toEqual([{ islandId: 1, areaIndex: 0 }]);
+      expect(result.checkedKeys).toEqual([{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }]);
       expect(result.activeCollectionId).toBeUndefined();
     });
 
@@ -643,8 +643,8 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       await seedThreeIslands(page);
       await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
-        view.onIslandClick({ islandId: 2, areaIndex: 0 }, true);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 2, areaIndex: 0 }, true);
         view.createCollection('Persisted Pair');
       });
 
@@ -671,7 +671,7 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
         return { checkedKeys: view.checkedKeys(), activeCollectionId: view.activeCollectionId() };
       });
       expect(afterArrival.checkedKeys.sort((a: any, b: any) => a.islandId - b.islandId)).toEqual([
-        { islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }
+        { sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }
       ]);
       expect(afterArrival.activeCollectionId).toBe(beforeArrival.activeCollectionId);
     });
@@ -680,7 +680,7 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       await seedThreeIslands(page);
       await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false);
         view.createCollection('Never Arrives');
       });
 
@@ -702,9 +702,9 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       await seedThreeIslands(page);
       await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
-        view.onIslandClick({ islandId: 2, areaIndex: 0 }, true);
-        view.onIslandClick({ islandId: 3, areaIndex: 0 }, true); // A, B, C all checked - the entire known set
+        view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 2, areaIndex: 0 }, true);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 3, areaIndex: 0 }, true); // A, B, C all checked - the entire known set
       });
 
       await installMockEventSource(page);
@@ -718,11 +718,11 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       const afterRestore = await page.evaluate(() => {
         const instances = (window as any).__mockEventSourceInstances;
         const instance = instances[instances.length - 1];
-        instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'IslandA', islandId: 1, areaIndex: 0, entries: [] }) });
-        instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'IslandB', islandId: 2, areaIndex: 0, entries: [] }) });
-        instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'IslandC', islandId: 3, areaIndex: 0, entries: [] }) });
+        instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'IslandA', sessionGuid: 3245, islandId: 1, areaIndex: 0, entries: [] }) });
+        instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'IslandB', sessionGuid: 3245, islandId: 2, areaIndex: 0, entries: [] }) });
+        instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'IslandC', sessionGuid: 3245, islandId: 3, areaIndex: 0, entries: [] }) });
         const view = (window as any).statisticsView;
-        const allKeys = view.feed.islands().map((i: any) => ({ islandId: i.islandId(), areaIndex: i.areaIndex() }));
+        const allKeys = view.feed.islands().map((i: any) => ({ sessionGuid: i.sessionIdentity(), islandId: i.islandId(), areaIndex: i.areaIndex() }));
         return { activeCollectionId: view.activeCollectionId(), allIslandsChecked: view.isGroupChecked(allKeys)() };
       });
       expect(afterRestore.activeCollectionId).toBeUndefined();
@@ -737,12 +737,12 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       const afterD = await page.evaluate(() => {
         const instances = (window as any).__mockEventSourceInstances;
         const instance = instances[instances.length - 1];
-        instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'IslandD', islandId: 4, areaIndex: 0, entries: [] }) });
+        instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'IslandD', sessionGuid: 3245, islandId: 4, areaIndex: 0, entries: [] }) });
         const view = (window as any).statisticsView;
         return view.checkedKeys().slice().sort((a: any, b: any) => a.islandId - b.islandId);
       });
       expect(afterD).toEqual([
-        { islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }, { islandId: 3, areaIndex: 0 }
+        { sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }, { sessionGuid: 3245, islandId: 3, areaIndex: 0 }
       ]);
 
       // Once the user explicitly re-expresses "select everything" in the new session (onGroupToggle
@@ -750,19 +750,19 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       // arm growth), a further new arrival E does auto-join.
       const afterGrow = await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        const allKeysBeforeE = view.feed.islands().map((i: any) => ({ islandId: i.islandId(), areaIndex: i.areaIndex() }));
-        view.onIslandClick({ islandId: 1, areaIndex: 0 }, true); // ctrl-uncheck A, breaking "fully checked"
+        const allKeysBeforeE = view.feed.islands().map((i: any) => ({ sessionGuid: i.sessionIdentity(), islandId: i.islandId(), areaIndex: i.areaIndex() }));
+        view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, true); // ctrl-uncheck A, breaking "fully checked"
         view.onGroupToggle(allKeysBeforeE); // re-select everything currently known - arms growth
 
         const instances = (window as any).__mockEventSourceInstances;
         const instance = instances[instances.length - 1];
-        instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'IslandE', islandId: 5, areaIndex: 0, entries: [] }) });
+        instance.onmessage({ data: JSON.stringify({ version: 1, areaName: 'IslandE', sessionGuid: 3245, islandId: 5, areaIndex: 0, entries: [] }) });
         const feedView = (window as any).statisticsView;
         return feedView.checkedKeys().slice().sort((a: any, b: any) => a.islandId - b.islandId);
       });
       expect(afterGrow).toEqual([
-        { islandId: 1, areaIndex: 0 }, { islandId: 2, areaIndex: 0 }, { islandId: 3, areaIndex: 0 },
-        { islandId: 4, areaIndex: 0 }, { islandId: 5, areaIndex: 0 }
+        { sessionGuid: 3245, islandId: 1, areaIndex: 0 }, { sessionGuid: 3245, islandId: 2, areaIndex: 0 }, { sessionGuid: 3245, islandId: 3, areaIndex: 0 },
+        { sessionGuid: 3245, islandId: 4, areaIndex: 0 }, { sessionGuid: 3245, islandId: 5, areaIndex: 0 }
       ]);
     });
 
@@ -770,7 +770,7 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       await seedThreeIslands(page);
       await page.evaluate(() => {
         const view = (window as any).statisticsView;
-        view.onIslandClick({ islandId: 1, areaIndex: 0 }, false);
+        view.onIslandClick({ sessionGuid: 3245, islandId: 1, areaIndex: 0 }, false);
         view.createCollection('Shape Check');
       });
       const raw = await page.evaluate((key) => localStorage.getItem(key), STORAGE_KEY);
@@ -778,9 +778,9 @@ test.describe('statistics collections/checked-islands state (U2)', () => {
       const parsed = JSON.parse(raw as string);
       expect(Array.isArray(parsed.collections)).toBe(true);
       expect(parsed.collections[0]).toEqual(
-        expect.objectContaining({ id: expect.any(String), name: 'Shape Check', members: [{ islandId: 1, areaIndex: 0 }] })
+        expect.objectContaining({ id: expect.any(String), name: 'Shape Check', members: [{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }] })
       );
-      expect(parsed.active).toEqual({ collectionId: parsed.collections[0].id, checked: [{ islandId: 1, areaIndex: 0 }] });
+      expect(parsed.active).toEqual({ collectionId: parsed.collections[0].id, checked: [{ sessionGuid: 3245, islandId: 1, areaIndex: 0 }] });
     });
   });
 });

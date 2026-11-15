@@ -71,6 +71,7 @@ test.describe('Monument effect adds a need (Amphitheatre Splendour IV -> Bread f
     const LIBERTI_RESIDENCE_GUID = 3087;
     const LIBERTI_POPULATION_LEVEL_GUID = 1499;
     const BREAD_PRODUCT_GUID = 2137;
+    const BREAD_NEED_GUID = 2689;
 
     test.beforeEach(async ({ page }) => {
         const configLoader = new ConfigLoader();
@@ -106,19 +107,26 @@ test.describe('Monument effect adds a need (Amphitheatre Splendour IV -> Bread f
 
     // Target behaviour: Bread is a conditional need for Liberti - consumed ONLY while the amphitheatre
     // effect is active. params.js emits need 2689 (Bread) as a single gated entry on residence 3087
-    // (needConsumptionRate 0.0215, requiresItem 159339), so Bread demand is 0 until the effect is on.
-    test('gates the Bread need: off -> no demand, on -> > 2 t/min', async ({ page }) => {
+    // (requiresItem 159339), so Bread demand is 0 until the effect is on. The rate changed with game
+    // patches (0.0215 until GU 2.0.1, 0.016185 since), so the expectation reads it from params.
+    test('gates the Bread need: off -> no demand, on -> constructed buildings * need rate', async ({ page }) => {
         const off = await page.evaluate((productGuid) => {
             const island = (window as any).view.island();
             return island.assetsMap.get(productGuid).totalDemand();
         }, BREAD_PRODUCT_GUID);
         expect(off).toBe(0);
 
-        const on = await page.evaluate(({ effectGuid, productGuid }) => {
+        const on = await page.evaluate(({ effectGuid, productGuid, residenceGuid, needGuid }) => {
             const island = (window as any).view.island();
             island.assetsMap.get(effectGuid).scaling(1);
-            return island.assetsMap.get(productGuid).totalDemand();
-        }, { effectGuid: AMPHITHEATRE_IV_EFFECT_GUID, productGuid: BREAD_PRODUCT_GUID });
-        expect(on).toBeGreaterThan(2);
+            const residence = (window as any).params.residenceBuildings.find((r: any) => r.guid === residenceGuid);
+            const entry = residence.needsList.find((n: any) => n.need === needGuid);
+            return {
+                demand: island.assetsMap.get(productGuid).totalDemand(),
+                expected: island.assetsMap.get(residenceGuid).buildings.constructed() * entry.needConsumptionRate,
+            };
+        }, { effectGuid: AMPHITHEATRE_IV_EFFECT_GUID, productGuid: BREAD_PRODUCT_GUID, residenceGuid: LIBERTI_RESIDENCE_GUID, needGuid: BREAD_NEED_GUID });
+        expect(on.expected).toBeGreaterThan(0);
+        expect(on.demand).toBeCloseTo(on.expected, 4);
     });
 });

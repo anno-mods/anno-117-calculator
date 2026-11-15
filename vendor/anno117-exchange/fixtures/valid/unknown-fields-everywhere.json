@@ -545,7 +545,7 @@
         }
       ],
       "harbour": {
-        "spots": 3,
+        "tradingSpots": 3,
         "unknownKey": {
           "nested": [
             1,

@@ -247,7 +247,7 @@ test.describe('exchange reader (U4)', () => {
             history: [],
             live: {},
             settings: { map: { size: 'x' }, dlcs: [1] },
-            islands: [{ id: 'a', population: { '1': 5 }, harbour: { spots: 2 }, layout: {} }],
+            islands: [{ id: 'a', population: { '1': 5 }, harbour: { tradingSpots: 2 }, layout: {} }],
         };
         const ok = asOk(await read(page, JSON.stringify(doc)));
         const byPointer = new Map(ok.unknown.map((u) => [u.pointer, u]));

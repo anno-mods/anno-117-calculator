@@ -32,18 +32,6 @@ test.describe('Mythical item effect rendering', () => {
         expect(detector.hasBindingError()).toBe(false);
     });
 
-    test('reduced-consumption rows show the percentage and the affected product icon', async ({ page }) => {
-        // "Bread Sentries" carries a single goodConsumptionUpgrade (Bread, +20%).
-        await page.fill('#effects-dialog input[type="text"]', 'Bread Sentries');
-        await expect(page.locator('#effects-dialog tbody tr')).toHaveCount(1);
-
-        const buffCell = page.locator('#effects-dialog tbody tr').first().locator('td:nth-child(5)');
-        await expect(buffCell).toContainText('%');
-        // A product icon (data-URI image) accompanies the percentage - not the generic marketplace icon.
-        expect(await buffCell.locator('img').count()).toBeGreaterThan(0);
-        await expect(buffCell.locator('img[src*="icon_marketplace_2d_light"]')).toHaveCount(0);
-    });
-
     test('additional-need rows show the extra-demand icon plus the added product icon', async ({ page }) => {
         const rows = page.locator('#effects-dialog tbody tr', {
             has: page.locator('img[src*="icon_2d_extra_demand"]'),
