@@ -1,17 +1,17 @@
+import { NILE_FLOOD_EFFECT, VOLCANO_EFFECTS } from "./exchange/discoveries";
+
 /**
- * Effects that are switched in the Permanent effects group of the factory dialog and nowhere else: the Egyptian
- * seasons (Shemu / Achet) and the three DLC 3 soil effects (sesame, olives, gold fertility). The Effects dialog
- * does not list them; `params.js` carries no flag for this, so the set is named here.
+ * Effects that the Effects dialog does not list. They show in the Permanent effects group of the factory dialog:
+ * - the Egyptian harvest season Shemu / Achet (`NILE_FLOOD_EFFECT`), switched on with its DLC by `DlcSettings`;
+ * - the three volcano effects (Obsidian gathering, Obsidian mining, fertile soil), whose scale is the volcano level
+ *   of the settings dialog.
+ * No row has a switch; a row exists while the effect is on. `params.js` carries no flag for this, so the set is named here.
  */
-export const HARVEST_SEASON_EFFECT = 155616;
+export const HARVEST_SEASON_EFFECT: number = NILE_FLOOD_EFFECT;
 
-export const PERMANENT_ONLY_EFFECTS: ReadonlySet<number> = new Set([
-    HARVEST_SEASON_EFFECT, // Effect Positive Harvest Season Productivity (Shemu / Achet)
-    183157, // TechEffect Production SesameFertility
-    183161, // TechEffect Production Olives Fertility
-    185454, // TechEffect Fertility Gold DLC03
-]);
+const HIDDEN_FROM_EFFECTS_DIALOG: ReadonlySet<number> = new Set([HARVEST_SEASON_EFFECT, ...VOLCANO_EFFECTS]);
 
+/** True for effects that are listed in the Permanent effects group only. */
 export function isPermanentOnlyEffect(guid: number): boolean {
-    return PERMANENT_ONLY_EFFECTS.has(guid);
+    return HIDDEN_FROM_EFFECTS_DIALOG.has(guid);
 }

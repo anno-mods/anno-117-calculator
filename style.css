@@ -1385,3 +1385,11 @@ right connector from last child*/
     background: #e6ebf0;
     color: #1c2530;
 }
+
+.boost-group-permanent table td:first-child {
+    padding-left: 0;
+}
+
+.boost-group-permanent .inline-list-centered {
+    justify-content: flex-start;
+}
