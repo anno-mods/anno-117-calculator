@@ -16,6 +16,7 @@ export interface RouteDoc {
 }
 
 export const IDS: Record<string, string> = { Roma: 'a1', Ostia: 'a2', Cumae: 'a3' };
+const idOf = (name: string) => IDS[name] ?? 'a' + name.slice(1);
 
 export const slot = (product: number, mode: string, i = 0, amount = 50) => ({ product, mode, slot: i, amount });
 export const ship = (slots = 4, count = 1) => ({ type: 1, slots, count });
@@ -50,8 +51,8 @@ export async function loadRouteDoc(
         name,
         session: LATIUM,
         data: {
-            'exchange.islandId': IDS[name],
-            ...(doc.minimum?.[IDS[name]] ? { 'exchange.ext': { minimumStock: doc.minimum[IDS[name]] } } : {}),
+            'exchange.islandId': idOf(name),
+            ...(doc.minimum?.[idOf(name)] ? { 'exchange.ext': { minimumStock: doc.minimum[idOf(name)] } } : {}),
         },
     }));
     const config = cl.createFullConfig(islands, {}, opts.active ?? islandNames[0]);

@@ -117,8 +117,12 @@ export class TradeRoute implements Supplier {
             const siblings = window.view.tradeManager.routes()
                 .filter((r: TradeRoute) => r !== this && r.from === this.from && r.product.guid === this.product.guid)
                 .map((r: TradeRoute) => ({ label: `${r.from.name()} → ${r.to.name()}`, rate: r.currentProduction() }));
+            const destRates = window.view.tradeManager.routes()
+                .filter((r: TradeRoute) => r.to === this.to && r.product.guid === this.product.guid)
+                .map((r: TradeRoute) => r.currentProduction());
             return computeIndicators({
                 analysis,
+                destRates,
                 source: exchangeIdOf(this.from),
                 dest: exchangeIdOf(this.to),
                 product: this.product.guid,

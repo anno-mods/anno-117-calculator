@@ -117,7 +117,7 @@ const DOCUMENT_SHAPE = obj(
             routes: arr(
                 obj(
                     {
-                        id: STR,
+                        id: prim("any"),
                         name: STR,
                         manual: BOOL,
                         stations: arr(

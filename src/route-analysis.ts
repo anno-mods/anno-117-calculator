@@ -157,6 +157,11 @@ export class RouteAnalysis {
         return this.pairs.get(pairKey(source, dest, product));
     }
 
+    /** Pair evidences of every source that serves the destination with the product. */
+    evidenceToDest(dest: string, product: number): PairEvidence[] {
+        return [...this.pairs.values()].filter((p) => p.dest === dest && p.product === product);
+    }
+
     /** All pair evidences a game route contributes to. */
     pairsOfRoute(routeId: string): PairEvidence[] {
         return this.byRoute.get(routeId) ?? [];
@@ -228,6 +233,13 @@ export class RouteAnalysis {
                 const totals = stops.map((s) => [...s.amounts.values()].reduce((a, b) => a + b, 0));
                 // The same island at several stops: the outcome must not differ between the mappings (AE3).
                 if (totals.some((t) => !sameNumber(t, totals[0]))) ev.reason = 'ambiguous';
+                // Stops of the route at the destination island that unload the product, whichever source serves them.
+                // Visits carry no station index, so with n such stops the gap between two visits of the same stop is the
+                // sum of n consecutive inter-visit gaps.
+                const destStops = (parsed?.stops ?? []).filter((s) => s.island === g.dest && s.slots.some((sl) => sl.product === g.product && sl.mode === 'unload'));
+                const destTotals = destStops.map((s) => s.slots.filter((sl) => sl.product === g.product && sl.mode === 'unload').reduce((a, sl) => a + (typeof sl.amount === 'number' ? sl.amount : 0), 0));
+                if (destTotals.some((t) => !sameNumber(t, destTotals[0]))) ev.reason = 'ambiguous';
+                const perCircuit = Math.max(1, destStops.length);
                 ev.relay = stops.some((s) => s.stop.slots.some((sl) => sl.product === g.product && sl.mode === 'load'));
 
                 if (!ev.reason) {
@@ -237,7 +249,8 @@ export class RouteAnalysis {
                         const unloadAtStop = stop.slots.filter((sl) => sl.mode === 'unload').reduce((a, sl) => a + (typeof sl.amount === 'number' ? sl.amount : 0), 0);
                         const cap = shipCapacity(route, unloadAtStop, totals[0], slotSize);
                         if (cap === undefined) ev.reason = 'ship';
-                        else ev.capacity = cap;
+                        // Every stop of the route at the destination is visited once per circuit; the gap below is the circuit gap.
+                        else ev.capacity = cap * stops.length;
                     }
                 }
 
@@ -247,8 +260,10 @@ export class RouteAnalysis {
                 const times = [...new Set(visits.map((v) => v.time).filter((t): t is number => typeof t === 'number' && Number.isFinite(t)))].sort((a, b) => a - b);
                 const gaps: number[] = [];
                 for (let i = 1; i < times.length; i++) gaps.push((times[i] - times[i - 1]) / MS_PER_MINUTE);
-                ev.gapCount = gaps.length;
-                if (gaps.length >= MIN_GAPS) ev.gapMinutes = Math.max(...gaps.slice(-GAP_WINDOW));
+                const windows: number[] = [];
+                for (let i = 0; i + perCircuit <= gaps.length; i++) windows.push(gaps.slice(i, i + perCircuit).reduce((a, b) => a + b, 0));
+                ev.gapCount = windows.length;
+                if (windows.length >= MIN_GAPS) ev.gapMinutes = Math.max(...windows.slice(-GAP_WINDOW));
                 else ev.reason = ev.reason ?? 'gaps';
 
                 if (!ev.relay) {
@@ -302,6 +317,8 @@ export interface IndicatorInput {
     rate: number;
     /** Other calculator routes loading the product at the same source island: label and rate. */
     siblings: { label: string; rate: number }[];
+    /** Rates of every calculator route that supplies the destination with the product, this one included. */
+    destRates: number[];
 }
 
 const NONE: RouteIndicators = { available: false, reason: 'no-evidence', gameRoutes: 0, red: false, competing: [] };
@@ -312,20 +329,24 @@ export function computeIndicators(input: IndicatorInput): RouteIndicators {
     const ev = analysis.evidence(source, dest, product);
     if (!ev || ev.routes.length === 0) return { ...NONE };
 
-    const bad = ev.routes.find((r) => r.reason);
+    // Every game route that serves the destination with the product is combined before the red state is decided (R10),
+    // whichever source island it loads at.
+    const served = analysis.evidenceToDest(dest, product).flatMap((p) => p.routes);
+    const bad = served.find((r) => r.reason);
     if (bad) return { ...NONE, reason: bad.reason as Reason, gameRoutes: ev.routes.length };
 
-    const gap = Math.max(...ev.routes.map((r) => r.gapMinutes as number));
-    const capacity = ev.routes.reduce((a, r) => a + (r.capacity as number), 0);
+    const gap = Math.max(...served.map((r) => r.gapMinutes as number));
+    const capacity = served.reduce((a, r) => a + (r.capacity as number), 0);
     const required = Math.max(0, rate) * gap;
+    const totalRequired = input.destRates.reduce((a, r) => a + Math.max(0, r), 0) * gap;
     const ind: RouteIndicators = {
         available: true,
         requiredOffload: required,
         capacity,
-        utilization: capacity > 0 ? (required / capacity) * 100 : undefined,
+        utilization: capacity > 0 ? (totalRequired / capacity) * 100 : undefined,
         gapMinutes: gap,
         gameRoutes: ev.routes.length,
-        red: capacity > 0 ? required > capacity + EPS : required > EPS,
+        red: capacity > 0 ? totalRequired > capacity + EPS : totalRequired > EPS,
         competing: [],
     };
     const unloads = ev.routes.map((r) => r.actualUnload);

@@ -179,6 +179,39 @@ test.describe('route indicators (U2)', () => {
         expect(r.actualUnload).toBeUndefined();
     });
 
+    test('AE2: game routes from different sources to one destination are combined before red is decided', async ({ page }) => {
+        await load(
+            page,
+            { routes: [simpleRoute(1, 'a1', 'a3'), simpleRoute(2, 'a2', 'a3')], visits: [...visitsAt(1, 'a3', GAPS), ...visitsAt(2, 'a3', GAPS)] },
+            [{ from: 'Roma', to: 'Cumae', amount: 3 }, { from: 'Ostia', to: 'Cumae', amount: 0.1 }],
+        );
+        const a = await ind(page, 0);
+        const b = await ind(page, 1);
+        expect(a.capacity).toBeCloseTo(100, 6);
+        expect(a.requiredOffload).toBeCloseTo(60, 6); // alone this is over the 50 t of its own game route
+        expect(a.utilization).toBeCloseTo(62, 6);
+        expect(a.red).toBe(false);
+        expect(b.red).toBe(false);
+    });
+
+    test('AE3: an island visited at two equal stops uses the gap between visits of the same stop', async ({ page }) => {
+        const route = {
+            id: 66,
+            stations: [
+                { island: 'a1', slots: [slot(BREAD, 'load', 0, 50)] },
+                { island: 'a2', slots: [slot(BREAD, 'unload', 0, 50)] },
+                { island: 'a1', slots: [slot(BREAD, 'load', 0, 50)] },
+                { island: 'a2', slots: [slot(BREAD, 'unload', 0, 50)] },
+            ],
+            ships: [ship()],
+        };
+        // gaps 10, 10, 20, 10, 10 -> sums of two consecutive gaps: 20, 30, 30, 20
+        await load(page, { routes: [route], visits: visitsAt(66, 'a2', [0, 10, 20, 40, 50, 60]) }, [{ ...R, amount: 1 }]);
+        const r = await ind(page);
+        expect(r.available).toBe(true);
+        expect(r.gapMinutes).toBeCloseTo(30, 6);
+    });
+
     test('AE1: zero demand and empty storage never shows yellow', async ({ page }) => {
         const history = [{ island: 'a2', product: BREAD, kind: 'storage', clock: 'game', unit: 't', start: 0, step: 600100, values: [0, 0, 0, 0] }];
         await load(page, { routes: [simpleRoute(51, 'a1', 'a2')], visits: visitsAt(51, 'a2', GAPS, 0), history }, [{ ...R, amount: 0 }]);
