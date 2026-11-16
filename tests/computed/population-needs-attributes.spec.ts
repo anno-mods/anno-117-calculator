@@ -35,7 +35,7 @@ const describeLevel = (page: Page, levelGuid: number) => page.evaluate((guid) =>
             guid: n.guid,
             residents: n.residents(),
             residentsPerResidence: n.residentsPerResidence,
-            cells: n.cells().map((c: any) => ({ id: c.attribute.id, value: c.value, isPopulation: c.isPopulation, text: c.text() })),
+            cells: n.cells().map((c: any) => ({ id: c.attribute.id, value: c.value, total: c.total(), isPopulation: c.isPopulation, text: c.text() })),
             weight: n.supplyWeight,
             dlcNames: n.dlcs.map((d: any) => d.name()),
             buildings: n.supplyBuildings().map((b: any) => ({ guid: b.guid, name: b.name() })),
@@ -104,6 +104,31 @@ test.describe('needs table columns (U7)', () => {
             expect(cell, `need ${need.guid}`).toBeDefined();
             expect(need.residents).toBeGreaterThan(0);
         }
+    });
+
+    test('every cell holds the total over the residences, the raw value stays on the cell, and the totals row sums them', async ({ page }) => {
+        await loadIsland(page);
+        const level = (await levelsOfIsland(page))[0];
+        const constructed = 7;
+        await page.evaluate(({ guid, n }) => {
+            for (const r of (window as any).view.island().populationLevels.find((l: any) => l.guid === guid).allResidences()) r.buildings.constructed(n);
+        }, { guid: level, n: constructed });
+        const d = await describeLevel(page, level);
+        let nonPopulation = 0;
+        for (const need of d.needs) {
+            for (const cell of need.cells) {
+                expect(cell.value, `need ${need.guid} ${cell.id}`).toBe(need.config.needAttributes[cell.id]);
+                if (cell.isPopulation) {
+                    expect(cell.total).toBeCloseTo(need.residents, 9);
+                } else {
+                    // goods needs have a share of supply of 1; public needs a default coverage of 100 percent
+                    expect(cell.total, `need ${need.guid} ${cell.id}`).toBeCloseTo(constructed * cell.value * (need.isBuilding ? need.coverage / 100 : 1), 9);
+                    expect(cell.text === '', `need ${need.guid} ${cell.id}`).toBe(cell.total === 0);
+                    if (cell.value !== 0) nonPopulation++;
+                }
+            }
+        }
+        expect(nonPopulation).toBeGreaterThan(0);
     });
 
     test('supply weight, DLC and supply buildings follow the data', async ({ page }) => {

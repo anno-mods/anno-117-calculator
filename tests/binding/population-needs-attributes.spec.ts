@@ -6,6 +6,7 @@ import { BindingErrorDetector } from '../helpers/binding-detector';
 const LATIUM = 3245;
 const LIBERTI_LEVEL = 1499;
 const LIBERTI_RESIDENCE = 3087;
+const CONSTRUCTED = 4; // constructed Liberti residences of the fixture island
 
 async function load(page: Page, opts: { aggregate?: boolean; patch?: string } = {}) {
     if (opts.patch) {
@@ -111,7 +112,13 @@ test.describe('population level dialog: needs table (U7)', () => {
                 const text = row.attributes[j].text;
                 if (raw === 0) expect(text, `need ${need.guid} ${a.id}`).toBe('');
                 else if (a.id === 'Population') expect(text).not.toBe('');
-                else expect(text.replace(/\s/g, '')).toBe((raw > 0 ? '+' : '-') + String(Math.abs(raw)));
+                else {
+                    // a total over the residences: the fixture constructs CONSTRUCTED Liberti residences, all needs switched on
+                    const total = CONSTRUCTED * raw;
+                    const shown = text.replace(/\s/g, '');
+                    expect(shown[0], `need ${need.guid} ${a.id}`).toBe(total > 0 ? '+' : '-');
+                    expect(Math.abs(parseFloat(shown.slice(1).replace(',', '.')) - Math.abs(total)), `need ${need.guid} ${a.id}`).toBeLessThan(0.06);
+                }
             });
             expect(row.checkbox).toBe(1);
         });
@@ -157,18 +164,65 @@ test.describe('population level dialog: needs table (U7)', () => {
         await openLevel(page, LIBERTI_LEVEL);
         const expected = await page.evaluate(() => {
             const p = (window as any).view.presenter.residence;
-            const needs = p.visibleNeedCategories().flatMap((c: any) => c.visiblePopulationLevelNeeds()).filter((n: any) => n.checked());
-            return p.needColumns().attributes.map((a: any) => a.id === 'Population'
-                ? needs.reduce((s: number, n: any) => s + n.residents(), 0)
-                : needs.reduce((s: number, n: any) => s + n.attributeValue(a), 0));
+            const needs = p.visibleNeedCategories().flatMap((c: any) => c.visiblePopulationLevelNeeds());
+            return p.needColumns().attributes.map((a: any) => needs.reduce((s: number, n: any) => s + n.attributeTotal(a.id), 0));
         });
         const t = await readTable(page);
         expect(t.totals.length).toBe(expected.length);
         expected.forEach((v: number, i: number) => {
             if (v === 0) expect(t.totals[i]).toBe('');
-            else expect(t.totals[i]).not.toBe('');
+            else {
+                const shown = t.totals[i].replace(/\s/g, '');
+                expect(Math.abs(parseFloat(shown.replace('+', '').replace(',', '.')) - v), `column ${i}`).toBeLessThan(0.06);
+            }
         });
         expect(expected.some((v: number) => v !== 0)).toBe(true);
+    });
+
+    test('unchecking a need blanks its non-Population cells and keeps the columns', async ({ page }) => {
+        await load(page);
+        await openLevel(page, LIBERTI_LEVEL);
+        const target = await page.evaluate(() => {
+            const p = (window as any).view.presenter.residence;
+            const needs = p.visibleNeedCategories().flatMap((c: any) => c.visiblePopulationLevelNeeds());
+            const columns = p.needColumns().attributes.map((a: any) => a.id);
+            const index = needs.findIndex((n: any) => n.cells().some((c: any) => !c.isPopulation && c.value !== 0));
+            return { index, columns };
+        });
+        expect(target.index).toBeGreaterThanOrEqual(0);
+        const before = await readTable(page);
+        expect(before.rows[target.index].attributes.some((a, j) => target.columns[j] !== 'Population' && a.text !== '')).toBe(true);
+        await page.evaluate((index) => {
+            const p = (window as any).view.presenter.residence;
+            p.visibleNeedCategories().flatMap((c: any) => c.visiblePopulationLevelNeeds())[index].checked(false);
+        }, target.index);
+        await page.waitForTimeout(200);
+        const after = await readTable(page);
+        expect(after.head.length).toBe(before.head.length);
+        after.rows[target.index].attributes.forEach((a, j) => { if (target.columns[j] !== 'Population') expect(a.text, target.columns[j]).toBe(''); });
+        expect(detector.hasBindingError(), detector.getFormattedBindingErrors().join('\n')).toBe(false);
+    });
+
+    test('aggregate mode shows the sum of the totals of the real islands', async ({ page }) => {
+        await load(page, { aggregate: true });
+        await openLevel(page, LIBERTI_LEVEL);
+        const t = await readTable(page);
+        const expected = await page.evaluate(() => {
+            const p = (window as any).view.presenter.residence;
+            const needs = p.visibleNeedCategories().flatMap((c: any) => c.visiblePopulationLevelNeeds());
+            const cfg = new Map<number, any>((window as any).params.needs.map((n: any) => [n.guid, n]));
+            return needs.map((n: any) => p.needColumns().attributes.map((a: any) => ({ id: a.id, raw: cfg.get(n.guid).needAttributes[a.id] ?? 0 })));
+        });
+        let checked = 0;
+        t.rows.forEach((row, i) => row.attributes.forEach((cell, j) => {
+            const { id, raw } = expected[i][j];
+            if (id === 'Population' || raw === 0) return;
+            const shown = cell.text.replace(/\s/g, '');
+            // 4 + 3 constructed Liberti residences on the two real islands
+            expect(Math.abs(parseFloat(shown.slice(1).replace(',', '.')) - Math.abs(7 * raw)), `row ${i} ${id}`).toBeLessThan(0.06);
+            checked++;
+        }));
+        expect(checked).toBeGreaterThan(0);
     });
 
     test('without public-building data the % is not shown, only the t/min', async ({ page }) => {

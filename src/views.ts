@@ -607,13 +607,23 @@ export interface SupplyBuilding {
     icon?: string | undefined;
 }
 
-/** One attribute cell of a need row: the Population cell shows the need's residents, the others the raw value with its sign. */
+/** One attribute cell of a need row: the total of the need over the residences of the level, signed except for Population. */
 export interface NeedAttributeCell {
     attribute: NamedElement;
     isPopulation: boolean;
-    /** Raw value of the need for this attribute (residents per residence for Population). */
+    /** Raw value of the need for this attribute per residence (residents per residence for Population); decides which columns exist. */
     value: number;
+    /** Total over the residences: constructed buildings x (raw value + item bonus) x supply share, 0 while the need is off. */
+    total(): number;
     text(): string;
+}
+
+/** Text of a total of an attribute: Population unsigned, other attributes signed and blank at 0. */
+function formatAttributeTotal(attribute: NamedElement, total: number): string {
+    const isPopulation = attribute.id === 'Population';
+    if (total === 0 && !isPopulation)
+        return '';
+    return formatNumber(total, !isPopulation);
 }
 
 /** The columns of the needs table that render for the visible needs of a level (R20). */
@@ -710,20 +720,7 @@ class PopulationLevelNeedPresenter {
             }
         });
         this.isInactive =  ko.pureComputed(() => false);
-        this.residents = ko.pureComputed(() => {
-            if (this.parent.parent.isAggregateMode()) {
-                const populationLevelGuid = this.parent.parent.instance()?.guid;
-                if (populationLevelGuid == null)
-                    return 0;
-                return sumPopulationLevelNeedAcrossRealIslands(populationLevelGuid, this.guid, n => n.residents());
-            }
-
-            let inst = this.instance();
-            if(inst == null)
-                return 0;
-
-            return inst.residents();
-        });
+        this.residents = ko.pureComputed(() => this.attributeTotal('Population'));
 
         this.need = need;
         this.supplyWeight = need.supplyWeight;
@@ -766,13 +763,31 @@ class PopulationLevelNeedPresenter {
         this.cells = ko.pureComputed(() => this.parent.parent.needColumns().attributes.map((attribute): NeedAttributeCell => {
             const isPopulation = attribute.id === 'Population';
             const value = isPopulation ? this.residentsPerResidence : (this.need.attributes.get(attribute) ?? 0);
+            const total = () => this.attributeTotal(attribute.id ?? '');
             return {
                 attribute,
                 isPopulation,
                 value,
-                text: () => isPopulation ? formatNumber(this.residents()) : formatNumber(value, true),
+                total,
+                text: () => formatAttributeTotal(attribute, total()),
             };
         }));
+    }
+
+    /**
+     * Total of an attribute of this need over the residences of the level. While aggregating it sums the totals of the
+     * need across every real island that has the level, otherwise it reads the single repointed instance.
+     */
+    attributeTotal(attributeId: string): number {
+        if (this.parent.parent.isAggregateMode()) {
+            const populationLevelGuid = this.parent.parent.instance()?.guid;
+            if (populationLevelGuid == null)
+                return 0;
+            return sumPopulationLevelNeedAcrossRealIslands(populationLevelGuid, this.guid, n => n.attributeTotal(attributeId));
+        }
+
+        const inst = this.instance();
+        return inst == null ? 0 : inst.attributeTotal(attributeId);
     }
 
     /** Raw value of this need for a need attribute (0 when the need has none). */
@@ -1063,16 +1078,13 @@ export class ResidencePresenter{
             };
         });
 
-        // Totals per attribute column over the needs that are switched on (all visible needs while aggregating):
-        // Population sums the residents of the needs, every other attribute sums the raw values.
+        // Totals per attribute column: the sum of the cell totals of the visible needs. A need that is switched off
+        // contributes 0, so no filter on `checked` is needed.
         this.needTotals = ko.pureComputed((): string[] => {
-            const needs = this.visibleNeedCategories().flatMap(c => c.visiblePopulationLevelNeeds())
-                .filter(n => this.isAggregateMode() || n.checked());
+            const needs = this.visibleNeedCategories().flatMap(c => c.visiblePopulationLevelNeeds());
             return this.needColumns().attributes.map(attribute => {
-                const total = attribute.id === 'Population'
-                    ? needs.reduce((sum, n) => sum + n.residents(), 0)
-                    : needs.reduce((sum, n) => sum + n.attributeValue(attribute), 0);
-                return total === 0 ? '' : formatNumber(total, attribute.id !== 'Population');
+                const total = needs.reduce((sum, n) => sum + n.attributeTotal(attribute.id ?? ''), 0);
+                return total === 0 ? '' : formatAttributeTotal(attribute, total);
             });
         });
     }

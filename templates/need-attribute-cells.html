@@ -4,7 +4,7 @@
     <img class="icon-sm icon-light" src="../icons/icon_resource_population.png" />
     <span class="ml-1" data-bind="text: $data.text()"></span>
     <!-- /ko -->
-    <!-- ko if: !$data.isPopulation && $data.value !== 0 -->
+    <!-- ko ifnot: $data.isPopulation -->
     <span data-bind="text: $data.text()"></span>
     <!-- /ko -->
 </td>
