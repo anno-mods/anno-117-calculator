@@ -37,6 +37,8 @@ export class Need {
     public category: NeedCategory;
     public supplyWeight: number;
     public attributes: Map<NamedElement, number>;
+    /** Raw values by attribute id; read by ResidenceNeed.attributeAmount without a literals lookup. */
+    private attributeValues: Record<string, number>;
     public residents: number;
     // Public service need (a building supplies it, no consumption rate)
     public isBuilding: boolean;
@@ -61,10 +63,12 @@ export class Need {
         this.category = literalsMap.get(config.needCategory) as NeedCategory;
         this.supplyWeight = config.supplyWeight;
         this.attributes = new Map()
+        this.attributeValues = {};
         for (let attr in config.needAttributes){
             this.attributes.set(window.view.literalsMap.get(attr), config.needAttributes[attr]);
+            this.attributeValues[attr] = config.needAttributes[attr];
         }
-        
+
 
         this.residents = config.needAttributes["Population"];
         this.isBuilding = config.isBuilding === true;
@@ -74,6 +78,11 @@ export class Need {
         this.available = ko.pureComputed(() => this.product.available());
 
         this.category.addNeed(this);
+    }
+
+    /** Raw value per residence of the attribute with the given id (0 when the need has none). */
+    attributeValue(attributeId: string): number {
+        return this.attributeValues[attributeId] ?? 0;
     }
 }
 
@@ -141,16 +150,8 @@ export class PopulationLevelNeed {
             ? this.populationLevel.island.publicNeedCoverage(this.populationLevel.guid, this.need.guid)
             : undefined);
 
-        // Calculate residents gained from this specific need
-        this.residents = ko.pureComputed(() => {
-            if (!this.checked()) return 0;
-            
-            // Sum residents from all residences for this specific need
-            return this.populationLevel.allResidences().reduce((sum: number, residence: ResidenceBuilding) => {
-                const residenceNeed = residence.needsMap.get(this.need.guid);
-                return sum + (residenceNeed ? residenceNeed.residents() : 0);
-            }, 0);
-        });
+        // Residents gained from this specific need
+        this.residents = ko.pureComputed(() => this.attributeTotal('Population'));
 
         // Calculate residents gained from this specific need
         this.amount = ko.pureComputed(() => {
@@ -180,6 +181,19 @@ export class PopulationLevelNeed {
      */
     get product() {
         return this.need.product;
+    }
+
+    /**
+     * Total of an attribute over all residences of the level: constructed buildings x (raw value + item bonus)
+     * x supply share, 0 while the need is unchecked or gated. Population is the residents of the need.
+     */
+    attributeTotal(attributeId: string): number {
+        if (!this.checked()) return 0;
+
+        return this.populationLevel.allResidences().reduce((sum: number, residence: ResidenceBuilding) => {
+            const residenceNeed = residence.needsMap.get(this.need.guid);
+            return sum + (residenceNeed ? residenceNeed.attributeAmount(attributeId) : 0);
+        }, 0);
     }
 
     /**
@@ -277,19 +291,25 @@ export class ResidenceNeed {
             return this.residence.buildings.constructed() * this.needConsumptionRate * window.view.settings.selectedNeedConsumptionSetting().consumptionFactor * (1 + consumptionModifierInPercent / 100) * this.supplyShare();
         });
 
-        this.residents = ko.pureComputed(() => {
-            if(!this.checked() || this.gatingEffectInactive())
-                return 0;
-
-            let residents = this.need.residents;
-            // residence items that add residents while this need is supplied (needAttributes with Population)
-            for (const b of this.residence.buffs())
-                residents += b.needPopulation(this.need.product.guid);
-
-            return this.residence.buildings.constructed() * residents * this.supplyShare();
-        })
+        this.residents = ko.pureComputed(() => this.attributeAmount('Population'));
 
         this.available = ko.pureComputed(() => this.need.available() && this.residence.available())
+    }
+
+    /**
+     * Value of an attribute of this need on this residence type: constructed buildings x (raw value + bonus of the
+     * residence items that apply while the need is supplied) x share of supply. 0 while the need is unchecked or gated.
+     * Population is the residents of the need. Reads observables only, so it is safe during island construction.
+     */
+    attributeAmount(attributeId: string): number {
+        if(!this.checked() || this.gatingEffectInactive())
+            return 0;
+
+        let value = this.need.attributeValue(attributeId);
+        for (const b of this.residence.buffs())
+            value += b.needAttribute(this.need.product.guid, attributeId);
+
+        return this.residence.buildings.constructed() * value * this.supplyShare();
     }
 
     /**

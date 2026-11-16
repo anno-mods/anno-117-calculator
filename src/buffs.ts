@@ -180,14 +180,14 @@ export class AppliedBuff {
     }
 
     /**
-     * Residents per residence that the buff adds while the need of the given product is supplied
-     * (`needAttributes` entries with a Population attribute), scaled like `populationBonus`.
+     * Value per residence that the buff adds to the attribute while the need of the given product is supplied
+     * (`needAttributes` entries with that attribute; Population adds residents), scaled like `populationBonus`.
      */
-    needPopulation(productGuid: number): number {
+    needAttribute(productGuid: number, attributeId: string): number {
         let sum = 0;
         for (const entry of this.buff.needAttributes)
             if (entry.productGuids.indexOf(productGuid) !== -1)
-                sum += entry.attributes.Population ?? 0;
+                sum += entry.attributes[attributeId] ?? 0;
         return sum * this.scaling() * this.coverage();
     }
 }
