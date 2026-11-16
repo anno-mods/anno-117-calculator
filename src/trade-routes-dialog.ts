@@ -1,6 +1,7 @@
 import { ko, formatNumber } from './util';
 import { stopsOf } from './exchange/derive-routes';
 import { exchangeIdOf, getRouteAnalysis, TradeRoute } from './trade';
+import { MIN_GAPS } from './route-analysis';
 import type { PairEvidence, RouteAnalysis, RouteIndicators } from './route-analysis';
 
 declare const window: any;
@@ -422,7 +423,7 @@ export class TradeRoutesViewModel {
             'no-evidence': 'tradeReasonNoEvidence', gaps: 'tradeReasonGaps', clock: 'tradeReasonClock', ship: 'tradeReasonShip',
             ambiguous: 'tradeReasonAmbiguous', 'no-ships': 'tradeReasonNoShips',
         };
-        return this.t(keys[ind.reason ?? 'no-evidence'] ?? 'tradeReasonNoEvidence');
+        return this.fmt(keys[ind.reason ?? 'no-evidence'] ?? 'tradeReasonNoEvidence', MIN_GAPS);
     }
 
     offloadTip(r: TradeRoute): string {

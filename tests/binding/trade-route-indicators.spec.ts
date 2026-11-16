@@ -64,12 +64,12 @@ test.describe('trade route indicators (U3)', () => {
     });
 
     test('unavailable shows its reason and the source-production triangle is untouched', async ({ page }) => {
-        await loadRouteDoc(page, { routes: [simpleRoute(1, 'a1', 'a2')], visits: visitsAt(1, 'a2', [0, 10, 20]) }, [{ ...ROMA_OSTIA, amount: 1 }]);
+        await loadRouteDoc(page, { routes: [simpleRoute(1, 'a1', 'a2')], visits: visitsAt(1, 'a2', [0, 10]) }, [{ ...ROMA_OSTIA, amount: 1 }]);
         await openTradeDialog(page);
         const row = page.locator('#trade-calc-table tbody tr').first();
         await expect(row.locator('.trade-unavailable')).toBeVisible();
         await row.locator('.trade-unavailable').focus();
-        await expect(row.locator('.trade-unavailable .prod-tip')).toContainText(/three/i);
+        await expect(row.locator('.trade-unavailable .prod-tip')).toContainText(/fewer than 2/i);
         await expect(row.locator('.trade-red, .trade-yellow')).toHaveCount(0);
     });
 

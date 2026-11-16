@@ -10,7 +10,7 @@ import type { HistorySeries, RouteShip, TradeRoute as GameRoute } from './exchan
 
 /** Game time is counted in milliseconds (KTD6). */
 export const MS_PER_MINUTE = 60000;
-export const MIN_GAPS = 3;
+export const MIN_GAPS = 2;
 const GAP_WINDOW = 5;
 const EPS = 1e-9;
 

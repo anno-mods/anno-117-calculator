@@ -112,8 +112,8 @@ test.describe('route indicators (U2)', () => {
         expect(after).toBeCloseTo(40, 6);
     });
 
-    test('AE5: two gaps only give unavailable with a reason', async ({ page }) => {
-        await load(page, { routes: [simpleRoute(1, 'a1', 'a2')], visits: visitsAt(1, 'a2', [0, 10, 20]) }, [{ ...R, amount: 1 }]);
+    test('AE5: one gap only gives unavailable with a reason', async ({ page }) => {
+        await load(page, { routes: [simpleRoute(1, 'a1', 'a2')], visits: visitsAt(1, 'a2', [0, 10]) }, [{ ...R, amount: 1 }]);
         const r = await ind(page);
         expect(r.available).toBe(false);
         expect(r.reason).toBe('gaps');

@@ -2653,18 +2653,18 @@ export const texts: Record<string, Record<string, string>> = {
         korean: "이 항로와 일치하는 가져온 게임 항로가 없습니다."
     },
     tradeReasonGaps: {
-        english: "Fewer than three usable gaps between visits were recorded.",
-        french: "Moins de trois intervalles exploitables entre les visites ont été enregistrés.",
-        polish: "Zarejestrowano mniej niż trzy użyteczne odstępy między wizytami.",
-        spanish: "Se registraron menos de tres intervalos utilizables entre visitas.",
-        italian: "Sono stati registrati meno di tre intervalli utilizzabili tra le visite.",
-        german: "Es wurden weniger als drei verwertbare Abstände zwischen Besuchen aufgezeichnet.",
-        brazilian: "Foram registrados menos de três intervalos utilizáveis entre visitas.",
-        russian: "Записано менее трёх пригодных интервалов между заходами.",
-        simplified_chinese: "记录的可用到访间隔少于三个。",
-        traditional_chinese: "記錄的可用到訪間隔少於三個。",
-        japanese: "利用可能な訪問間隔が3回分未満です。",
-        korean: "사용 가능한 방문 간격이 3개 미만입니다."
+        english: "Fewer than %0 usable gaps between visits were recorded.",
+        french: "Moins de %0 intervalles exploitables entre les visites ont été enregistrés.",
+        polish: "Zarejestrowano mniej niż %0 użyteczne odstępy między wizytami.",
+        spanish: "Se registraron menos de %0 intervalos utilizables entre visitas.",
+        italian: "Sono stati registrati meno di %0 intervalli utilizzabili tra le visite.",
+        german: "Es wurden weniger als %0 verwertbare Abstände zwischen Besuchen aufgezeichnet.",
+        brazilian: "Foram registrados menos de %0 intervalos utilizáveis entre visitas.",
+        russian: "Записано менее %0 пригодных интервалов между заходами.",
+        simplified_chinese: "记录的可用到访间隔少于%0个。",
+        traditional_chinese: "記錄的可用到訪間隔少於%0個。",
+        japanese: "利用可能な訪問間隔が%0回分未満です。",
+        korean: "사용 가능한 방문 간격이 %0개 미만입니다."
     },
     tradeReasonClock: {
         english: "The visit times use different clocks.",
