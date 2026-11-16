@@ -17,7 +17,7 @@ function isObj(v: unknown): v is Record<string, unknown> {
 }
 
 // Ships of a route: the sum of `count` of its ship entries (an entry without `count` is one ship).
-function shipCount(route: TradeRoute): number {
+export function shipCount(route: TradeRoute): number {
     if (!Array.isArray(route.ships)) return 0;
     let total = 0;
     for (const s of route.ships) {
@@ -33,13 +33,13 @@ export function hasShipRoutes(doc: { trade?: Pick<Trade, "routes"> }): boolean {
     return Array.isArray(routes) && routes.some((r) => isObj(r) && shipCount(r) > 0);
 }
 
-interface Stop {
+export interface Stop {
     index: number;
     island: string;
     slots: RouteSlot[];
 }
 
-function stopsOf(route: TradeRoute): { stops: Stop[]; length: number } | undefined {
+export function stopsOf(route: TradeRoute): { stops: Stop[]; length: number } | undefined {
     if (!Array.isArray(route.stations)) return undefined;
     const stops: Stop[] = [];
     route.stations.forEach((st: RouteStation, index) => {
@@ -51,7 +51,7 @@ function stopsOf(route: TradeRoute): { stops: Stop[]; length: number } | undefin
 }
 
 // Net amount of a product the recorded visits name for one route stop; undefined when no visit record exists for the stop.
-function visitNet(visits: Record<string, unknown>[], route: string, island: string, product: number): number | undefined {
+export function visitNet(visits: Record<string, unknown>[], route: string, island: string, product: number): number | undefined {
     let found = false;
     let net = 0;
     for (const v of visits) {
@@ -70,6 +70,74 @@ interface Pair {
     weights: Map<string, number>;
 }
 
+export interface StopPair {
+    product: number;
+    sink: Stop;
+    source: Stop;
+    slot: RouteSlot;
+}
+
+// Load-to-unload pairs of one route: the nearest preceding source in circuit order serves each unload slot.
+export function pairsOf(route: TradeRoute, visits: Record<string, unknown>[] = []): StopPair[] {
+    const out: StopPair[] = [];
+    const parsed = stopsOf(route);
+    if (!parsed || parsed.stops.length === 0) return out;
+    const { stops, length } = parsed;
+    const routeId = typeof route.id === "string" ? route.id : "";
+
+    const products = new Set<number>();
+    for (const s of stops) for (const sl of s.slots) products.add(sl.product);
+
+    for (const product of products) {
+        const handlers = stops.filter((s) => s.slots.some((sl) => sl.product === product && (sl.mode === "load" || sl.mode === "unload")));
+        const loads = (s: Stop): RouteSlot[] => s.slots.filter((sl) => sl.product === product && sl.mode === "load");
+        const unloads = (s: Stop): RouteSlot[] => s.slots.filter((sl) => sl.product === product && sl.mode === "unload");
+
+        const sources: Stop[] = [];
+        const sinks: Stop[] = [];
+        const everyStopBoth = handlers.length > 0 && handlers.every((s) => loads(s).length > 0 && unloads(s).length > 0);
+        for (const s of handlers) {
+            if (everyStopBoth) {
+                // Roles that slot modes cannot tell come from the signs of the recorded net amounts.
+                const net = visitNet(visits, routeId, s.island, product);
+                if (net !== undefined && net > 0) sinks.push(s);
+                else if (net !== undefined && net < 0) sources.push(s);
+                continue;
+            }
+            const hasLoad = loads(s).length > 0;
+            const hasUnload = unloads(s).length > 0;
+            if (hasLoad && !hasUnload) {
+                sources.push(s);
+            } else if (hasUnload) {
+                // A relay passes goods on and is no supplier. When its recorded visits name no net amount of the
+                // product it is a pure relay and gets no entry.
+                if (hasLoad) {
+                    const net = visitNet(visits, routeId, s.island, product);
+                    if (net !== undefined && net === 0) continue;
+                }
+                sinks.push(s);
+            }
+        }
+        if (sources.length === 0) continue;
+
+        for (const sink of sinks) {
+            for (const slot of unloads(sink)) {
+                const wanted = typeof slot.slot === "number" ? slot.slot : undefined;
+                const distance = (src: Stop): number => (((sink.index - src.index) % length) + length) % length;
+                const candidates = sources.filter((src) => src !== sink && src.island !== sink.island);
+                if (candidates.length === 0) continue;
+                const sameSlot = wanted === undefined ? [] : candidates.filter((src) => loads(src).some((l) => l.slot === wanted));
+                const pool = sameSlot.length > 0 ? sameSlot : candidates;
+                let best = pool[0];
+                for (const c of pool) if (distance(c) < distance(best) || (distance(c) === distance(best) && c.index < best.index)) best = c;
+
+                out.push({ product, sink, source: best, slot });
+            }
+        }
+    }
+    return out;
+}
+
 export function deriveImports(routes: TradeRoute[], visits: Record<string, unknown>[] = []): TradeImport[] {
     const pairs = new Map<string, Pair>();
 
@@ -77,64 +145,12 @@ export function deriveImports(routes: TradeRoute[], visits: Record<string, unkno
         if (!isObj(route)) continue;
         const ships = shipCount(route);
         if (ships <= 0) continue;
-        const parsed = stopsOf(route);
-        if (!parsed || parsed.stops.length === 0) continue;
-        const { stops, length } = parsed;
-        const routeId = typeof route.id === "string" ? route.id : "";
-
-        const products = new Set<number>();
-        for (const s of stops) for (const sl of s.slots) products.add(sl.product);
-
-        for (const product of products) {
-            const handlers = stops.filter((s) => s.slots.some((sl) => sl.product === product && (sl.mode === "load" || sl.mode === "unload")));
-            const loads = (s: Stop): RouteSlot[] => s.slots.filter((sl) => sl.product === product && sl.mode === "load");
-            const unloads = (s: Stop): RouteSlot[] => s.slots.filter((sl) => sl.product === product && sl.mode === "unload");
-
-            const sources: Stop[] = [];
-            const sinks: Stop[] = [];
-            const everyStopBoth = handlers.length > 0 && handlers.every((s) => loads(s).length > 0 && unloads(s).length > 0);
-            for (const s of handlers) {
-                if (everyStopBoth) {
-                    // Roles that slot modes cannot tell come from the signs of the recorded net amounts.
-                    const net = visitNet(visits, routeId, s.island, product);
-                    if (net !== undefined && net > 0) sinks.push(s);
-                    else if (net !== undefined && net < 0) sources.push(s);
-                    continue;
-                }
-                const hasLoad = loads(s).length > 0;
-                const hasUnload = unloads(s).length > 0;
-                if (hasLoad && !hasUnload) {
-                    sources.push(s);
-                } else if (hasUnload) {
-                    // A relay passes goods on and is no supplier. When its recorded visits name no net amount of the
-                    // product it is a pure relay and gets no entry.
-                    if (hasLoad) {
-                        const net = visitNet(visits, routeId, s.island, product);
-                        if (net !== undefined && net === 0) continue;
-                    }
-                    sinks.push(s);
-                }
-            }
-            if (sources.length === 0) continue;
-
-            for (const sink of sinks) {
-                for (const slot of unloads(sink)) {
-                    const wanted = typeof slot.slot === "number" ? slot.slot : undefined;
-                    const distance = (src: Stop): number => (((sink.index - src.index) % length) + length) % length;
-                    const candidates = sources.filter((src) => src !== sink && src.island !== sink.island);
-                    if (candidates.length === 0) continue;
-                    const sameSlot = wanted === undefined ? [] : candidates.filter((src) => loads(src).some((l) => l.slot === wanted));
-                    const pool = sameSlot.length > 0 ? sameSlot : candidates;
-                    let best = pool[0];
-                    for (const c of pool) if (distance(c) < distance(best) || (distance(c) === distance(best) && c.index < best.index)) best = c;
-
-                    const amount = typeof slot.amount === "number" && Number.isFinite(slot.amount) && slot.amount > 0 ? slot.amount : 1;
-                    const key = `${sink.island}|${product}`;
-                    let pair = pairs.get(key);
-                    if (!pair) pairs.set(key, (pair = { island: sink.island, product, weights: new Map() }));
-                    pair.weights.set(best.island, (pair.weights.get(best.island) ?? 0) + amount * ships);
-                }
-            }
+        for (const { product, sink, source, slot } of pairsOf(route, visits)) {
+            const amount = typeof slot.amount === "number" && Number.isFinite(slot.amount) && slot.amount > 0 ? slot.amount : 1;
+            const key = `${sink.island}|${product}`;
+            let pair = pairs.get(key);
+            if (!pair) pairs.set(key, (pair = { island: sink.island, product, weights: new Map() }));
+            pair.weights.set(source.island, (pair.weights.get(source.island) ?? 0) + amount * ships);
         }
     }
 
