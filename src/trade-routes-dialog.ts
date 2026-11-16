@@ -445,7 +445,7 @@ export class TradeRoutesViewModel {
             const base = this.fmt('tradeTipPool', r.from.name(), this.num(ind.stock?.pool), this.num(ind.stock?.load));
             return ind.competing.length ? `${base} ${this.fmt('tradeTipCompeting', ind.competing.join(', '))}` : base;
         }
-        if (ind.yellow === 'storage') return this.fmt('tradeTipStorage', `${r.to.name()} (${product})`, this.num(ind.actualUnload), this.num(ind.requiredOffload));
+        if (ind.yellow === 'storage') return this.fmt('tradeTipStorage', `${r.to.name()} (${product})`, this.num(ind.actualUnload), this.num(ind.requiredOffload)) + (ind.unloadIsNet ? ' ' + this.t('tradeNetNote') : '');
         return '';
     }
 }

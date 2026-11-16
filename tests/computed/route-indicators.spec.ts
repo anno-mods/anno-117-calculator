@@ -171,12 +171,31 @@ test.describe('route indicators (U2)', () => {
             ],
             ships: [ship(4)],
         };
-        // the relay's net per visit is 10 t: capacity stays 100 (slot amount), the actual unload is unknown
-        await load(page, { routes: [route], visits: visitsAt(7, 'a2', GAPS, 10) }, [{ ...R, amount: 1 }]);
+        // the relay's net per visit alternates in sign: capacity stays 100 (slot amount), the actual unload is unknown
+        const mixed = GAPS.map((m, i) => ({ route: 7, island: 'a2', time: m * MIN, clock: 'game', goods: { [BREAD]: i % 2 ? -20 : 10 } }));
+        await load(page, { routes: [route], visits: mixed }, [{ ...R, amount: 1 }]);
         const r = await ind(page);
         expect(r.available).toBe(true);
         expect(r.capacity).toBeCloseTo(100, 6);
         expect(r.actualUnload).toBeUndefined();
+    });
+
+    test('relay whose recorded nets are all positive: the net is a lower bound of the unload and drives yellow storage', async ({ page }) => {
+        const route = {
+            id: 85,
+            stations: [
+                { island: 'a1', slots: [slot(BREAD, 'load', 1, 50)] },
+                { island: 'a2', slots: [slot(BREAD, 'unload', 1, 50), slot(BREAD, 'load', 1, 50)] },
+            ],
+            ships: [ship(7, 2)],
+        };
+        // storage at zero in half the samples, 10 t net per visit against 1.5 t/min x 20 min = 30 t required
+        const history = [{ island: 'a2', product: BREAD, kind: 'storage', clock: 'game', unit: 't', start: 0, step: 600100, values: [4, 0, 0, 5, 0, 0] }];
+        await load(page, { routes: [route], visits: visitsAt(85, 'a2', GAPS, 10), history }, [{ ...R, amount: 1.5 }]);
+        const r = await ind(page);
+        expect(r.actualUnload).toBeCloseTo(10, 6);
+        expect(r.unloadIsNet).toBe(true);
+        expect(r.yellow).toBe('storage');
     });
 
     test('AE2: game routes from different sources to one destination are combined before red is decided', async ({ page }) => {
@@ -241,9 +260,14 @@ test.describe('route indicators (U2)', () => {
         };
         const doc: Doc = { routes: [relay], visits: visitsAt(9, 'a2', GAPS, 10), minimum: { a2: { [BREAD]: 50 } } };
         await load(page, doc, [{ ...R, amount: 3 }]); // 3 t/min x 20 min = 60 > 50
-        expect((await ind(page)).yellow).toBe('minimumStock');
+        const capped = await ind(page);
+        expect(capped.yellow).toBe('minimumStock');
+        expect(capped.capacity).toBeCloseTo(50, 6); // the relay keeps at most its minimum stock per visit
+        expect(capped.red).toBe(true);
         await page.evaluate(() => { (window as any).view.tradeManager.routes()[0].userSetAmount(2); }); // 40 < 50
-        expect((await ind(page)).yellow).toBeUndefined();
+        const ok = await ind(page);
+        expect(ok.yellow).toBeUndefined();
+        expect(ok.red).toBe(false);
     });
 
     test('AE7 (a): a pure unload stop is not limited by its own minimum stock', async ({ page }) => {

@@ -98,10 +98,14 @@ export interface RouteEvidence {
     gapCount: number;
     /** Tons per visit the route can unload of the product (slot amount capped by cargo, times ships). */
     capacity?: number;
-    /** Mean positive net amount of the product per visit; undefined when the stop also loads it (net, not gross). */
+    /** Mean positive net amount of the product per visit; for a stop that also loads it only while no visit netted negative (`netOnly`). */
     actualUnload?: number;
     /** The destination stop also loads the product. */
     relay: boolean;
+    /** Ships of the game route (capacity and the minimum-stock cap count per ship). */
+    ships: number;
+    /** `actualUnload` is the net of a stop that also loads the product, so a lower bound of the unload. */
+    netOnly?: boolean;
     /** A reason that makes this route's values unavailable. */
     reason?: 'no-ships' | 'ship' | 'ambiguous' | 'clock' | 'gaps';
 }
@@ -228,7 +232,7 @@ export class RouteAnalysis {
             }
 
             for (const g of groups.values()) {
-                const ev: RouteEvidence = { routeId, routeName: typeof route.name === 'string' ? route.name : routeId, gapCount: 0, relay: false };
+                const ev: RouteEvidence = { routeId, routeName: typeof route.name === 'string' ? route.name : routeId, gapCount: 0, relay: false, ships };
                 const stops = [...g.sinks.values()];
                 const totals = stops.map((s) => [...s.amounts.values()].reduce((a, b) => a + b, 0));
                 // The same island at several stops: the outcome must not differ between the mappings (AE3).
@@ -266,11 +270,16 @@ export class RouteAnalysis {
                 if (windows.length >= MIN_GAPS) ev.gapMinutes = Math.max(...windows.slice(-GAP_WINDOW));
                 else ev.reason = ev.reason ?? 'gaps';
 
-                if (!ev.relay) {
-                    const nets = visits
-                        .map((v) => (isObj(v.goods) ? (v.goods as Record<string, unknown>)[String(g.product)] : undefined))
-                        .filter((n): n is number => typeof n === 'number' && n > 0);
-                    if (nets.length) ev.actualUnload = nets.reduce((a, b) => a + b, 0) / nets.length;
+                // Visit goods are net amounts (R8). A stop that only unloads gives the unload directly. A stop that also
+                // loads the product gives a lower bound of the unload, usable only while no recorded visit netted
+                // negative; the indicator then says so.
+                const nets = visits
+                    .map((v) => (isObj(v.goods) ? (v.goods as Record<string, unknown>)[String(g.product)] : undefined))
+                    .filter((n): n is number => typeof n === 'number');
+                const positive = nets.filter((n) => n > 0);
+                if (positive.length && (!ev.relay || nets.every((n) => n >= 0))) {
+                    ev.actualUnload = positive.reduce((a, b) => a + b, 0) / positive.length;
+                    ev.netOnly = ev.relay;
                 }
 
                 const key = pairKey(g.source, g.dest, g.product);
@@ -299,6 +308,8 @@ export interface RouteIndicators {
     /** Mean unload per recorded visit, when it can be told from the net amounts. */
     actualUnload?: number;
     gapMinutes?: number;
+    /** `actualUnload` is the net of a stop that also loads the product (lower bound of the unload). */
+    unloadIsNet?: boolean;
     gameRoutes: number;
     red: boolean;
     /** Yellow state: the minimum stock of a loading station, or an observed empty storage. */
@@ -336,7 +347,13 @@ export function computeIndicators(input: IndicatorInput): RouteIndicators {
     if (bad) return { ...NONE, reason: bad.reason as Reason, gameRoutes: ev.routes.length };
 
     const gap = Math.max(...served.map((r) => r.gapMinutes as number));
-    const capacity = served.reduce((a, r) => a + (r.capacity as number), 0);
+    // A relay stop that also loads the product ends every visit at its minimum stock: the island keeps at most that
+    // much, so the minimum caps what one visit contributes (KTD9).
+    const relayMin = analysis.minimumStock(dest, product);
+    const capacity = served.reduce((a, r) => {
+        const c = r.capacity as number;
+        return a + (r.relay && relayMin !== undefined ? Math.min(c, relayMin * Math.max(1, r.ships)) : c);
+    }, 0);
     const required = Math.max(0, rate) * gap;
     const totalRequired = input.destRates.reduce((a, r) => a + Math.max(0, r), 0) * gap;
     const ind: RouteIndicators = {
@@ -351,6 +368,7 @@ export function computeIndicators(input: IndicatorInput): RouteIndicators {
     };
     const unloads = ev.routes.map((r) => r.actualUnload);
     if (unloads.every((u) => u !== undefined)) ind.actualUnload = (unloads as number[]).reduce((a, b) => a + b, 0);
+    if (ind.actualUnload !== undefined && ev.routes.some((r) => r.netOnly)) ind.unloadIsNet = true;
 
     // Yellow (a): minimum stock limits loading only (KTD9).
     const destMin = ev.routes.some((r) => r.relay) ? analysis.minimumStock(dest, product) : undefined;

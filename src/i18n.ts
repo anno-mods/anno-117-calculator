@@ -3085,6 +3085,20 @@ export const texts: Record<string, Record<string, string>> = {
         traditional_chinese: "供應有風險",
         japanese: "供給に懸念",
         korean: "공급 위험"
+    },
+    tradeNetNote: {
+        english: "The stop also loads this good, so the unloaded amount is the net of the visit and a lower bound.",
+        french: "L'arrêt charge aussi cette marchandise : la quantité déchargée est le solde de la visite, donc une valeur minimale.",
+        polish: "Przystanek też załadowuje ten towar, więc podana ilość to saldo wizyty i dolna granica wyładunku.",
+        spanish: "La parada también carga esta mercancía: la cantidad descargada es el saldo de la visita y un valor mínimo.",
+        italian: "La fermata carica anche questa merce: la quantità scaricata è il saldo della visita, quindi un valore minimo.",
+        german: "Der Stopp lädt diese Ware auch: die entladene Menge ist der Saldo des Besuchs und eine Untergrenze.",
+        brazilian: "A parada também carrega esta mercadoria: a quantidade descarregada é o saldo da visita e um valor mínimo.",
+        russian: "Остановка также грузит этот товар: выгруженное количество — баланс захода и нижняя граница.",
+        simplified_chinese: "该停靠点也会装载此商品，因此卸货量是本次到访的净值，即下限。",
+        traditional_chinese: "該停靠點也會裝載此商品，因此卸貨量是本次到訪的淨值，即下限。",
+        japanese: "この停泊所はこの商品も積み込むため、荷下ろし量は訪問ごとの差引量で、下限値です。",
+        korean: "이 정박지는 이 상품도 적재하므로 하역량은 방문의 순증감이며 하한값입니다."
     }
 };
 

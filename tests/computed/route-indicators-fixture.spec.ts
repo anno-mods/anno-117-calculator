@@ -108,11 +108,11 @@ test.describe('route indicators on reduced Marcia 73 fixtures (U4)', () => {
         }
     });
 
-    test('AE6: relay stop that loads and unloads Statuettes uses slot flow, not the net visit amount', async ({ page }) => {
+    test('AE6: relay stop that loads and unloads Statuettes uses slot flow for capacity and flags a net-only unload', async ({ page }) => {
         await load(page, [{ from: 'a25668', to: 'a41796', product: STATUETTES, amount: 0.5 }]);
         const [row] = await indicators(page);
-        // the relay's visits record net amounts only: the actual unload per visit is not derived from them
-        expect(row.ind.actualUnload).toBeUndefined();
+        // the relay's visits record net amounts: a net-only unload is flagged as a lower bound, never read as gross
+        expect(row.ind.unloadIsNet === true).toBe(row.ind.actualUnload !== undefined);
         expect(row.ind.reason === 'gaps' || row.ind.capacity > 0).toBe(true);
     });
 
