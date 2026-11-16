@@ -18,6 +18,7 @@ import { Storage as SubStorage, Island, Region, Session } from './world';
 import { Effect, ProductCategory, Fertility, AreaBuff } from './production';
 import { isAggregating, compareAggregateDemands } from './aggregate';
 import { VillaItemsViewModel } from './villa-items';
+import { TradeRoutesViewModel } from './trade-routes-dialog';
 import { DlcSettings } from './dlc-settings';
 import './exchange';
 import { ExchangeReportDialog } from './exchange/report-dialog';
@@ -99,6 +100,7 @@ window.view = {
     needAttributes: [] as NamedElement[],
     // Created in the bootstrap, once the need attributes exist.
     villaItems: null as VillaItemsViewModel | null,
+    tradeRoutes: null as TradeRoutesViewModel | null,
     assetsMap: new Map() as AssetsMap,
     literalsMap: new Map() as LiteralsMap,
     productsToTraders: new Map(),
@@ -672,6 +674,7 @@ function init(_isFirstRun: boolean, configVersion: string | null): void {
 
     // Set up trade manager
     window.view.tradeManager = new (require('./trade').TradeManager)();
+    window.view.tradeRoutes = new TradeRoutesViewModel();
 
     // Set up presenters and templates
     const allIslands = window.view.islandManager.allIslands as Island;

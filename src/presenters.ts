@@ -332,6 +332,7 @@ export class ProductPresenter {
     public tradeList: KnockoutComputed<TradeList>;
 
     // === UI STATE ===
+    public gameRouteIndicators: KnockoutComputed<{ visible: boolean; red: boolean; yellow: boolean }>;
     public isHighlightedAsMissing: KnockoutComputed<boolean>;
     public name: KnockoutComputed<string>;
     public icon: KnockoutComputed<string>;
@@ -684,6 +685,26 @@ export class ProductPresenter {
         // UI properties
         this.name = ko.pureComputed(() => this.product.name());
         this.icon = ko.pureComputed(() => this.product.icon as string);
+
+        // Indicators of the imported game routes that supply this product on the selected island (R12). Read by the tile
+        // only for imported products, so locally produced products cost nothing.
+        this.gameRouteIndicators = ko.pureComputed(() => {
+            const island = this.island();
+            const none = { visible: false, red: false, yellow: false };
+            if (island.isAllIslands()) return none;
+            let visible = false;
+            let red = false;
+            let yellow = false;
+            for (const r of (this.instance()?.tradeList.routes() ?? []) as TradeRoute[]) {
+                if (r.to !== island) continue;
+                const ind = r.indicators();
+                if (ind.gameRoutes === 0) continue;
+                visible = true;
+                red = red || ind.red;
+                yellow = yellow || ind.yellow !== undefined;
+            }
+            return { visible, red, yellow };
+        });
 
         this.isHighlightedAsMissing = ko.pureComputed(() => {
             if (!isAggregateModeFor(this.island()))

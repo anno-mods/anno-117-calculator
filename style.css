@@ -1393,3 +1393,47 @@ right connector from last child*/
 .boost-group-permanent .inline-list-centered {
     justify-content: flex-start;
 }
+
+/* Trade routes dialog: sticky header and filter bar, indicator dots */
+.trade-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background-color: inherit;
+    border-radius: inherit;
+}
+
+.trade-filter-select {
+    width: auto;
+    max-width: 14rem;
+}
+
+.trade-table th[aria-sort="ascending"] .villa-sort-indicator,
+.trade-table th[aria-sort="descending"] .villa-sort-indicator {
+    opacity: 1;
+    color: #007bff;
+}
+
+.route-ind-red {
+    color: #d9534f;
+}
+
+.route-ind-yellow {
+    color: #f0ad4e;
+}
+
+.trade-table .prod-trigger.trade-red,
+.trade-table .prod-trigger.trade-yellow,
+.product-tile .prod-trigger {
+    border-bottom: 0;
+}
+
+.trade-table .prod-tip {
+    right: 0;
+    left: auto;
+    text-align: left;
+}
+
+.trade-stops {
+    list-style: decimal;
+}
