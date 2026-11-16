@@ -2,6 +2,7 @@ import { ko, formatNumber } from './util';
 import { stopsOf } from './exchange/derive-routes';
 import { exchangeIdOf, getRouteAnalysis, TradeRoute } from './trade';
 import { MIN_GAPS } from './route-analysis';
+import { recomputeShares } from './trade-allocation';
 import type { PairEvidence, RouteAnalysis, RouteIndicators } from './route-analysis';
 
 declare const window: any;
@@ -177,6 +178,12 @@ export class TradeRoutesViewModel {
 
     // ---- texts ----
 
+    /** Recomputes the floors and the default supplier of every multi-source group (src/trade-allocation.ts). */
+    recomputeShares(untouchedOnly = false): void {
+        ko.tasks.runEarly();
+        recomputeShares(window.view.tradeManager.routes(), { untouchedOnly });
+    }
+
     t(key: string): string {
         return window.view.texts[key]?.name() ?? key;
     }
@@ -221,8 +228,8 @@ export class TradeRoutesViewModel {
                     index: s.index,
                     islandId: s.island,
                     name: this.islandName(analysis, s.island),
-                    loads: s.slots.filter((sl) => sl.mode === 'load').map((sl) => sl.product),
-                    unloads: s.slots.filter((sl) => sl.mode === 'unload').map((sl) => sl.product),
+                    loads: [...new Set(s.slots.filter((sl) => sl.mode === 'load').map((sl) => sl.product))],
+                    unloads: [...new Set(s.slots.filter((sl) => sl.mode === 'unload').map((sl) => sl.product))],
                 }));
                 const id = String(route.id);
                 list.push({ id, name: typeof route.name === 'string' && route.name ? route.name : id, stops, pairs: analysis.pairsOfRoute(id) });

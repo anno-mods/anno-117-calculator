@@ -2,10 +2,12 @@
 //
 // Implements the candidate trade derivation of the format specification (spec/format.md, "Candidate trade derivation"):
 // per route with ships and per product a station is a source (loads, never unloads), a sink (unloads) or a relay (does
-// both, counted as a sink). Every unload slot is served by the nearest preceding source in circuit order, with
-// wraparound; a source that loads the same slot index wins. The weight of a (sink, supplier) pair is the unloaded
-// amount times the ship count; a supplier's share is its weight over the sum for the island and product. The residual
-// (default) supplier is the largest share, ties by the smallest island id (R54). The result carries no amounts.
+// both, counted as a sink). Every unload slot is served by every source of the product; sources that load the same
+// slot index serve it, else all sources do. The weight of a (sink, supplier) pair is the unloaded amount divided by the
+// number of serving sources, times the ship count; a supplier's share is its weight over the sum for the island and
+// product. The share only provisionally picks the residual (default) supplier, the largest share, ties by the smallest
+// island id (R54): the amounts and the final default come from the allocation after the import (src/trade-allocation.ts).
+// The result carries no amounts.
 //
 // `hasShipRoutes` is the single place that decides whether the re-calculation toggle has an effect (OQ3): the file's
 // `trade.routes` hold at least one route with at least one ship. No source signal is read.
@@ -75,14 +77,18 @@ export interface StopPair {
     sink: Stop;
     source: Stop;
     slot: RouteSlot;
+    /** Number of source islands serving this unload slot. */
+    servers: number;
 }
 
-// Load-to-unload pairs of one route: the nearest preceding source in circuit order serves each unload slot.
+// Load-to-unload pairs of one route: every source of the product serves each unload slot of a sink, so a route that
+// collects a good at several islands yields one pair per source. Sources that load the same slot index serve the slot;
+// when none does, all sources of the product serve it. `servers` is the number of sources serving the slot.
 export function pairsOf(route: TradeRoute, visits: Record<string, unknown>[] = []): StopPair[] {
     const out: StopPair[] = [];
     const parsed = stopsOf(route);
     if (!parsed || parsed.stops.length === 0) return out;
-    const { stops, length } = parsed;
+    const { stops } = parsed;
     const routeId = typeof route.id === "string" ? route.id : "";
 
     const products = new Set<number>();
@@ -123,15 +129,14 @@ export function pairsOf(route: TradeRoute, visits: Record<string, unknown>[] = [
         for (const sink of sinks) {
             for (const slot of unloads(sink)) {
                 const wanted = typeof slot.slot === "number" ? slot.slot : undefined;
-                const distance = (src: Stop): number => (((sink.index - src.index) % length) + length) % length;
                 const candidates = sources.filter((src) => src !== sink && src.island !== sink.island);
                 if (candidates.length === 0) continue;
                 const sameSlot = wanted === undefined ? [] : candidates.filter((src) => loads(src).some((l) => l.slot === wanted));
                 const pool = sameSlot.length > 0 ? sameSlot : candidates;
-                let best = pool[0];
-                for (const c of pool) if (distance(c) < distance(best) || (distance(c) === distance(best) && c.index < best.index)) best = c;
-
-                out.push({ product, sink, source: best, slot });
+                // One pair per source island: a source visited at several stops is one supplier.
+                const islands = new Set<string>();
+                const servers = pool.filter((src) => !islands.has(src.island) && islands.add(src.island));
+                for (const source of servers) out.push({ product, sink, source, slot, servers: servers.length });
             }
         }
     }
@@ -145,8 +150,8 @@ export function deriveImports(routes: TradeRoute[], visits: Record<string, unkno
         if (!isObj(route)) continue;
         const ships = shipCount(route);
         if (ships <= 0) continue;
-        for (const { product, sink, source, slot } of pairsOf(route, visits)) {
-            const amount = typeof slot.amount === "number" && Number.isFinite(slot.amount) && slot.amount > 0 ? slot.amount : 1;
+        for (const { product, sink, source, slot, servers } of pairsOf(route, visits)) {
+            const amount = (typeof slot.amount === "number" && Number.isFinite(slot.amount) && slot.amount > 0 ? slot.amount : 1) / Math.max(1, servers);
             const key = `${sink.island}|${product}`;
             let pair = pairs.get(key);
             if (!pair) pairs.set(key, (pair = { island: sink.island, product, weights: new Map() }));

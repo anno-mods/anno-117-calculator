@@ -86,6 +86,39 @@ test.describe('route derivation (U7)', () => {
         expect(d[0].suppliers.find((s) => s.default)?.island).toBe('alpha');
     });
 
+    test('one route collecting a good at five islands: every source is a supplier of the sink, once each', async ({ page }) => {
+        const loads = (slots: number[]) => slots.map((s) => load(BREAD, s, 50));
+        const d = await derive(page, [
+            route('r73', [
+                { island: 'a8451', slots: loads([0, 1, 2, 3, 4]) },
+                // slot 2 twice and slot 0 missing, as the savegame extraction delivers it
+                { island: 'a8899', slots: [2, 1, 2, 3, 4].map((s) => unload(BREAD, s, 50)) },
+                { island: 'a9667', slots: loads([0, 1, 2, 3, 4]) },
+                { island: 'a9795', slots: loads([0, 1, 2, 3, 4]) },
+                { island: 'a9603', slots: loads([0, 1, 2, 3, 4]) },
+                { island: 'a8515', slots: loads([0, 1, 2, 3, 4]) },
+            ]),
+        ]);
+        expect(d.length).toBe(1);
+        expect(d[0].island).toBe('a8899');
+        expect(d[0].suppliers.map((s) => s.island).sort()).toEqual(['a8451', 'a8515', 'a9603', 'a9667', 'a9795']);
+        expect(d[0].suppliers.filter((s) => s.default)).toHaveLength(1);
+        for (const s of d[0].suppliers) expect(s.share).toBeCloseTo(0.2, 9);
+    });
+
+    test('sources that load different slot indexes serve only their own slots', async ({ page }) => {
+        const d = await derive(page, [
+            route('r1', [
+                { island: 'a', slots: [load(BREAD, 0, 50)] },
+                { island: 'b', slots: [load(BREAD, 1, 50), load(BREAD, 2, 50)] },
+                { island: 'c', slots: [unload(BREAD, 0, 50), unload(BREAD, 1, 50), unload(BREAD, 2, 50)] },
+            ]),
+        ]);
+        const shares = Object.fromEntries(d[0].suppliers.map((s) => [s.island, s.share as number]));
+        expect(shares.a).toBeCloseTo(1 / 3, 9);
+        expect(shares.b).toBeCloseTo(2 / 3, 9);
+    });
+
     test('a good that is never unloaded gives no entry', async ({ page }) => {
         expect(await derive(page, [route('r1', [{ island: 'a', slots: [load(BREAD)] }, { island: 'b', slots: [load(BREAD)] }])])).toEqual([]);
     });

@@ -110,6 +110,10 @@ export interface RouteEvidence {
     deliveredPerMin?: number;
     /** A reason that makes this route's values unavailable. */
     reason?: 'no-ships' | 'ship' | 'ambiguous' | 'clock' | 'gaps';
+    /** Game route, destination and product: evidences of several sources with one key describe the same unload slots. */
+    capacityKey: string;
+    /** Number of source islands that serve the destination with the product on this game route. */
+    sources: number;
 }
 
 export interface PairEvidence {
@@ -222,19 +226,38 @@ export class RouteAnalysis {
             const slotSize = slotAmounts.length ? Math.max(...slotAmounts) : 0;
 
             // Group the load-unload pairs by source island, destination island and product.
-            const groups = new Map<string, { source: string; dest: string; product: number; sinks: Map<number, { stop: Stop; amounts: Map<number | string, number> }> }>();
+            // Every source of a product serves every unload slot of a sink, so the unload capacity of a sink belongs to
+            // the game route and the destination, not to one source: all groups of a destination share one union of the
+            // unload slots and one `capacityKey`.
+            type SinkSlots = Map<number, { stop: Stop; amounts: Map<number | string, number> }>;
+            const groups = new Map<string, { source: string; dest: string; product: number; sinks: SinkSlots }>();
+            const unions = new Map<string, { sinks: SinkSlots; sources: Set<string> }>();
             for (const p of pairsOf(route, this.data.visits)) {
                 const key = pairKey(p.source.island, p.sink.island, p.product);
                 let g = groups.get(key);
                 if (!g) groups.set(key, (g = { source: p.source.island, dest: p.sink.island, product: p.product, sinks: new Map() }));
-                let sink = g.sinks.get(p.sink.index);
-                if (!sink) g.sinks.set(p.sink.index, (sink = { stop: p.sink, amounts: new Map() }));
+                const unionKey = `${p.sink.island}|${p.product}`;
+                let union = unions.get(unionKey);
+                if (!union) unions.set(unionKey, (union = { sinks: new Map(), sources: new Set() }));
+                union.sources.add(p.source.island);
+                let sink = union.sinks.get(p.sink.index);
+                if (!sink) union.sinks.set(p.sink.index, (sink = { stop: p.sink, amounts: new Map() }));
                 const amount = typeof p.slot.amount === 'number' && p.slot.amount > 0 ? p.slot.amount : 0;
                 sink.amounts.set(p.slot.slot ?? `i${sink.amounts.size}`, amount);
+                g.sinks = union.sinks;
             }
 
             for (const g of groups.values()) {
-                const ev: RouteEvidence = { routeId, routeName: typeof route.name === 'string' ? route.name : routeId, gapCount: 0, relay: false, ships };
+                const union = unions.get(`${g.dest}|${g.product}`) as { sinks: SinkSlots; sources: Set<string> };
+                const ev: RouteEvidence = {
+                    routeId,
+                    routeName: typeof route.name === 'string' ? route.name : routeId,
+                    gapCount: 0,
+                    relay: false,
+                    ships,
+                    capacityKey: `${routeId}|${g.dest}|${g.product}`,
+                    sources: union.sources.size,
+                };
                 const stops = [...g.sinks.values()];
                 const totals = stops.map((s) => [...s.amounts.values()].reduce((a, b) => a + b, 0));
                 // The same island at several stops: the outcome must not differ between the mappings (AE3).
@@ -349,7 +372,10 @@ export function computeIndicators(input: IndicatorInput): RouteIndicators {
 
     // Every game route that serves the destination with the product is combined before the red state is decided (R10),
     // whichever source island it loads at.
-    const served = analysis.evidenceToDest(dest, product).flatMap((p) => p.routes);
+    // Sources of one game route share its unload slots: each game route counts once.
+    const byKey = new Map<string, RouteEvidence>();
+    for (const r of analysis.evidenceToDest(dest, product).flatMap((p) => p.routes)) if (!byKey.has(r.capacityKey)) byKey.set(r.capacityKey, r);
+    const served = [...byKey.values()];
     const bad = served.find((r) => r.reason);
     if (bad) return { ...NONE, reason: bad.reason as Reason, gameRoutes: ev.routes.length };
 
@@ -373,7 +399,8 @@ export function computeIndicators(input: IndicatorInput): RouteIndicators {
         red: capacity > 0 ? totalRequired > capacity + EPS : totalRequired > EPS,
         competing: [],
     };
-    const unloads = ev.routes.map((r) => r.actualUnload);
+    // The recorded unload is the total at the destination; with several sources it is not this route's share.
+    const unloads = ev.routes.map((r) => (r.sources > 1 ? undefined : r.actualUnload));
     if (unloads.every((u) => u !== undefined)) ind.actualUnload = (unloads as number[]).reduce((a, b) => a + b, 0);
     if (ind.actualUnload !== undefined && ev.routes.some((r) => r.netOnly)) ind.unloadIsNet = true;
 

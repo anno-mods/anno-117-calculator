@@ -2890,6 +2890,34 @@ export const texts: Record<string, Record<string, string>> = {
         japanese: "警告のある航路のみ",
         korean: "경고가 있는 항로만"
     },
+    tradeRecomputeShares: {
+        english: "Recompute shares",
+        french: "Recalculer les parts",
+        polish: "Przelicz udziały",
+        spanish: "Recalcular cuotas",
+        italian: "Ricalcola le quote",
+        german: "Anteile neu berechnen",
+        brazilian: "Recalcular participações",
+        russian: "Пересчитать доли",
+        simplified_chinese: "重新计算份额",
+        traditional_chinese: "重新計算份額",
+        japanese: "配分を再計算",
+        korean: "배분 다시 계산"
+    },
+    tradeRecomputeSharesHint: {
+        english: "Splits the demand of each island that has several supplying routes by the production of the sources: fixed amounts for all but the largest producer, which stays the default supplier. Replaces fixed amounts set by hand on those routes.",
+        french: "Répartit la demande de chaque île ayant plusieurs routes d'approvisionnement selon la production des sources : des quantités fixes pour tous sauf le plus gros producteur, qui reste le fournisseur par défaut. Remplace les quantités fixes saisies à la main sur ces routes.",
+        polish: "Dzieli zapotrzebowanie każdej wyspy z kilkoma trasami zaopatrzenia według produkcji źródeł: stałe ilości dla wszystkich oprócz największego producenta, który pozostaje domyślnym dostawcą. Zastępuje ręcznie ustawione stałe ilości na tych trasach.",
+        spanish: "Reparte la demanda de cada isla con varias rutas de suministro según la producción de las fuentes: cantidades fijas para todas salvo la mayor productora, que sigue siendo el proveedor por defecto. Sustituye las cantidades fijas puestas a mano en esas rutas.",
+        italian: "Ripartisce la domanda di ogni isola con più rotte di rifornimento in base alla produzione delle fonti: quantità fisse per tutte tranne il maggiore produttore, che resta il fornitore predefinito. Sostituisce le quantità fisse impostate a mano su quelle rotte.",
+        german: "Verteilt den Bedarf jeder Insel mit mehreren Liefer-Routen nach der Produktion der Quellen: feste Mengen für alle außer dem größten Produzenten, der Standardlieferant bleibt. Ersetzt von Hand gesetzte feste Mengen dieser Routen.",
+        brazilian: "Divide a demanda de cada ilha com várias rotas de fornecimento pela produção das fontes: quantidades fixas para todas, exceto o maior produtor, que continua como fornecedor padrão. Substitui as quantidades fixas definidas manualmente nessas rotas.",
+        russian: "Распределяет потребность каждого острова с несколькими маршрутами снабжения по производству источников: фиксированные объёмы у всех, кроме крупнейшего производителя, который остаётся поставщиком по умолчанию. Заменяет вручную заданные фиксированные объёмы этих маршрутов.",
+        simplified_chinese: "按来源岛屿的产量分配每个拥有多条供货航线的岛屿的需求：除产量最大者（仍为默认供应方）外，其余均为固定数量。会替换这些航线上手动设置的固定数量。",
+        traditional_chinese: "依來源島嶼的產量分配每個擁有多條供貨航線的島嶼的需求：除產量最大者（仍為預設供應方）外，其餘均為固定數量。會取代這些航線上手動設定的固定數量。",
+        japanese: "複数の供給航路を持つ各島の需要を、供給元の生産量に応じて配分します。最大の生産島（既定の供給元のまま）以外は固定量になります。これらの航路に手動で設定した固定量は置き換えられます。",
+        korean: "여러 공급 항로가 있는 각 섬의 수요를 공급원의 생산량에 따라 나눕니다. 기본 공급원으로 남는 최대 생산 섬을 제외하고는 고정량이 됩니다. 이 항로에 직접 설정한 고정량은 대체됩니다."
+    },
     tradeColSource: {
         english: "Source",
         french: "Source",

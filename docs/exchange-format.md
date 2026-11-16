@@ -159,7 +159,13 @@ export dropped or approximated. A file that cannot be read at all is the one imp
   from savegame data" and at least one ship on the file's `routes` (`hasShipRoutes`, no source signal is read) the supplier
   sets, residual suppliers and floors come from the route data (`derive-routes.ts`, the candidate derivation of the
   specification, no amounts); governor, non-player and passive suppliers and the entered amounts of `basis: "entered"`
-  entries still come from `imports`. Routes the calculator keeps (keep my other routes) take part in the default-supplier
+  entries still come from `imports`. A route that collects a good at several islands gives the receiver one route per
+  source island. After the import reloads the page, `src/trade-allocation.ts` splits the receiver's demand across these
+  routes once: the source that can give most (built capacity plus extra goods, minus its own demand without routes)
+  stays or becomes the default supplier, every other source gets a floor of demand times its share of the summed
+  surplus, or its full surplus when the demand exceeds the summed surplus. Groups with a floor set by hand are left alone;
+  the button "Recompute shares" in the trade routes dialog repeats the allocation for every multi-source group and
+  replaces such floors. Routes the calculator keeps (keep my other routes) take part in the default-supplier
   cycle check; a route of a (product, receiver) pair the file produces is replaced. A partial Trade import that leaves
   routes or a passive amount next to a preserved entry refreshes the entry's snapshot, so the export keeps the entry and
   lists the kept routes next to its suppliers. A local producer of a received good is fully utilized unless the
@@ -280,7 +286,8 @@ the calculator and prints computed values per island; it checks the config updat
 ## Limits
 
 - Supplier sets follow `imports`. Only with "re-calculate routes from savegame data" and at least one ship on the file's
-  `routes` does the calculator derive them from `routes` (the specification's candidate derivation, no amounts); the rule
+  `routes` does the calculator derive them from `routes` (the candidate derivation with every source of a good serving
+  every unload slot, no amounts); the rule
   for relays and order-dependent routes belongs to the file's writer. The derived sets differ from the planner's `imports`
   for part of the entries, which is why the toggle is off by default.
 - `products[p].producer` is read as given (the config updater of the savegame repository decides it).

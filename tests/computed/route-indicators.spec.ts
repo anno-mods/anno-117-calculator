@@ -360,4 +360,30 @@ test.describe('route indicators (U2)', () => {
         });
         expect(left).toEqual({ n: 1, available: true });
     });
+
+    test('one game route that collects at two islands: the unload slots count once for both calculator routes', async ({ page }) => {
+        const collect = {
+            id: 1,
+            name: 'collect',
+            stations: [
+                { island: 'a1', slots: [slot(BREAD, 'load', 0, 50)] },
+                { island: 'a2', slots: [slot(BREAD, 'load', 0, 50)] },
+                { island: 'a3', slots: [slot(BREAD, 'unload', 0, 50)] },
+            ],
+            ships: [ship()],
+        };
+        await load(page, { routes: [collect], visits: visitsAt(1, 'a3', GAPS) }, [
+            { from: 'Roma', to: 'Cumae', amount: 1 },
+            { from: 'Ostia', to: 'Cumae', amount: 1 },
+        ]);
+        for (const i of [0, 1]) {
+            const r = await ind(page, i);
+            expect(r.available).toBe(true);
+            expect(r.requiredOffload).toBeCloseTo(20, 6);
+            expect(r.capacity).toBeCloseTo(50, 6);
+            expect(r.utilization).toBeCloseTo(80, 6);
+            expect(r.red).toBe(false);
+            expect(r.actualUnload).toBeUndefined();
+        }
+    });
 });

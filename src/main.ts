@@ -19,6 +19,7 @@ import { Effect, ProductCategory, Fertility, AreaBuff } from './production';
 import { isAggregating, compareAggregateDemands } from './aggregate';
 import { VillaItemsViewModel } from './villa-items';
 import { TradeRoutesViewModel } from './trade-routes-dialog';
+import { recomputeShares } from './trade-allocation';
 import { DlcSettings } from './dlc-settings';
 import './exchange';
 import { ExchangeReportDialog } from './exchange/report-dialog';
@@ -385,6 +386,13 @@ function openDownloadDialogAfterImport(): void {
         window.sessionStorage.removeItem(JUST_IMPORTED_KEY);
     } catch (e) {
         return;
+    }
+    // One-shot allocation of the imported multi-source routes (src/trade-allocation.ts); hand-set floors stay.
+    try {
+        ko.tasks.runEarly();
+        recomputeShares(window.view.tradeManager.routes(), { untouchedOnly: true });
+    } catch (e) {
+        console.warn('trade allocation after import failed', e);
     }
     $('#download-dialog').modal('show');
 }
