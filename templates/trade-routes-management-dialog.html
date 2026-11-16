@@ -47,7 +47,7 @@
                         <label class="custom-control-label" for="trade-filter-warnings" data-bind="text: $root.tradeRoutes.t('tradeWarningsOnly')"></label>
                     </div>
                     <button type="button" id="trade-recompute-shares" class="btn btn-outline-secondary btn-sm mr-3"
-                            data-bind="click: () => $root.tradeRoutes.recomputeShares(), text: $root.tradeRoutes.t('tradeRecomputeShares'), attr: {title: $root.tradeRoutes.t('tradeRecomputeSharesHint')}"></button>
+                            data-bind="click: () => $root.tradeRoutes.recomputeShares(false, true), text: $root.tradeRoutes.t('tradeRecomputeShares'), attr: {title: $root.tradeRoutes.t('tradeRecomputeSharesHint')}"></button>
                     <!-- ko if: $root.tradeRoutes.pair() -->
                     <span class="badge badge-info trade-jump-chip">
                         <span data-bind="text: $root.tradeRoutes.pair().label"></span>

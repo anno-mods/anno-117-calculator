@@ -164,8 +164,12 @@ export dropped or approximated. A file that cannot be read at all is the one imp
   routes once: the source that can give most (built capacity plus extra goods, minus its own demand without routes)
   stays or becomes the default supplier, every other source gets a floor of demand times its share of the summed
   surplus, or its full surplus when the demand exceeds the summed surplus. Groups with a floor set by hand are left alone;
-  the button "Recompute shares" in the trade routes dialog repeats the allocation for every multi-source group and
-  replaces such floors. Routes the calculator keeps (keep my other routes) take part in the default-supplier
+  the button "Recompute shares" in the trade routes dialog updates the floors of every multi-source group, replaces
+  hand-set floors and keeps each group's default supplier. A producer named in `products[].producer` that the island has
+  built (`buildings[].built > 0`) stays the default supplier; an import of that product is written as an ordinary route
+  (`factory-default-kept`), because a factory that is not the default supplier would not run and neither would its extra
+  goods. The allocation then gives such a route a fixed amount only for the demand the factory's built capacity cannot
+  cover, split across the routes by the surplus of their sources. Routes the calculator keeps (keep my other routes) take part in the default-supplier
   cycle check; a route of a (product, receiver) pair the file produces is replaced. A partial Trade import that leaves
   routes or a passive amount next to a preserved entry refreshes the entry's snapshot, so the export keeps the entry and
   lists the kept routes next to its suppliers. A local producer of a received good is fully utilized unless the

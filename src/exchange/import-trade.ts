@@ -352,6 +352,15 @@ class TradePlanner {
                 continue;
             }
             let isDefault = residual === c;
+            // A producer named in the file keeps the default supplier: an own factory that is not the default would not run, and
+            // with it its extra goods. The route is written as an ordinary route (floor 0 unless entered).
+            if (isDefault && this.builtProducerIsDefault(receiver, e.product)) {
+                isDefault = false;
+                this.add("approximated", "factory-default-kept", `Product ${e.product} on ${receiver.name} keeps its factory as default supplier; ${from.name} is written as an ordinary route.`, receiver.id, {
+                    product: e.product,
+                    from: from.id,
+                });
+            }
             if (isDefault) {
                 const demand = this.defaultBlocked(e.product, from.key, receiver.key);
                 if (demand === "duplicate") {
@@ -439,6 +448,14 @@ class TradePlanner {
         let map = this.defaults.get(product);
         if (!map) this.defaults.set(product, (map = new Map()));
         map.set(to, from);
+    }
+
+    // The file names a producer of the product and the island has built it.
+    private builtProducerIsDefault(receiver: IslandPlan, product: number): boolean {
+        const store = this.result.islands[receiver.key].store;
+        if (store[keys.defaultSupplierType(product)] !== "factory") return false;
+        const built = receiver.file.buildings?.[String(store[keys.defaultSupplierId(product)])]?.built;
+        return typeof built === "number" && built > 0;
     }
 
     // R51: a built local producer of the product is fully utilized unless the file states otherwise.

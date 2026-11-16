@@ -179,9 +179,9 @@ export class TradeRoutesViewModel {
     // ---- texts ----
 
     /** Recomputes the floors and the default supplier of every multi-source group (src/trade-allocation.ts). */
-    recomputeShares(untouchedOnly = false): void {
+    recomputeShares(untouchedOnly = false, keepDefault = false): void {
         ko.tasks.runEarly();
-        recomputeShares(window.view.tradeManager.routes(), { untouchedOnly });
+        recomputeShares(window.view.tradeManager.routes(), { untouchedOnly, keepDefault });
     }
 
     t(key: string): string {

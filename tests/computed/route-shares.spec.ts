@@ -43,6 +43,18 @@ test.describe('allocateShares (pure rule)', () => {
         expect(r.find((x) => x.isDefault)?.key).toBe('B');
     });
 
+    test('keepPreferred leaves the default where it is and only sets the floors of the others', () => {
+        const r = allocateShares(5, sources, () => true, 'C', true);
+        expect(r.find((x) => x.isDefault)?.key).toBe('C');
+        expect(r.find((x) => x.key === 'A')?.floor).toBeGreaterThan(0);
+        expect(r.find((x) => x.key === 'B')?.floor).toBeGreaterThan(0);
+    });
+
+    test('keepPreferred does not keep a source that must not be default', () => {
+        const r = allocateShares(5, sources, (k) => k !== 'C', 'C', true);
+        expect(r.find((x) => x.isDefault)?.key).toBe('A');
+    });
+
     test('a source that must not be default is skipped; it keeps a floor of its own', () => {
         const r = allocateShares(5, sources, (k) => k !== 'A');
         expect(r.find((x) => x.isDefault)?.key).toBe('B');
@@ -130,6 +142,34 @@ test.describe('recomputeShares on routes', () => {
         await page.evaluate(() => (window as any).view.tradeRoutes.recomputeShares());
         const after = await floors(page);
         expect(after.find((r: any) => r.from === 'Ostia' && r.to === 'Cumae').def).toBe(true);
+    });
+
+    test('keeping the default updates only the floors of the other routes', async ({ page }) => {
+        await load(page, ROUTES);
+        await setBakeries(page, { Roma: 1, Ostia: 4 });
+        await page.evaluate(() => (window as any).view.tradeRoutes.recomputeShares(false, true));
+        const list = await floors(page);
+        const roma = list.find((r: any) => r.from === 'Roma' && r.to === 'Cumae');
+        const ostia = list.find((r: any) => r.from === 'Ostia' && r.to === 'Cumae');
+        expect(roma.def).toBe(true);
+        expect(ostia.def).toBe(false);
+        expect(ostia.floor).toBeGreaterThan(0);
+    });
+
+    test('a built factory as default supplier stays; the routes carry what its capacity cannot cover', async ({ page }) => {
+        await load(page, [route('Roma', 'Cumae', 0, false), route('Ostia', 'Cumae', 0, false), route('Cumae', 'Pompeii', 6, false)]);
+        const cap = await setBakeries(page, { Cumae: 1, Roma: 3, Ostia: 1 });
+        await page.evaluate(() => (window as any).view.tradeRoutes.recomputeShares());
+        const list = await floors(page);
+        const roma = list.find((r: any) => r.from === 'Roma' && r.to === 'Cumae');
+        const ostia = list.find((r: any) => r.from === 'Ostia' && r.to === 'Cumae');
+        const need = Math.max(0, 6 - cap.Cumae);
+        const total = cap.Roma + cap.Ostia;
+        expect(roma.def).toBe(false);
+        expect(ostia.def).toBe(false);
+        expect(roma.floor + ostia.floor).toBeCloseTo(Math.min(need, total), 6);
+        const isDefaultFactory = await page.evaluate(() => (window as any).view.islands().find((i: any) => i.name() === 'Cumae').assetsMap.get(2137).defaultSupplier().type);
+        expect(isDefaultFactory).toBe('factory');
     });
 
     test('a single supplier is left alone', async ({ page }) => {

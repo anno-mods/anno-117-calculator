@@ -37,13 +37,16 @@ export function allocateShares(
     sources: ShareSource[],
     canBeDefault: (key: string) => boolean = () => true,
     preferred?: string,
+    keepPreferred = false,
 ): ShareResult[] {
     // Equal surplus keeps the preferred (current) default, then the alphabetically first island.
     const rank = (k: string): number => (k === preferred ? 0 : 1);
     const sorted = [...sources].sort((a, b) => b.surplus - a.surplus || rank(a.key) - rank(b.key) || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
     const total = sorted.reduce((sum, s) => sum + Math.max(0, s.surplus), 0);
     const need = Math.max(0, demand);
-    const top = sorted.find((s) => canBeDefault(s.key)) ?? sorted[0];
+    // keepPreferred: the default supplier stays where the user put it; only the floors of the others follow the surplus.
+    const kept = keepPreferred ? sorted.find((s) => s.key === preferred && canBeDefault(s.key)) : undefined;
+    const top = kept ?? sorted.find((s) => canBeDefault(s.key)) ?? sorted[0];
     return sorted.map((s) => {
         if (s === top) return { key: s.key, floor: 0, isDefault: true };
         const surplus = Math.max(0, s.surplus);
@@ -69,10 +72,12 @@ export function builtCapacity(product: Product): number {
 export interface SharesOptions {
     /** Leave groups alone that carry a floor set by hand (a group is untouched while every route floor is 0). */
     untouchedOnly: boolean;
+    /** Keep the current default supplier of every group and update only the floors of the other routes. */
+    keepDefault?: boolean;
 }
 
 /** Groups of two or more island routes into one destination and product, keyed by the destination's product. */
-function groupsOf(routes: TradeRoute[]): Map<Product, TradeRoute[]> {
+function groupsOf(routes: TradeRoute[], minSize = 2): Map<Product, TradeRoute[]> {
     const groups = new Map<Product, TradeRoute[]>();
     for (const r of routes) {
         if (!r.active() || r.from.isAllIslands() || r.to.isAllIslands()) continue;
@@ -80,8 +85,28 @@ function groupsOf(routes: TradeRoute[]): Map<Product, TradeRoute[]> {
         list.push(r);
         groups.set(r.toIslandProduct, list);
     }
-    for (const [p, list] of groups) if (list.length < 2) groups.delete(p);
+    for (const [p, list] of groups) if (list.length < minSize) groups.delete(p);
     return groups;
+}
+
+/**
+ * The default supplier is a built factory of the destination: the routes only cover what its built capacity cannot, as
+ * fixed amounts split by the surplus of their sources. Returns whether a group was touched.
+ */
+function setFactoryFloors(dest: Product, group: TradeRoute[], factory: Factory, options: SharesOptions): boolean {
+    if (factory.buildings.constructed() <= 0) return false;
+    if (options.untouchedOnly && group.some((r) => r.userSetAmount() > 0)) return false;
+    const capacity = (factory.buildings.constructed() * factory.boost() * 60 * factory.extraGoodFactor()) / factory.cycleTime;
+    const others = dest.totalCurrentProduction() - factory.currentProduction() - group.reduce((sum, r) => sum + r.currentProduction(), 0);
+    const need = Math.max(0, dest.totalDemand() - others - capacity);
+    const surplus = group.map((r) => Math.max(0, builtCapacity(r.fromIslandProduct) - r.fromIslandProduct.totalDemandNoRoutes()));
+    const total = surplus.reduce((a, b) => a + b, 0);
+    group.forEach((r, i) => {
+        const floor = total <= EPS ? 0 : total <= need ? surplus[i] : (need * surplus[i]) / total;
+        r.userSetAmount(floor);
+        r.setDemand(floor);
+    });
+    return true;
 }
 
 /**
@@ -91,9 +116,14 @@ function groupsOf(routes: TradeRoute[]): Map<Product, TradeRoute[]> {
  */
 export function recomputeShares(routes: TradeRoute[], options: SharesOptions): number {
     let changed = 0;
-    for (const [dest, group] of groupsOf(routes)) {
-        const current = dest.defaultSupplier() as TradeRoute | null;
-        if (!current || !group.includes(current)) continue;
+    for (const [dest, group] of groupsOf(routes, 1)) {
+        const supplier = dest.defaultSupplier();
+        if (supplier && supplier.type === 'factory') {
+            if (setFactoryFloors(dest, group, supplier as Factory, options)) changed++;
+            continue;
+        }
+        const current = supplier as TradeRoute | null;
+        if (group.length < 2 || !current || !group.includes(current)) continue;
         if (options.untouchedOnly && group.some((r) => r.userSetAmount() > 0)) continue;
 
         const others = dest.totalCurrentProduction() - group.reduce((sum, r) => sum + r.currentProduction(), 0);
@@ -103,7 +133,7 @@ export function recomputeShares(routes: TradeRoute[], options: SharesOptions): n
             key: r.from.name(),
             surplus: Math.max(0, builtCapacity(r.fromIslandProduct) - r.fromIslandProduct.totalDemandNoRoutes()),
         }));
-        const result = allocateShares(demand, sources, (key) => !(byName.get(key) as TradeRoute).fromIslandProduct.isSuppliedFrom(dest), current.from.name());
+        const result = allocateShares(demand, sources, (key) => !(byName.get(key) as TradeRoute).fromIslandProduct.isSuppliedFrom(dest), current.from.name(), options.keepDefault === true);
         const next = byName.get(result.find((x) => x.isDefault)?.key as string) as TradeRoute;
 
         if (next !== current) {

@@ -1277,6 +1277,18 @@ right connector from last child*/
     align-items: center;
 }
 
+/* .table-fixed centers every cell; the boost sources container reads left to right */
+.table-fixed tr.boost-sources-row td {
+    text-align: left;
+}
+
+/* Game trade route icon and its indicator sit together in the middle of the tile */
+.game-route-indicator .inline-list-stretched {
+    justify-content: center;
+    gap: .35rem;
+    margin-right: 0 !important;
+}
+
 .boost-head-pair {
     display: inline-flex;
     align-items: center;

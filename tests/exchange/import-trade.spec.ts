@@ -567,6 +567,18 @@ test.describe('import plan: trade (U6)', () => {
         expect(trade.islands['B'].ext.preservedImports).toEqual([]);
     });
 
+    test('a built producer named in the file stays the default supplier; the import becomes an ordinary route', async ({ page }) => {
+        const built = doc([isl('a'), isl('b', { buildings: { [BAKERY]: { built: 2 } }, products: { [BREAD]: { producer: BAKERY } } })], { imports: [imp('b', BREAD, [{ island: 'a', default: true }])] });
+        const r = await planFull(page, built);
+        expect(r.trade.tradeRoutes).toEqual([{ productGUID: BREAD, from: 'A', to: 'B', userSetAmount: 0, isDefaultSupplier: false }]);
+        expect(codes(r.trade.report)).toContain('factory-default-kept');
+        const key = Object.keys(r.trade.islands).find((k) => k.toUpperCase() === 'B') as string;
+        expect(r.trade.islands[key].store['2137.defaultSupplier.type']).toBe('factory');
+        // Without the building the route stays the default supplier.
+        const unbuilt = doc([isl('a'), isl('b', { products: { [BREAD]: { producer: BAKERY } } })], { imports: [imp('b', BREAD, [{ island: 'a', default: true }])] });
+        expect((await planFull(page, unbuilt)).trade.tradeRoutes[0].isDefaultSupplier).toBe(true);
+    });
+
     test('Covers R14: a kept default route closes a cycle with a plan default route; a kept route of a produced pair is not seen', async ({ page }) => {
         const text = doc([isl('a'), isl('b')], { imports: [imp('b', BREAD, [{ island: 'a', default: true }])] });
         // Kept: B supplies A (default). The plan makes A the default supplier of B: a cycle.
