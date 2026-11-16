@@ -106,6 +106,8 @@ export interface RouteEvidence {
     ships: number;
     /** `actualUnload` is the net of a stop that also loads the product, so a lower bound of the unload. */
     netOnly?: boolean;
+    /** Tons per minute delivered over the recorded visits (lower bound for a stop that also loads the product). */
+    deliveredPerMin?: number;
     /** A reason that makes this route's values unavailable. */
     reason?: 'no-ships' | 'ship' | 'ambiguous' | 'clock' | 'gaps';
 }
@@ -280,6 +282,9 @@ export class RouteAnalysis {
                 if (positive.length && (!ev.relay || nets.every((n) => n >= 0))) {
                     ev.actualUnload = positive.reduce((a, b) => a + b, 0) / positive.length;
                     ev.netOnly = ev.relay;
+                    // Delivered tons per minute over the visit window (mean unload per visit times visits per minute).
+                    const span = times.length > 1 ? (times[times.length - 1] - times[0]) / MS_PER_MINUTE : 0;
+                    if (span > 0) ev.deliveredPerMin = (ev.actualUnload * (times.length - 1)) / span;
                 }
 
                 const key = pairKey(g.source, g.dest, g.product);
@@ -310,6 +315,8 @@ export interface RouteIndicators {
     gapMinutes?: number;
     /** `actualUnload` is the net of a stop that also loads the product (lower bound of the unload). */
     unloadIsNet?: boolean;
+    /** Red was suppressed: storage is not falling and the recorded deliveries cover the calculated rate. */
+    supplied?: boolean;
     gameRoutes: number;
     red: boolean;
     /** Yellow state: the minimum stock of a loading station, or an observed empty storage. */
@@ -369,6 +376,24 @@ export function computeIndicators(input: IndicatorInput): RouteIndicators {
     const unloads = ev.routes.map((r) => r.actualUnload);
     if (unloads.every((u) => u !== undefined)) ind.actualUnload = (unloads as number[]).reduce((a, b) => a + b, 0);
     if (ind.actualUnload !== undefined && ev.routes.some((r) => r.netOnly)) ind.unloadIsNet = true;
+
+    // Red is dropped when the game evidently supplies the destination: storage never empty and not falling, and the
+    // recorded deliveries reach at least 80 percent of the calculated rate into the destination. The rate is then
+    // overstated (for example production halted by full storage at the source), not the capacity too small.
+    if (ind.red) {
+        const delivered = served.every((r) => r.deliveredPerMin !== undefined) ? served.reduce((a, r) => a + (r.deliveredPerMin as number), 0) : undefined;
+        const totalRate = input.destRates.reduce((a, r) => a + Math.max(0, r), 0);
+        const samples = analysis.samples(dest, product);
+        if (delivered !== undefined && totalRate > EPS && samples.length >= 6 && Math.min(...samples) > EPS) {
+            const mean = (v: number[]) => v.reduce((a, b) => a + b, 0) / v.length;
+            const head = mean(samples.slice(0, 3));
+            const tail = mean(samples.slice(-3));
+            if (delivered >= 0.8 * totalRate && tail >= 0.98 * head) {
+                ind.red = false;
+                ind.supplied = true;
+            }
+        }
+    }
 
     // Yellow (a): minimum stock limits loading only (KTD9).
     const destMin = ev.routes.some((r) => r.relay) ? analysis.minimumStock(dest, product) : undefined;

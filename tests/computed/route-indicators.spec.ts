@@ -231,6 +231,30 @@ test.describe('route indicators (U2)', () => {
         expect(r.gapMinutes).toBeCloseTo(30, 6);
     });
 
+    test('red is dropped when storage is not falling and deliveries cover 80 percent of the rate; kept when storage falls', async ({ page }) => {
+        const series = (values: number[]) => [{ island: 'a2', product: BREAD, kind: 'storage', clock: 'game', unit: 't', start: 0, step: 600100, values }];
+        // 3 t/min x 20 min = 60 t over the 50 t capacity; delivered 35 t x 4 intervals / 50 min = 2.8 t/min = 93 % of the rate
+        const doc = (values: number[]) => ({ routes: [simpleRoute(1, 'a1', 'a2')], visits: visitsAt(1, 'a2', GAPS, 35), history: series(values) });
+        await load(page, doc([500, 500, 500, 500, 500, 500]), [{ ...R, amount: 3 }]);
+        let r = await ind(page);
+        expect(r.utilization).toBeCloseTo(120, 6);
+        expect(r.red).toBe(false);
+        expect(r.supplied).toBe(true);
+
+        await load(page, doc([500, 450, 400, 350, 300, 250]), [{ ...R, amount: 3 }]);
+        r = await ind(page);
+        expect(r.red).toBe(true);
+        expect(r.supplied).toBeUndefined();
+
+        // empty samples never count as supplied
+        await load(page, doc([500, 500, 0, 500, 500, 500]), [{ ...R, amount: 3 }]);
+        expect((await ind(page)).red).toBe(true);
+
+        // deliveries well below the rate: 7 t x 4 / 50 = 0.56 t/min of 3 t/min
+        await load(page, { ...doc([500, 500, 500, 500, 500, 500]), visits: visitsAt(1, 'a2', GAPS, 7) }, [{ ...R, amount: 3 }]);
+        expect((await ind(page)).red).toBe(true);
+    });
+
     test('AE1: zero demand and empty storage never shows yellow', async ({ page }) => {
         const history = [{ island: 'a2', product: BREAD, kind: 'storage', clock: 'game', unit: 't', start: 0, step: 600100, values: [0, 0, 0, 0] }];
         await load(page, { routes: [simpleRoute(51, 'a1', 'a2')], visits: visitsAt(51, 'a2', GAPS, 0), history }, [{ ...R, amount: 0 }]);
