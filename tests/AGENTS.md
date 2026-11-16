@@ -143,6 +143,7 @@ The Playwright `webServer` uses `http-server -p 8080`. On this machine port 8080
 - **Fuel (coal) demand**: `buildings.utilized * 60 / (fuelProductionTime * (1 + sum(fuelDurationPercent)/100))`; independent of cycle time and productivity (see `tests/computed/fuel-consumption.spec.ts`)
 - **Residence Need**: `buildings.constructed * needConsumptionRate * consumptionFactor`
 - **Residence Residents**: `buildings.constructed * need.residents` (summed for checked needs)
+- **Need attribute (every attribute, Population included)**: `buildings.constructed * (need raw value + villa-item bonus) * supplyShare`, 0 for an unchecked or gated need, summed over the residences of the level (`PopulationLevelNeed.attributeTotal(id)`; see `tests/computed/need-attribute-totals.spec.ts`)
 - **Extra Goods**: `requiredInputAmount * (scaling * defaultAmount / additionalOutputCycle)`
 
 ## Storage Architecture
