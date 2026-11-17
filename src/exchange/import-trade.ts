@@ -452,9 +452,14 @@ class TradePlanner {
 
     // The file names a producer of the product and the island has built it.
     private builtProducerIsDefault(receiver: IslandPlan, product: number): boolean {
-        const store = this.result.islands[receiver.key].store;
-        if (store[keys.defaultSupplierType(product)] !== "factory") return false;
-        const built = receiver.file.buildings?.[String(store[keys.defaultSupplierId(product)])]?.built;
+        // The producer is a core field (products[].producer) or, for goods the exporter leaves to the calculator's own
+        // block, a default-supplier key of ext.calculator.store.
+        const core = this.result.islands[receiver.key].store;
+        const own = (receiver.file.ext?.calculator as { store?: Record<string, unknown> } | undefined)?.store ?? {};
+        const type = core[keys.defaultSupplierType(product)] ?? own[keys.defaultSupplierType(product)];
+        if (type !== "factory") return false;
+        const id = core[keys.defaultSupplierId(product)] ?? own[keys.defaultSupplierId(product)];
+        const built = receiver.file.buildings?.[String(id)]?.built;
         return typeof built === "number" && built > 0;
     }
 

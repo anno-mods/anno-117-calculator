@@ -25,7 +25,7 @@ import './exchange';
 import { ExchangeReportDialog } from './exchange/report-dialog';
 import { ImportScopesViewModel } from './exchange/import-scopes-ui';
 import type { ReportEntry } from './exchange/types';
-import { JUST_IMPORTED_KEY } from './exchange/writer';
+import { JUST_IMPORTED_KEY, JUST_IMPORTED_RECALC } from './exchange/writer';
 import { saveSnapshot, hasSnapshot, clearSnapshot } from './exchange/undo';
 
 
@@ -380,17 +380,21 @@ function exportExchange(): void {
  * consumed. Runs at the end of bootstrapping.
  */
 function openDownloadDialogAfterImport(): void {
+    let recalculated = false;
     try {
-        if (!window.sessionStorage.getItem(JUST_IMPORTED_KEY))
+        const flag = window.sessionStorage.getItem(JUST_IMPORTED_KEY);
+        if (!flag)
             return;
+        recalculated = flag === JUST_IMPORTED_RECALC;
         window.sessionStorage.removeItem(JUST_IMPORTED_KEY);
     } catch (e) {
         return;
     }
-    // One-shot allocation of the imported multi-source routes (src/trade-allocation.ts); hand-set floors stay.
+    // One-shot allocation of the imported multi-source routes (src/trade-allocation.ts). After a route recalculation the
+    // floors are calculated from scratch; otherwise groups with hand-set floors stay.
     try {
         ko.tasks.runEarly();
-        recomputeShares(window.view.tradeManager.routes(), { untouchedOnly: true });
+        recomputeShares(window.view.tradeManager.routes(), { untouchedOnly: !recalculated });
     } catch (e) {
         console.warn('trade allocation after import failed', e);
     }
@@ -426,7 +430,8 @@ function installImportExchangeListener(): void {
             // A failed snapshot does not stop the import; saveSnapshot then leaves no record and Undo is not offered.
             SubStorage.flushPending();
             saveSnapshot(window.exchange.undo.snapshot());
-            const result = window.exchange.applyImport(plan);
+            const selection = window.view.importScopes.selection();
+            const result = window.exchange.applyImport(plan, { recalcRoutes: selection.trade && selection.recalcRoutes });
             if (!result.ok) {
                 console.error('Exchange import failed:', result.error);
                 clearSnapshot();

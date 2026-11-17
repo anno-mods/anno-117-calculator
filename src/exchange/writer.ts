@@ -13,6 +13,7 @@ const SETTINGS_KEY = "calculatorSettings";
 const DARK_MODE_KEY = "darkMode.checked"; // views.ts
 // sessionStorage flag, set by a committed import and consumed by the bootstrap after the reload.
 export const JUST_IMPORTED_KEY = "exchange.justImported";
+export const JUST_IMPORTED_RECALC = "recalc";
 
 // The subset of the Web Storage interface the writer uses; tests inject a fake.
 export interface StorageLike {
@@ -34,6 +35,9 @@ export interface ApplyOptions {
     // Set the "just imported" flag. Default: true when the page reloads (the flag makes the bootstrap open the Download
     // dialog), false with reload: false.
     markImported?: boolean;
+    // The import recalculated the routes: the flag then carries "recalc" and the allocation after the reload replaces
+    // the floors of the multi-source groups instead of leaving the ones with floors alone.
+    recalcRoutes?: boolean;
     // Test hook: the n-th write (1-based, counted over every setItem of the import) throws a QuotaExceededError.
     failAfterWrites?: number;
     // Session GUIDs in app order, for the island list order; default window.params.sessions.
@@ -183,7 +187,7 @@ export function applyImport(plan: ImportPlan, opts: ApplyOptions = {}): ApplyRes
     const warnings: string[] = [];
     if (session && (opts.markImported ?? opts.reload !== false)) {
         try {
-            session.setItem(JUST_IMPORTED_KEY, "1");
+            session.setItem(JUST_IMPORTED_KEY, opts.recalcRoutes ? JUST_IMPORTED_RECALC : "1");
         } catch (e) {
             warnings.push(`The just-imported flag could not be written: ${describe(e)}`);
         }
