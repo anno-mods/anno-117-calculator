@@ -19,12 +19,36 @@ import { PublicConsumerBuilding, Factory, Consumer } from './factories';
 import { ResidenceEffectView } from './views';
 import { Need, NeedCategory, RecipeList, } from './consumption';
 import { ExtraGoodSupplier } from './suppliers';
+import { isVillaItem } from './residence-items';
 
 declare const $: any;
 declare const view: any;
 declare const window: any;
 declare const params: any;
 declare const localStorage: any;
+
+/**
+ * Game Connector (KTD4): per-island Storage keys identifying which live game island this
+ * calculator Island is synced from. Set once on first match/create (see src/game-connector.ts),
+ * read on every subsequent matching pass. Defined here (not in game-connector.ts) so Island owns
+ * its own persistence, matching the existing pattern (e.g. this.storage.setItem("session", ...)).
+ */
+const GAME_CONNECTOR_ISLAND_ID_STORAGE_KEY = 'gameConnector.islandID';
+const GAME_CONNECTOR_AREA_INDEX_STORAGE_KEY = 'gameConnector.areaIndex';
+
+/** Exchange format (KTD3): stable opaque island id, island-store key. */
+const EXCHANGE_ISLAND_ID_STORAGE_KEY = 'exchange.islandId';
+
+export function generateExchangeIslandId(): string {
+    const bytes = new Uint8Array(8);
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues)
+        crypto.getRandomValues(bytes);
+    else
+        for (let i = 0; i < bytes.length; i++)
+            bytes[i] = Math.floor(Math.random() * 256);
+
+    return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+}
 
 
 /**
@@ -144,12 +168,26 @@ export class Storage {
             return;
 
         this.savingScheduled = true;
+        pendingSaves.add(this);
         setTimeout(() => {
             this.savingScheduled = false;
-            localStorage.setItem(this.key, JSON.stringify(this.json, null, 4));            
+            pendingSaves.delete(this);
+            localStorage.setItem(this.key, JSON.stringify(this.json, null, 4));
         }, 0);
     }
+
+    /**
+     * Writes every store with a scheduled (debounced) save to localStorage now. The scheduled save still runs and
+     * writes the same JSON again. The exchange exporter reads localStorage and calls this first (U9).
+     */
+    static flushPending(): void {
+        for (const s of pendingSaves)
+            localStorage.setItem(s.key, JSON.stringify(s.json, null, 4));
+    }
 }
+
+// Stores whose debounced save has not run yet.
+const pendingSaves = new Set<Storage>();
 
 /**
  * Represents a region in the game: all sessions of a region have the same products, factories, residences.
@@ -553,6 +591,20 @@ export class Island {
     public allFertilitiesSet: KnockoutComputed<boolean>;
     public fertilitiesExpanded: KnockoutObservable<boolean>;
     public items: Item[];
+    // Residence items (villa items) with one island-level state each; separate from `items`, so no factory dialog lists them
+    public residenceItems: Item[];
+    // Share of residences the villas reach, percent 0..100 (clamped on write)
+    public villaCoverage: KnockoutComputed<number>;
+    // Share of a level's residences in range of an area effect (percent, default 100), per (level, effect); stored as
+    // `<level>[<effect>].coverage`. Created on first request.
+    private areaCoverages: Map<string, KnockoutObservable<number>>;
+    // Share of a level's residences in range of a public building (percent); undefined while the building is not
+    // listed. Stored as `<level>[<building>].publicCoverage`. Created on first request.
+    private publicCoverages: Map<string, KnockoutObservable<number | undefined>>;
+    // Share for public buildings that are not listed per level (percent, default 100); stored as `publicCoverage`
+    public publicCoverageDefault: KnockoutComputed<number>;
+    // Public-building GUIDs that provide a need, by need GUID (params.publicServices.providedNeeds)
+    private publicProviders: Map<number, number[]>;
     public replaceInputItems: Item[];
     public extraGoodItems: Item[];
     public recipeLists: RecipeList[];
@@ -757,6 +809,34 @@ export class Island {
         this.factories = [];
         this.multiFactoryProducts = [];
         this.items = [];
+        this.residenceItems = [];
+        const villaCoverage = ko.observable(100);
+        this.villaCoverage = ko.pureComputed({
+            read: () => villaCoverage(),
+            write: (v: number) => {
+                const n = Number(v);
+                villaCoverage(isFinite(n) ? Math.min(100, Math.max(0, n)) : 100);
+            }
+        });
+        this.areaCoverages = new Map();
+        this.publicCoverages = new Map();
+        const publicCoverageDefault = ko.observable(100);
+        this.publicCoverageDefault = ko.pureComputed({
+            read: () => publicCoverageDefault(),
+            write: (v: number) => {
+                const n = Number(v);
+                publicCoverageDefault(isFinite(n) ? Math.min(100, Math.max(0, n)) : 100);
+            }
+        });
+        this.publicProviders = new Map();
+        for (const service of (params.publicServices || []))
+            for (const need of service.providedNeeds) {
+                const list = this.publicProviders.get(need);
+                if (list)
+                    list.push(service.guid);
+                else
+                    this.publicProviders.set(need, [service.guid]);
+            }
         this.replaceInputItems = [];
         this.extraGoodItems = [];
         this.recipeLists = [];
@@ -1031,6 +1111,9 @@ export class Island {
                 }
 
             }
+
+            // after the stored states are loaded, so a load never writes the island-wide effect (R4)
+            i.linkHeroicEffect();
         }
 
         this.extraGoodItems.sort((a, b) => (a ).name().localeCompare((b ).name()));
@@ -1062,6 +1145,8 @@ export class Island {
             if (localStorage) {
                 persistString(p, "notes");
                 persistFloat(p.passiveTradeSupplier, "userSetAmount", "passiveTrade.userSetAmount");
+                // Same key as keys.governorSupply in src/exchange/keys.ts
+                persistFloat(p, "governorSupply", p.guid + ".governorSupply");
 
                 // Restore default supplier from localStorage
                 const typeKey = p.guid + ".defaultSupplier.type";
@@ -1162,6 +1247,22 @@ export class Island {
             effect.applyBuffsToResidences(assetsMap);
         }
 
+        // Residence items: a second item pass, because residences did not exist in the first one. Radius buffs
+        // apply to the residence targets only and scale with villaCoverage; the island-wide effect of an item
+        // stays an island effect (Item.linkHeroicEffect).
+        const villaShare = ko.pureComputed(() => this.villaCoverage() / 100);
+        for (const item of (params.items || [])) {
+            if (!isVillaItem(item, params))
+                continue;
+            const sharedState = ko.observable(0);
+            const i = new Item(item, assetsMap, this.region, { sharedState, coverage: villaShare, residencesOnly: true });
+            if (!i.factories.length)
+                continue;
+            if (!assetsMap.has(i.guid))
+                assetsMap.set(i.guid, i);
+            this.residenceItems.push(i);
+        }
+
         for (let group of params.populationGroups) {
             
 
@@ -1203,6 +1304,14 @@ export class Island {
                 });
             }
             persistBuildings(b);
+        }
+
+        // Residence item states (int 0/1/2) and the villa share (percent), loaded after the links exist
+        persistFloat(this, "villaCoverage", "villaCoverage");
+        persistFloat(this, "publicCoverageDefault", "publicCoverage");
+        for (const i of this.residenceItems) {
+            persistInt({ state: i.slotStates.values().next().value }, "state", `residenceItem.${i.guid}.state`);
+            i.linkHeroicEffect();
         }
 
         for (let r of this.residenceBuildings) {
@@ -1293,6 +1402,77 @@ export class Island {
     
 
     /**
+     * Share of a population level's residences in range of an area effect, in percent (0..100, default 100).
+     * One observable per (level, effect), shared by all residences of the level; it multiplies the buff values the
+     * effect puts on those residences and never the effect's own 0/1 scaling. The stored value
+     * `<level>[<effect>].coverage` loads when the observable is created.
+     */
+    areaEffectCoverage(levelGuid: number, effectGuid: number): KnockoutObservable<number> {
+        const key = `${levelGuid}[${effectGuid}].coverage`;
+        const known = this.areaCoverages.get(key);
+        if (known)
+            return known;
+
+        const value = ko.observable(100);
+        const obs: KnockoutObservable<number> = ko.pureComputed({
+            read: () => value(),
+            write: (v: number) => {
+                const n = Number(v);
+                value(isFinite(n) ? Math.min(100, Math.max(0, n)) : 100);
+            }
+        });
+        const stored = parseFloat(this.storage.getItem(key));
+        if (isFinite(stored))
+            obs(stored);
+        obs.subscribe((v: number) => this.storage.setItem(key, v));
+        this.areaCoverages.set(key, obs);
+        return obs;
+    }
+
+    /**
+     * Share of a population level's residences in range of a public building, in percent. Undefined while the
+     * building is not listed for the level (the island's `publicCoverageDefault` then applies).
+     */
+    publicCoverage(levelGuid: number, buildingGuid: number): KnockoutObservable<number | undefined> {
+        const key = `${levelGuid}[${buildingGuid}].publicCoverage`;
+        const known = this.publicCoverages.get(key);
+        if (known)
+            return known;
+
+        const value = ko.observable(undefined as number | undefined);
+        const obs: KnockoutObservable<number | undefined> = ko.pureComputed({
+            read: () => value(),
+            write: (v: number | undefined) => {
+                const n = Number(v);
+                value(v === undefined || !isFinite(n) ? undefined : Math.min(100, Math.max(0, n)));
+            }
+        });
+        const stored = parseFloat(this.storage.getItem(key));
+        if (isFinite(stored))
+            obs(stored);
+        obs.subscribe((v: number | undefined) => {
+            if (v !== undefined)
+                this.storage.setItem(key, v);
+        });
+        this.publicCoverages.set(key, obs);
+        return obs;
+    }
+
+    /**
+     * Share of supply (percent) of a public need on a population level: the largest listed coverage among the
+     * public buildings that provide the need, else `publicCoverageDefault`.
+     */
+    publicNeedCoverage(levelGuid: number, needGuid: number): number {
+        let best: number | undefined;
+        for (const building of (this.publicProviders.get(needGuid) || [])) {
+            const share = this.publicCoverage(levelGuid, building)();
+            if (share !== undefined && (best === undefined || share > best))
+                best = share;
+        }
+        return best !== undefined ? best : this.publicCoverageDefault();
+    }
+
+    /**
      * Prepares the residence effect view for this island
      */
     prepareResidenceEffectView(): void {
@@ -1324,7 +1504,45 @@ export class Island {
     getVisibleIslandFertility(guid: number): IslandFertility | undefined {
         return this.visibleIslandFertilities.find(f => f.fertility.guid === guid);
     }
-} 
+
+    /**
+     * Game Connector identity (KTD4/R2): the live game island this calculator Island is synced
+     * from, if any. `null` when this island has never been matched/created by the connector.
+     */
+    getGameConnectorIdentity(): { islandID: number; areaIndex: number } | null {
+        const islandID = this.storage.getItem(GAME_CONNECTOR_ISLAND_ID_STORAGE_KEY);
+        const areaIndex = this.storage.getItem(GAME_CONNECTOR_AREA_INDEX_STORAGE_KEY);
+        if (typeof islandID !== 'number' || typeof areaIndex !== 'number')
+            return null;
+
+        return { islandID, areaIndex };
+    }
+
+    /** Written once on first match/create (KTD4); not overwritten on later syncs of the same island. */
+    setGameConnectorIdentity(islandID: number, areaIndex: number): void {
+        this.storage.setItem(GAME_CONNECTOR_ISLAND_ID_STORAGE_KEY, islandID);
+        this.storage.setItem(GAME_CONNECTOR_AREA_INDEX_STORAGE_KEY, areaIndex);
+    }
+
+    /**
+     * Exchange island id (KTD3): stable opaque id (16 hex chars) in the island store. Assigned lazily on
+     * first read. It lives in the same JSON as the island's data, so it survives a rename
+     * (Storage.updateKey) and is removed with the store on delete.
+     */
+    get exchangeIslandId(): string {
+        const stored = this.storage.getItem(EXCHANGE_ISLAND_ID_STORAGE_KEY);
+        if (typeof stored === 'string' && stored)
+            return stored;
+
+        const id = generateExchangeIslandId();
+        this.storage.setItem(EXCHANGE_ISLAND_ID_STORAGE_KEY, id);
+        return id;
+    }
+
+    set exchangeIslandId(id: string) {
+        this.storage.setItem(EXCHANGE_ISLAND_ID_STORAGE_KEY, id);
+    }
+}
 
 export interface Constructible extends NamedElement{
     associatedRegions: Region[];

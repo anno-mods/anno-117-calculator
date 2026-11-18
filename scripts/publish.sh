@@ -149,13 +149,7 @@ git commit -m "$COMMIT_MESSAGE"
 
 echo -e "${GREEN}✓ Squash merged main into release${NC}"
 
-# Step 9: Push the release branch to GitHub
-echo "Pushing release branch to GitHub..."
-git push anno-mods release
-
-echo -e "${GREEN}✓ Pushed release branch to GitHub${NC}"
-
-# Step 10: Push the release branch's squashed tip directly onto anno-mods' public
+# Step 9: Push the release branch's squashed tip directly onto anno-mods' public
 # main ref. NEVER push local 'main' here - it carries the full granular dev
 # history as ancestry, which must stay private. Pushing 'release' (a linear
 # chain of one squash commit per release) keeps anno-mods/main's history clean,

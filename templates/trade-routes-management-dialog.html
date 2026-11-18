@@ -1,51 +1,226 @@
 <div id="trade-routes-management-dialog" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true" data-bind="debug: 'Trade Routes Dialog'">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header">
-                <h4 data-bind="text: $root.texts.tradeRoutes.name">Trade Routes</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <div class="trade-sticky">
+                <div class="modal-header">
+                    <h4 data-bind="text: $root.texts.tradeRoutes.name">Trade Routes</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
 
+                <!-- The content is bound only while the dialog is open: closed-dialog edits cost nothing. -->
+                <!-- ko if: $root.tradeRoutes.opened() -->
+                <div class="px-3 pt-2">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <button type="button" id="trade-tab-calc-button" class="nav-link active" data-toggle="tab" data-target="#trade-tab-calc" role="tab">
+                                <span data-bind="text: $root.tradeRoutes.t('tradeCalculatorRoutes')"></span>
+                                <!-- ko if: $root.tradeRoutes.calcCounts().red > 0 -->
+                                <span class="badge badge-danger ml-1" data-bind="text: $root.tradeRoutes.calcCounts().red, attr: {title: $root.tradeRoutes.t('tradeOverCapacity')}"></span>
+                                <!-- /ko -->
+                                <!-- ko if: $root.tradeRoutes.calcCounts().yellow > 0 -->
+                                <span class="badge badge-warning ml-1" data-bind="text: $root.tradeRoutes.calcCounts().yellow, attr: {title: $root.tradeRoutes.t('tradeSupplyAtRisk')}"></span>
+                                <!-- /ko -->
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button type="button" id="trade-tab-game-button" class="nav-link" data-toggle="tab" data-target="#trade-tab-game" role="tab">
+                                <span data-bind="text: $root.tradeRoutes.t('tradeGameRoutes')"></span>
+                                <!-- ko if: $root.tradeRoutes.gameCounts().red > 0 -->
+                                <span class="badge badge-danger ml-1" data-bind="text: $root.tradeRoutes.gameCounts().red, attr: {title: $root.tradeRoutes.t('tradeOverCapacity')}"></span>
+                                <!-- /ko -->
+                                <!-- ko if: $root.tradeRoutes.gameCounts().yellow > 0 -->
+                                <span class="badge badge-warning ml-1" data-bind="text: $root.tradeRoutes.gameCounts().yellow, attr: {title: $root.tradeRoutes.t('tradeSupplyAtRisk')}"></span>
+                                <!-- /ko -->
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="trade-filter-bar d-flex flex-wrap align-items-center px-3 py-2">
+                    <label class="mb-0 mr-2" for="trade-filter-island" data-bind="text: $root.tradeRoutes.t('tradeFilterIsland')"></label>
+                    <select id="trade-filter-island" class="form-control form-control-sm mr-3 trade-filter-select"
+                            data-bind="options: $root.tradeRoutes.islandOptions, optionsText: 'label', optionsValue: 'value', value: $root.tradeRoutes.islandFilter"></select>
+                    <label class="mb-0 mr-2" for="trade-filter-good" data-bind="text: $root.tradeRoutes.t('tradeFilterGood')"></label>
+                    <select id="trade-filter-good" class="form-control form-control-sm mr-3 trade-filter-select"
+                            data-bind="options: $root.tradeRoutes.goodOptions, optionsText: 'label', optionsValue: 'value', value: $root.tradeRoutes.goodFilter"></select>
+                    <div class="custom-control custom-checkbox mr-3">
+                        <input id="trade-filter-warnings" type="checkbox" class="custom-control-input" data-bind="checked: $root.tradeRoutes.warningsOnly" />
+                        <label class="custom-control-label" for="trade-filter-warnings" data-bind="text: $root.tradeRoutes.t('tradeWarningsOnly')"></label>
+                    </div>
+                    <button type="button" id="trade-recompute-shares" class="btn btn-outline-secondary btn-sm mr-3"
+                            data-bind="click: () => $root.tradeRoutes.recomputeShares(false, true), text: $root.tradeRoutes.t('tradeRecomputeShares'), attr: {title: $root.tradeRoutes.t('tradeRecomputeSharesHint')}"></button>
+                    <!-- ko if: $root.tradeRoutes.pair() -->
+                    <span class="badge badge-info trade-jump-chip">
+                        <span data-bind="text: $root.tradeRoutes.pair().label"></span>
+                        <button type="button" class="btn btn-link btn-sm p-0 ml-1 trade-jump-back" data-bind="click: () => $root.tradeRoutes.back(), attr: {title: $root.tradeRoutes.t('tradeBackToFilter'), 'aria-label': $root.tradeRoutes.t('tradeBackToFilter')}">&times;</button>
+                    </span>
+                    <!-- /ko -->
+                </div>
+                <!-- /ko -->
             </div>
-            <div class="modal-body">
-                <table class="table table-striped table-sm">
-                    <tbody data-bind="foreach: $root.tradeManager.routes">
-                        <tr>
-                            <td>
-                                <span data-bind="if: $data.from.session">
-                                    <img src="../icons/icon_marketplace_2d_light.png" class="icon-sm icon-light" data-bind="attr: {src: $data.from.session.icon}" />
-                                </span>
-                                <a href="#" data-dismiss="modal" data-bind="text: $data.from.name, click: () => { $root.island($data.from); setTimeout(() => {$root.selectedProduct($data.fromIslandProduct);$('#product-config-dialog').modal('show')}, 500);}"></a>
-                            </td>
-                            <td><span>&rarr;</span></td>
-                            <td>
-                                <span data-bind="if: $data.to.session">
-                                    <img src="../icons/icon_marketplace_2d_light.png" class="icon-sm icon-light" data-bind="attr: {src: $data.to.session.icon}" />
-                                </span>
-                                <a href="#" data-dismiss="modal" data-bind="text: $data.to.name, click: () => {setTimeout(() => { $root.island($data.to); $root.selectedProduct($data.toIslandProduct);$('#product-config-dialog').modal('show')}, 500);}"></a>
-                            </td>
-                            <td>
-                                <img class="icon-sm" src="../icons/icon_marketplace_2d_light.png" data-bind="attr: {src: $data.product.icon, alt: $data.product.name()}" />
-                            </td>
-                            <td>
-                                
-                                <div class="float-right inline-list">
-                                    <span data-bind="if: !$data.isExport($parent) && $data.fromIslandProduct.isHighlightedAsMissing()">
-                                        <span class="fa fa-exclamation-triangle danger-icon mr-2" style="position: initial"></span>
-                                    </span>
-                                    <trade-route-amount params="supplier: $data"></trade-route-amount>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="float-right">
-                                    <button class="btn btn-secondary btn-sm" data-bind="click: () => $data.delete()">
-                                        <span class="fa fa-trash"> </span>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
 
+            <div class="modal-body">
+                <!-- ko if: $root.tradeRoutes.opened() -->
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="trade-tab-calc" role="tabpanel">
+                        <table id="trade-calc-table" class="table table-striped table-sm trade-table">
+                            <thead>
+                                <tr data-bind="foreach: $root.tradeRoutes.calcColumns">
+                                    <th scope="col" data-bind="css: {'text-right': $data.right}, attr: {'aria-sort': $data.key ? $root.tradeRoutes.ariaSort('calc', $data.key) : null, 'data-sort-key': $data.key}">
+                                        <!-- ko if: $data.key -->
+                                        <button type="button" class="btn btn-link btn-sm villa-sort" data-bind="click: () => $root.tradeRoutes.sortBy('calc', $data.key), attr: {title: $root.tradeRoutes.headerTitle('calc', $data.key, $root.tradeRoutes.t($data.title)), 'aria-label': $root.tradeRoutes.headerTitle('calc', $data.key, $root.tradeRoutes.t($data.title))}">
+                                            <span data-bind="text: $root.tradeRoutes.t($data.title)"></span>
+                                            <span class="villa-sort-indicator" aria-hidden="true" data-bind="css: $root.tradeRoutes.sortIconClass('calc', $data.key)"></span>
+                                        </button>
+                                        <!-- /ko -->
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach: $root.tradeRoutes.calcRows">
+                                <tr data-bind="attr: {'data-product': $data.product.guid}">
+                                    <td>
+                                        <span data-bind="if: $data.from.session">
+                                            <img src="../icons/icon_marketplace_2d_light.png" class="icon-sm icon-light" data-bind="attr: {src: $data.from.session.icon}" />
+                                        </span>
+                                        <a href="#" data-dismiss="modal" data-bind="text: $data.from.name, click: () => { $root.island($data.from); setTimeout(() => {$root.selectedProduct($data.fromIslandProduct);$('#product-config-dialog').modal('show')}, 500);}"></a>
+                                    </td>
+                                    <td><span>&rarr;</span></td>
+                                    <td>
+                                        <span data-bind="if: $data.to.session">
+                                            <img src="../icons/icon_marketplace_2d_light.png" class="icon-sm icon-light" data-bind="attr: {src: $data.to.session.icon}" />
+                                        </span>
+                                        <a href="#" data-dismiss="modal" data-bind="text: $data.to.name, click: () => {setTimeout(() => { $root.island($data.to); $root.selectedProduct($data.toIslandProduct);$('#product-config-dialog').modal('show')}, 500);}"></a>
+                                    </td>
+                                    <td>
+                                        <img class="icon-sm" src="../icons/icon_marketplace_2d_light.png" data-bind="attr: {src: $data.product.icon, alt: $data.product.name()}" />
+                                    </td>
+                                    <td>
+                                        <div class="float-right inline-list">
+                                            <span data-bind="if: !$data.isExport($parent) && $data.fromIslandProduct.isHighlightedAsMissing()">
+                                                <span class="fa fa-exclamation-triangle danger-icon mr-2" style="position: initial"></span>
+                                            </span>
+                                            <trade-route-amount params="supplier: $data"></trade-route-amount>
+                                        </div>
+                                    </td>
+                                    <td class="trade-offload text-right">
+                                        <!-- ko if: $data.indicators().available -->
+                                        <span class="prod-trigger" tabindex="0" data-bind="attr: {'aria-describedby': 'trade-tip-offload-' + $index()}">
+                                            <span class="trade-offload-value" data-bind="text: $root.tradeRoutes.num($data.indicators().requiredOffload)"></span> t
+                                            <span class="prod-tip" role="tooltip" data-bind="attr: {id: 'trade-tip-offload-' + $index()}, text: $root.tradeRoutes.offloadTip($data)"></span>
+                                        </span>
+                                        <!-- ko if: $data.indicators().yellow -->
+                                        <span class="prod-trigger trade-yellow ml-1" tabindex="0" data-bind="attr: {'aria-describedby': 'trade-tip-yellow-' + $index(), 'aria-label': $root.tradeRoutes.t('tradeSupplyAtRisk')}">
+                                            <span class="fa fa-circle route-ind-yellow" aria-hidden="true"></span>
+                                            <span class="prod-tip" role="tooltip" data-bind="attr: {id: 'trade-tip-yellow-' + $index()}, text: $root.tradeRoutes.yellowTip($data)"></span>
+                                        </span>
+                                        <!-- /ko -->
+                                        <!-- /ko -->
+                                        <!-- ko ifnot: $data.indicators().available -->
+                                        <span class="prod-trigger text-muted trade-unavailable" tabindex="0" data-bind="attr: {'aria-describedby': 'trade-tip-offload-' + $index()}">
+                                            <span data-bind="text: $root.tradeRoutes.t('tradeUnavailable')"></span>
+                                            <span class="prod-tip" role="tooltip" data-bind="attr: {id: 'trade-tip-offload-' + $index()}, text: $root.tradeRoutes.offloadTip($data)"></span>
+                                        </span>
+                                        <!-- /ko -->
+                                    </td>
+                                    <td class="trade-utilization text-right">
+                                        <!-- ko if: $data.indicators().available -->
+                                        <span data-bind="text: $data.indicators().utilization === undefined ? '–' : $root.tradeRoutes.num($data.indicators().utilization) + ' %'"></span>
+                                        <!-- ko if: $data.indicators().red -->
+                                        <span class="prod-trigger trade-red ml-1" tabindex="0" data-bind="attr: {'aria-describedby': 'trade-tip-red-' + $index(), 'aria-label': $root.tradeRoutes.t('tradeOverCapacity')}">
+                                            <span class="fa fa-circle route-ind-red" aria-hidden="true"></span>
+                                            <span class="prod-tip" role="tooltip" data-bind="attr: {id: 'trade-tip-red-' + $index()}, text: $root.tradeRoutes.redTip($data)"></span>
+                                        </span>
+                                        <!-- /ko -->
+                                        <!-- /ko -->
+                                        <!-- ko ifnot: $data.indicators().available -->
+                                        <span class="text-muted">&ndash;</span>
+                                        <!-- /ko -->
+                                    </td>
+                                    <td>
+                                        <!-- ko if: $root.tradeRoutes.gameRouteCount($data) > 0 -->
+                                        <button type="button" class="btn btn-outline-secondary btn-sm trade-chip-game" data-bind="click: () => $root.tradeRoutes.showGameRoutes($data), attr: {title: $root.tradeRoutes.t('tradeShowGameRoutes'), 'aria-label': $root.tradeRoutes.t('tradeShowGameRoutes')}">
+                                            <img class="icon-sm icon-light" src="../icons/icon_trade_routes_0.webp" alt="" />
+                                            <span data-bind="text: $root.tradeRoutes.gameRouteCount($data)"></span>
+                                        </button>
+                                        <!-- /ko -->
+                                    </td>
+                                    <td>
+                                        <div class="float-right">
+                                            <button class="btn btn-secondary btn-sm" data-bind="click: () => $data.delete()">
+                                                <span class="fa fa-trash"> </span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="tab-pane fade" id="trade-tab-game" role="tabpanel">
+                        <!-- ko ifnot: $root.tradeRoutes.hasGameRoutes() -->
+                        <p class="text-muted mb-1" data-bind="text: $root.tradeRoutes.t('tradeNoGameRoutes')"></p>
+                        <p class="text-muted mb-1" data-bind="text: $root.tradeRoutes.t('tradeImportHint')"></p>
+                        <p class="text-muted mb-0">
+                            <span data-bind="text: $root.tradeRoutes.t('exchangeFromPlanner')"></span>
+                            <a href="https://github.com/Taludas/Anno-117-Planner/releases/latest" target="_blank" rel="noopener noreferrer">https://github.com/Taludas/Anno-117-Planner/releases/latest</a>
+                        </p>
+                        <!-- /ko -->
+                        <!-- ko if: $root.tradeRoutes.hasGameRoutes() -->
+                        <table id="trade-game-table" class="table table-striped table-sm trade-table">
+                            <thead>
+                                <tr data-bind="foreach: $root.tradeRoutes.gameColumns">
+                                    <th scope="col" data-bind="attr: {'aria-sort': $data.key ? $root.tradeRoutes.ariaSort('game', $data.key) : null, 'data-sort-key': $data.key}">
+                                        <!-- ko if: $data.key -->
+                                        <button type="button" class="btn btn-link btn-sm villa-sort" data-bind="click: () => $root.tradeRoutes.sortBy('game', $data.key), attr: {title: $root.tradeRoutes.headerTitle('game', $data.key, $root.tradeRoutes.t($data.title)), 'aria-label': $root.tradeRoutes.headerTitle('game', $data.key, $root.tradeRoutes.t($data.title))}">
+                                            <span data-bind="text: $root.tradeRoutes.t($data.title)"></span>
+                                            <span class="villa-sort-indicator" aria-hidden="true" data-bind="css: $root.tradeRoutes.sortIconClass('game', $data.key)"></span>
+                                        </button>
+                                        <!-- /ko -->
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach: $root.tradeRoutes.gameRows">
+                                <tr data-bind="attr: {'data-game-route': $data.id}">
+                                    <td data-bind="text: $data.name"></td>
+                                    <td data-bind="text: $root.tradeRoutes.islandsOf($data, 'loads')"></td>
+                                    <td data-bind="text: $root.tradeRoutes.islandsOf($data, 'unloads')"></td>
+                                    <td class="trade-game-status">
+                                        <!-- ko with: $root.tradeRoutes.status($data) -->
+                                        <span class="fa fa-circle route-ind-red" data-bind="visible: $data.red, attr: {title: $root.tradeRoutes.t('tradeOverCapacity')}"></span>
+                                        <span class="fa fa-circle route-ind-yellow" data-bind="visible: $data.yellow, attr: {title: $root.tradeRoutes.t('tradeSupplyAtRisk')}"></span>
+                                        <!-- /ko -->
+                                    </td>
+                                    <td>
+                                        <ol class="trade-stops mb-0 pl-3" data-bind="foreach: $data.stops">
+                                            <li>
+                                                <span data-bind="text: $data.name"></span>
+                                                <!-- ko foreach: $data.loads -->
+                                                <img class="icon-sm" data-bind="attr: {src: $root.tradeRoutes.productIcon($data), title: $root.tradeRoutes.t('tradeLoads') + ': ' + $root.tradeRoutes.productName($data), alt: $root.tradeRoutes.productName($data)}" />
+                                                <!-- /ko -->
+                                                <!-- ko if: $data.loads.length && $data.unloads.length --><span>/</span><!-- /ko -->
+                                                <!-- ko foreach: $data.unloads -->
+                                                <img class="icon-sm trade-unload" data-bind="attr: {src: $root.tradeRoutes.productIcon($data), title: $root.tradeRoutes.t('tradeUnloads') + ': ' + $root.tradeRoutes.productName($data), alt: $root.tradeRoutes.productName($data)}" />
+                                                <!-- /ko -->
+                                            </li>
+                                        </ol>
+                                    </td>
+                                    <td>
+                                        <!-- ko foreach: $root.tradeRoutes.pairs($data) -->
+                                        <!-- ko if: $root.tradeRoutes.hasCalcRoute($data.pair) -->
+                                        <button type="button" class="btn btn-outline-secondary btn-sm trade-chip-calc mb-1" data-bind="click: () => $root.tradeRoutes.showCalculatorRoutes($data.pair), attr: {title: $root.tradeRoutes.t('tradeShowCalculatorRoutes') + ': ' + $data.label, 'aria-label': $root.tradeRoutes.t('tradeShowCalculatorRoutes') + ': ' + $data.label}">
+                                            <img class="icon-sm" data-bind="attr: {src: $data.icon, alt: ''}" />
+                                            <span class="trade-chip-tag" data-bind="text: $data.tag"></span>
+                                            <span class="fa fa-calculator" aria-hidden="true"></span>
+                                        </button>
+                                        <!-- /ko -->
+                                        <!-- /ko -->
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <!-- /ko -->
+                    </div>
+                </div>
+                <!-- /ko -->
             </div>
         </div>
     </div>

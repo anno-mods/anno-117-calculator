@@ -129,7 +129,6 @@ The Playwright `webServer` uses `http-server -p 8080`. On this machine port 8080
 | **Effect**    | 43600 | CeresPopulationEffect |
 | **Effect**    | 166475| Sláinga Gaileanga (mythical-item, targets Aldermen 6472, adds need 174425) |
 | **Effect**    | 159339| Amphitheatre Splendour IV (island-event, targets Liberti 3087, adds Bread need 2689) |
-| **Effect**    | 140883| Bread Sentries (island-event, goodConsumptionUpgrade Bread +20%) |
 | **Buff**      | 166476| Sláinga buff (additionalNeedsDemand [174425] -> Necklaces 2146) |
 | **Buff**      | 159338| Amphitheatre Splendour IV buff (additionalNeedsDemand [2689] -> Bread 2137) |
 | **Effect**    | 156267| Hippodrome "Privilege of the Public Horse" (island-event, DLC2 67903, targets Equites 3142 + Patricians 3145, adds horse need 174983) |
@@ -141,8 +140,10 @@ The Playwright `webServer` uses `http-server -p 8080`. On this machine port 8080
 ## Formulas Reference
 - **Productivity (Boost)**: `((100 + sum(baseProductivityUpgrades)) * (100 + sum(productivityUpgrades))) / 100` (Division at end to avoid rounding artifacts like 315.01%)
 - **Factory Throughput**: `buildings.utilized * boost * 60 / cycleTime`
+- **Fuel (coal) demand**: `buildings.utilized * 60 / (fuelProductionTime * (1 + sum(fuelDurationPercent)/100))`; independent of cycle time and productivity (see `tests/computed/fuel-consumption.spec.ts`)
 - **Residence Need**: `buildings.constructed * needConsumptionRate * consumptionFactor`
 - **Residence Residents**: `buildings.constructed * need.residents` (summed for checked needs)
+- **Need attribute (every attribute, Population included)**: `round(buildings.constructed * supplyShare) * (need raw value + villa-item bonus)`, 0 for an unchecked or gated need, summed over the residences of the level (`PopulationLevelNeed.attributeTotal(id)`; see `tests/computed/need-attribute-totals.spec.ts`)
 - **Extra Goods**: `requiredInputAmount * (scaling * defaultAmount / additionalOutputCycle)`
 
 ## Storage Architecture
@@ -168,9 +169,44 @@ The Playwright `webServer` uses `http-server -p 8080`. On this machine port 8080
 - **Collapsible summary selector**: The ID parameter passed to a `<collapsible>` component (e.g. `product-config-consumption`) is assigned to the collapsible body `div.collapse` rather than the fieldset or legend. To query the summary text in the header of a collapsible, locate the legend element pointing to that target: `legend[data-target="#product-config-consumption"] .summary span.float-right span`.
 - **DLC03 / Olive Oil Gating**: Verifies Egyptian Olive Press (152729) is hidden in the Olive Oil (2149) config dialog on all islands when DLC03 (67904) is disabled, but becomes visible when DLC03 is active. Requires `Region.available` to check session availability and `Consumer.available` to check region availability.
 
+## Exchange format tests (`tests/exchange/`)
+
+Feature description: `docs/exchange-format.md`. The specs call the pure functions through `window.exchange` (installed by `src/exchange/index.ts`), so they run against `dist/calculator.bundle.js`: build first.
+
+- **Run serially**: `npm run build ; npx playwright test tests/exchange --reporter=list --workers=1`, one invocation at a time (see the concurrency pitfall above).
+- **Seed once, not per navigation**: `ConfigLoader.loadConfigObject` re-seeds localStorage on every navigation (`addInitScript`) and overwrites an imported state on `page.reload()`. Exchange specs use `tests/helpers/exchange.ts`: `seedOnce(page)` writes `versionCalculator` and an empty `islandNames` once per browser tab (the marker lives in `sessionStorage`, which survives a reload); `openApp(page)` = seed + goto + `appReady`.
+- **Import in a test**: `importText(page, text)` runs `planImport` + `applyImport(plan, { reload: false })`, then reloads the page so the app runs on the imported state. Wait for debounced storage writes with `settle(page)` before reading localStorage; `exportDoc(page)` does it.
+- **Scoped import specs**: `scopes` (classifier), `matching`, `merge` (scoped plan and merge: build the stored calculator with `importText`, then call `window.exchange.planScopedImport(text, selection)` and diff the returned `keyMap` against localStorage), `undo`, `import-scopes-ui` (dialog, persistence, Undo button). A real import (file input, or `applyImport` without `reload: false`) sets the sessionStorage flag `exchange.justImported`, so after the reload the Download dialog is open; `applyImport(plan, { reload: false })` sets no flag unless `markImported: true`.
+- **Old import path**: drive the real `#config-selector` input with `page.setInputFiles`; the old import clears localStorage, writes the dump and reloads (see `oldImport` in `roundtrip.spec.ts`, which waits for a window marker to disappear).
+- **Schema validation**: `validateSchema` (dev dependency `ajv`, `ajv/dist/2020`, `strict: false`) of the vendored schema; the bundle has no validator. `vendoredFixture('valid/<file>')` reads `vendor/anno117-exchange/fixtures/`; do not edit the vendored files.
+- **Conformance**: `conformance.spec.ts` iterates `fixtures/MANIFEST.json`; a vendored fixture missing from the manifest fails the first test.
+- **Computed values compare by island name**: island ids are assigned on first export, so `summaryByName` keys `computeSummary()` by island name; `summaryDifferences(a, b)` returns the differing values.
+- **Observable values are not strictly boolean**: values restored from storage can be `0`/`1` (`need.checked()`, `buildings.fullyUtilizeConstructed()`, `DLC.checked()`); wrap with `Boolean(...)` before `toBe(true/false)`.
+- **Marcia 69 scenario** needs `Marcia 69 updated.json` of the repository `anno-117-savegame-exchange-format` (`data/processed/calculator_configs/`, a sibling folder of this repository, or the folder in `ANNO_EXCHANGE_REPO`); without it that one test is skipped.
+- **Cross-tool drivers** (`xt-driver.spec.ts`, `xt-diag.spec.ts`): skipped unless `XT_JOBS` (list of `{in, summary, export}`) or `XT_DIAG` (`file|island|product`) is set. They are driven by `tools/cross_tool` of the planner repository, which compares the planner's engine with the calculator on the same exchange files and round-trips them with edits. The summary adds `demand` (`product.totalDemand()` per product) to `computeSummary()`; build first.
+- **Test GUIDs**: sawmill 3089 (Wood 2077), Peasants residence 3087, Sardines 2088, DLC 3 factory Dates 152272 (session Aegyptus 149679), DLC 3 needs Wine 2690 and Soap 2770, DLC 3 mythical-item effect 185132, Goldsmith 152358 (Gold 31698).
+
+## DLC settings (volcano level)
+- `tests/computed/dlc-settings-volcano.spec.ts` (model: level read/write, unlocked set, `applyAll`, Master mode) and `tests/binding/dlc-settings-volcano.spec.ts` (settings dialog selector: DLC on/off, lock, mixed state, icon titles). Seed volcano scales through `config.sessionSettings = { 'session.3245.effect.145095.scaling': '5', 'volcano.unlocked': [145095] }` after `createIslandConfig`; a reload re-seeds, so assert stored values from `localStorage.sessionSettings` after a short wait (debounced save). The view mode exists only on a first run (empty localStorage); fetch Master mode there. Exchange side of the DLC and volcano rules: `tests/exchange/import-effects.spec.ts`, `exporter.spec.ts`, `roundtrip.spec.ts`.
+
+## Residence items, coverage, villa dialog and needs table
+- Specs: `tests/computed/residence-items.spec.ts`, `heroic-effect-write.spec.ts`, `area-effect-coverage.spec.ts`, `public-coverage.spec.ts`, `population-needs-attributes.spec.ts`; `tests/exchange/residence-items.spec.ts`, `heroic-effect-write.spec.ts`, `area-effect-coverage.spec.ts`, `public-coverage.spec.ts`; `tests/binding/villa-items-dialog.spec.ts`, `population-needs-attributes.spec.ts`.
+- **Patching data**: `page.route('**/js/params.js', ...)` that appends a script (`window.params.items.find(...).heroicEffect = ...;`, `window.params.publicServices = [];`) is the way to test data the extractor does not deliver; register it before `page.goto`. Villa items carry no `heroicEffect` in the data, so the heroic-icon scenarios patch one in.
+- **Binding specs read the DOM, not the view model**: the sort tests compute the expected order from the cells (chip values, icon titles, names) and a `Intl.Collator`, and open dialogs with `$('#id').modal('show')`; a dialog hide during the fade transition is ignored, so wait for the transition before hiding. Static `src` attributes of templates are hashed by the build (`dist/<hash>.png`), so identify those icons by title.
+- Fixtures: item 149292 (residents 2 / 3, consumption -5 % / -10 %), 160084 (Bread -20 % / -30 %), 51835 (no boost variant, +2 Population with Bread supplied); area effect 99014 (population 1, levels 1496 to 1499); public need 2750 provided by building 3527 (residence 3087, level 1499).
+
+## Factory boost sources and river embankment icon
+- Specs: `tests/computed/factory-boost-sources.spec.ts` (classification, parity of `boostSources.breakdown().total` and `factory.boost()`, header count and net, heroic effect rows), `tests/binding/factory-boost-sources.spec.ts` (container, groups, tooltip, links), `tests/binding/collapsible-header-template.spec.ts`, `tests/computed/river-embankment-flag.spec.ts`, `tests/binding/river-embankment-tab-icon.spec.ts`.
+- Selectors: `#factories-tab-<factoryGuid> .factory-config-section`, container `.boost-sources-row` with `legend[data-target="#factory-config-boost-sources"]` (click to expand; the state is stored as `collapsibleStates["factory-config-boost-sources"]`, 0 = open), groups `.boost-group-items|range|permanent`, headings `.boost-group-head`, permanent rows `tr[data-effect-guid]` with `.boost-source-line` and `.boost-source-link`, tooltip `.prod-trigger` / `.prod-tip` (`.prod-tip-total`, `.prod-tip-fertility`), river icon `.river-embankment-icon:visible`. Clicking the modal backdrop closes the dialog, so blur the tooltip trigger instead of clicking elsewhere.
+- Fixtures: Furnace 3070 (Iron 2115; effect 80565 is a patron effect of Mars, owner `patron`; research effect 157428 needs DLC 67904 and locks it when its scaling is set; session event 99955 has a duration), Bakery 3174 (Bread 2137; Chariot and Crew needs DLC 67903), Spinner 3187 (Product 2141; item 160048 names the island-wide effect 166439, which changes workforce maintenance).
+- `ConfigLoader` re-seeds localStorage on every navigation, so a reload resets stored state; assert the stored value of `collapsibleStates` instead of reloading.
+- Params patch through `page.route('**/js/params.js', ...)`: start the appended script with `;` (params.js may end without a semicolon, and a following `(function ...)()` would be read as a call). The extractor flag `isRiverEmbankment` is patched this way while `js/params.js` does not carry it.
+
 ## Test files: conditional-need gating (mythical-item / monument / DLC gating)
 - `tests/binding/olive-oil-dlc-gating.spec.ts` — DLC03-gated Egyptian Olive Press tab visibility in the Olive Oil product config dialog.
 - `tests/computed/hippodrome-need-gating.spec.ts` — DLC-gated hippodrome horse need: demand on/off, tile-production reconvergence, `activateAllNeeds`/user-controlled `checked`.
 - `tests/computed/mythical-item-needs.spec.ts`, `tests/computed/mythical-item-effect-display.spec.ts`, `tests/computed/mythical-item-consumption-modifier.spec.ts` — Sláinga (item) + Amphitheatre (monument) gating and buff wiring.
 - `tests/computed/base-needs-not-locked.spec.ts` — base-game consumption never hidden at startup.
+- `tests/computed/base-products-not-dlc-locked.spec.ts` — data guard (no browser): no product ungated in `params-base.js`, and no product with a base-game factory, carries `dlcUnlocks` in `params.js`. `Product.available` is "any listed DLC checked", so a stray DLC tag removes a base-game good for every player without that DLC.
 - `tests/binding/population-need-gating.spec.ts` — presenter hides gated needs until effect active.
+- **Route derivation specs**: `derive-routes.spec.ts` checks every vendored `trade-*.json` fixture against `deriveImports`; `import-trade.spec.ts` passes `{recalcRoutes, keptRoutes}` as third argument of `window.exchange.planTrade`. The Marcia 73 planner export (repository root, or `MARCIA73_EXPORT`) drives the scenarios in `roundtrip.spec.ts`; they are skipped without it.

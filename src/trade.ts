@@ -2,11 +2,35 @@ import { ALL_ISLANDS, createFloatInput, ko } from './util';
 import { Island } from './world';
 import { Supplier } from './suppliers';
 import { Product } from './production';
+import { RouteAnalysis, RouteIndicators, computeIndicators, readExchangeData } from './route-analysis';
 
 
 
 declare const $: any;
 declare const view: any;
+
+let analysisCache: RouteAnalysis | null = null;
+
+/** Evidence of the imported game routes, built on first use from the stored exchange data (KTD2). */
+export function getRouteAnalysis(): RouteAnalysis {
+    if (!analysisCache) {
+        const stored = view.islands()
+            .filter((i: Island) => !i.isAllIslands())
+            .map((i: Island) => ({ name: i.name(), item: (key: string) => i.storage.getItem(key) }));
+        analysisCache = new RouteAnalysis(readExchangeData(localStorage.getItem('exchange.ext'), stored));
+    }
+    return analysisCache;
+}
+
+/** Drops the evidence; the next read rebuilds it (island deleted or renamed). */
+export function resetRouteAnalysis(): void {
+    analysisCache = null;
+}
+
+export function exchangeIdOf(island: Island): string | undefined {
+    const id = island.storage.getItem('exchange.islandId');
+    return typeof id === 'string' && id ? id : undefined;
+}
 
 interface ITradeList {
     island: Island;
@@ -37,6 +61,9 @@ export class TradeRoute implements Supplier {
     public userSetAmount: KnockoutObservable<number>; // User-set minimum amount
 
     public readonly active: KnockoutObservable<boolean>; // when trade route is destructed, active makes canSupply return false and thus trigger unregistering as default supplier
+
+    /** Required offload, utilization and warnings; lazy, so only rows that are read cost anything (R6). */
+    public readonly indicators: KnockoutComputed<RouteIndicators>;
 
     /**
      * Creates a trade route, or returns null (and logs a warning) if the product
@@ -84,6 +111,25 @@ export class TradeRoute implements Supplier {
         this.amount = ko.observable(0);
 
         this.active = ko.observable(true);
+
+        this.indicators = ko.pureComputed(() => {
+            const analysis = getRouteAnalysis();
+            const siblings = window.view.tradeManager.routes()
+                .filter((r: TradeRoute) => r !== this && r.from === this.from && r.product.guid === this.product.guid)
+                .map((r: TradeRoute) => ({ label: `${r.from.name()} → ${r.to.name()}`, rate: r.currentProduction() }));
+            const destRates = window.view.tradeManager.routes()
+                .filter((r: TradeRoute) => r.to === this.to && r.product.guid === this.product.guid)
+                .map((r: TradeRoute) => r.currentProduction());
+            return computeIndicators({
+                analysis,
+                destRates,
+                source: exchangeIdOf(this.from),
+                dest: exchangeIdOf(this.to),
+                product: this.product.guid,
+                rate: this.currentProduction(),
+                siblings,
+            });
+        });
     }
 
     /**
@@ -361,6 +407,7 @@ export class TradeManager {
      * @param island - The island being deleted
      */
     islandDeleted(island: Island): void {
+        resetRouteAnalysis();
         var deletedRoutes = this.routes().filter((r: TradeRoute) => r.to === island || r.from === island);
         deletedRoutes.forEach((r: TradeRoute) => this.remove(r));
     }

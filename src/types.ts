@@ -231,6 +231,7 @@ declare global {
     formatPercentage: (num: number | string, forceSign?: boolean) => string;
     factoryReset: () => void;
     exportConfig: () => void;
+    exportExchange: () => void;
   }
 } 
 

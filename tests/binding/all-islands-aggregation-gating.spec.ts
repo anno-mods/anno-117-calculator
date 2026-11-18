@@ -383,7 +383,7 @@ test.describe('All-Islands aggregation - read-only gating & indicator (U3)', () 
         await expect(activeTabOffAggregate.locator('tr[data-bind*="Workforce Demand"] span').last()).toHaveText(expectedLatiumOnly);
     });
 
-    test('U6: Items Equipped section is structurally absent while aggregating, present off-aggregate', async ({ page }) => {
+    test('U6: Boost sources container (Items Equipped group) and productivity tooltip are structurally absent while aggregating, present off-aggregate', async ({ page }) => {
         test.skip(!itemFixture, 'No factory with items was found in the current params.js');
         if (!itemFixture) return;
 
@@ -395,8 +395,10 @@ test.describe('All-Islands aggregation - read-only gating & indicator (U3)', () 
         await page.waitForTimeout(200);
 
         await openProductDialog(page, itemFixture.productGuid);
+        expect(await page.locator('#product-config-dialog .factory-config-section .boost-sources-row').count()).toBe(0);
         expect(await page.locator('#product-config-dialog .factory-config-section').getByText(/Items Equipped/i).count()).toBe(0);
         expect(await page.locator('#product-config-dialog .factory-config-section tri-state-toggle').count()).toBe(0);
+        expect(await page.locator('#product-config-dialog .factory-config-section .prod-trigger').count()).toBe(0);
         await closeProductDialog(page);
 
         // No regression: off-aggregate, the section renders normally with its item rows. Pick
@@ -411,7 +413,9 @@ test.describe('All-Islands aggregation - read-only gating & indicator (U3)', () 
         await page.waitForTimeout(200);
 
         await openProductDialog(page, itemFixture.productGuid);
+        expect(await page.locator('#product-config-dialog .factory-config-section .boost-sources-row').count()).toBeGreaterThan(0);
         expect(await page.locator('#product-config-dialog .factory-config-section').getByText(/Items Equipped/i).count()).toBeGreaterThan(0);
+        expect(await page.locator('#product-config-dialog .factory-config-section .prod-trigger').count()).toBeGreaterThan(0);
     });
 
     test('U7: ProductPresenter.isHighlightedAsMissing reflects aggregate required/constructed shortfall summed across real islands', async ({ page }) => {

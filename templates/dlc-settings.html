@@ -1,0 +1,27 @@
+<!-- DLC-specific settings, one block per DLC. Included by settings-dialog.html at the end of every DLC row with the DLC as $data. -->
+<!-- ko if: $root.dlcSettings && $root.dlcSettings.volcano && $root.dlcSettings.volcano.dlc === $data -->
+<!-- ko with: $root.dlcSettings.volcano -->
+<!-- ko if: $data.dlc.checked() -->
+<div class="dlc-extras" data-bind="debug: 'Volcano Level'">
+    <div class="inline-list-centered">
+        <img class="icon-sm icon-light mr-2" src="../icons/icon_2d_volcano_overdrive_level_0.webp" data-bind="attr: { title: $root.texts.volcanoLevel.name() + ': ' + $data.effectNames(), alt: $root.texts.volcanoLevel.name() }" />
+        <div class="btn-group btn-group-sm" role="group" data-bind="attr: { 'aria-label': $root.texts.volcanoLevel.name() }, foreach: $data.levels">
+            <button type="button" class="btn btn-outline-secondary volcano-level-button" data-bind="text: $data, css: { active: $parent.level() === $data }, attr: { 'aria-pressed': $parent.level() === $data ? 'true' : 'false' }, click: () => $parent.setLevel($data)"></button>
+        </div>
+    </div>
+    <!-- ko if: $data.level() === null -->
+    <div class="volcano-level-differs small mt-1">
+        <div data-bind="text: $root.texts.volcanoLevelDiffers.name()"></div>
+        <!-- ko foreach: $data.differences() -->
+        <div class="inline-list-centered volcano-level-difference">
+            <img class="icon-sm mr-1" data-bind="attr: { src: $data.effect.icon, title: $data.effect.name(), alt: $data.effect.name() }" />
+            <span data-bind="text: $data.effect.name()"></span>
+            <strong class="ml-1" data-bind="text: $data.value"></strong>
+        </div>
+        <!-- /ko -->
+    </div>
+    <!-- /ko -->
+</div>
+<!-- /ko -->
+<!-- /ko -->
+<!-- /ko -->

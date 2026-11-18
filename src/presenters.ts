@@ -2,6 +2,7 @@ import { ACCURACY, BuildingsCalc, createFloatInput, EPSILON, formatNumber, ko } 
 import { AppliedBuff, IslandFertility, Product, ProductCategory } from './production';
 import { Factory, Module } from './factories';
 import { Island, Region } from './world';
+import { EffectBoostRow, openEffectOwner } from './factory-boost-sources';
 import { ExtraGoodSupplier, Supplier } from './suppliers';
 import { TradeRoute, TradeList } from './trade';
 import { ProductionChainView } from './views';
@@ -45,6 +46,7 @@ export class FactoryPresenter {
     public isDefaultSupplier: KnockoutComputed<boolean>;
     public representativeInstance: KnockoutComputed<Factory | null>;
     public productionChain: ProductionChainView;
+    public syncedAverageProductivity: KnockoutComputed<number | null>;
     
 
     /**
@@ -145,6 +147,7 @@ export class FactoryPresenter {
         });
         this.modules = ko.pureComputed(() => this.instance()?.modules || []);
         this.items = ko.pureComputed(() => this.instance()?.availableItems() || []);
+        this.syncedAverageProductivity = ko.pureComputed(() => this.instance()?.syncedAverageProductivity() ?? null);
 
         // Sums this one factory type's required workforce across every real island (mirrors
         // .buildings above) - the All-Islands pseudo-island's own workforceDemand.amount() is
@@ -269,6 +272,19 @@ export class FactoryPresenter {
         return factory.fertilityFactor() > EPSILON;
     }
 
+    /** True for a factory built on a river embankment (params flag `isRiverEmbankment`); the one place that reads it. */
+    get isRiverEmbankment(): boolean {
+        return this.factory.isRiverEmbankment;
+    }
+
+    /**
+     * Closes the factory dialog and opens the dialog that owns the effect of a permanent effect row
+     * (the Effects dialog, or the patron selection dialog for patron effects).
+     */
+    openEffectSource(row: EffectBoostRow): void {
+        openEffectOwner(row.effect, row.owner);
+    }
+
     showFertilityCheckbox(): IslandFertility | undefined {
         const factory = this.instance();
         if (!factory?.neededFertility) return undefined;
@@ -316,6 +332,7 @@ export class ProductPresenter {
     public tradeList: KnockoutComputed<TradeList>;
 
     // === UI STATE ===
+    public gameRouteIndicators: KnockoutComputed<{ visible: boolean; red: boolean; yellow: boolean }>;
     public isHighlightedAsMissing: KnockoutComputed<boolean>;
     public name: KnockoutComputed<string>;
     public icon: KnockoutComputed<string>;
@@ -607,6 +624,7 @@ export class ProductPresenter {
                     sum += supplier.currentProduction();
             }
             sum += product.passiveTradeSupplier.currentProduction();
+            sum += product.governorSupply();
             return sum;
         };
 
@@ -667,6 +685,26 @@ export class ProductPresenter {
         // UI properties
         this.name = ko.pureComputed(() => this.product.name());
         this.icon = ko.pureComputed(() => this.product.icon as string);
+
+        // Indicators of the imported game routes that supply this product on the selected island (R12). Read by the tile
+        // only for imported products, so locally produced products cost nothing.
+        this.gameRouteIndicators = ko.pureComputed(() => {
+            const island = this.island();
+            const none = { visible: false, red: false, yellow: false };
+            if (island.isAllIslands()) return none;
+            let visible = false;
+            let red = false;
+            let yellow = false;
+            for (const r of (this.instance()?.tradeList.routes() ?? []) as TradeRoute[]) {
+                if (r.to !== island) continue;
+                const ind = r.indicators();
+                if (ind.gameRoutes === 0) continue;
+                visible = true;
+                red = red || ind.red;
+                yellow = yellow || ind.yellow !== undefined;
+            }
+            return { visible, red, yellow };
+        });
 
         this.isHighlightedAsMissing = ko.pureComputed(() => {
             if (!isAggregateModeFor(this.island()))
@@ -900,7 +938,7 @@ export class ProductPresenter {
     }
 
     tradingAmountFormatted(): string{
-        return formatNumber(this.tradeList().amount() + this.instance().passiveTradeSupplier.currentProduction()) + ' t/min';
+        return formatNumber(this.tradeList().amount() + this.instance().passiveTradeSupplier.currentProduction() + this.instance().governorSupply()) + ' t/min';
     }
 }
 

@@ -6,7 +6,7 @@ This guide explains how to publish a new release of the Anno 117 Calculator.
 
 - You must be on the `main` branch
 - All changes should be committed
-- Git Bash or WSL installed (for Windows users)
+- Git for Windows installed (`publish.bat` uses its Git Bash so Git Credential Manager is used; WSL bash is not supported)
 
 ## Usage
 
@@ -71,7 +71,7 @@ main → [commit "Release X.Y"] → main
          ↓
       [squash merge]
          ↓
-      release → [push] → GitHub Actions creates tag
+      release → [push release:main] → GitHub Actions creates tag
          ↓
       [merge back]
          ↓

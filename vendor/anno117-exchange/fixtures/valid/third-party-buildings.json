@@ -1,0 +1,23 @@
+{
+  "format": "anno117-exchange",
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "layout-script",
+    "version": "1.0.0"
+  },
+  "islands": [
+    {
+      "id": "i1",
+      "name": "Latium 5",
+      "session": 3245,
+      "buildings": {
+        "3089": {
+          "built": 2
+        },
+        "3174": {
+          "built": 3
+        }
+      }
+    }
+  ]
+}

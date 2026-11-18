@@ -1,5 +1,8 @@
 # Template Design Guidelines for Anno Calculator
 
+Design decisions (principles, colours, dark mode, empty states, defaults, checklist): `docs/ui-ux-design.md`. This file
+holds the template mechanics.
+
 ## UI Design Patterns
 - **Dark mode support**: All product-tile classes have `.bg-dark .product-tile` variants in style.css
 
@@ -96,6 +99,14 @@ When displaying resident counts in templates, follow these patterns:
 - Implements headerless table design with conditional residence type display
 - Uses population summary section with prominent total residents display
 - Follows inline-list-centered pattern for all resident count displays
+
+- Needs table: `modal-xl`; a header table (the "Needs" cell with one annolayouts.de link, then an icon row `tr.need-column-icons` with one `th` per rendered column, then the totals row `tr.need-totals` with one total per attribute column) and one `table-fixed` table per need category with a `<colgroup>` that repeats the widths. The columns come from `$root.presenter.residence.needColumns()` and are gated with `ko if:`, never `visible:`; the cells after the need cell come from the shared template `need-attribute-cells.html`, used by both branches of the `editable()` `if`/`ifnot` pair. Static `src` attributes of a template are hashed by the build; icons that tests must identify by name are bound from the view model.
+
+### villa-items-dialog.html
+- Icon-first table, one `th scope="col"` per column from `window.view.villaItems.columns` (state, item, target residences, one per `window.view.needAttributes` entry in params order, consumption, additional effects); every header is a `<button>` with a title and an aria-label that join the column title and the sort state, the `th` carries `aria-sort`. Rows use `tri-state-toggle` (no `asset` param: the item icon is in the item cell), chips (`.villa-chip`) with good icons, and `&ndash;` with a title where an item has no value. The dialog is not offered on the All-Islands pseudo-island (`ifnot: $root.island().isAllIslands()` around the content and on both entry buttons).
+
+### settings-dialog.html / dlc-settings.html
+- The DLC list item ends with the one seam `<!-- ko template: { name: 'dlc-settings', data: $data } --><!-- /ko -->`; the dialog names no DLC. `dlc-settings.html` holds one block per DLC (today the volcano level selector: effect icon with a titled tooltip, a `btn-group` of buttons 0 to 5 with `aria-pressed`, and for mixed scales one sentence plus an icon, name and value per effect), guarded with `ko if` (not `visible:`) on `dlc.checked()`. Debug label "Volcano Level"; layout classes `.dlc-extras`, `.volcano-level-button` in `style.css`.
 
 ### population-tile.html  
 - Separates editable buildings input from read-only residents display
@@ -290,6 +301,19 @@ When enabled, debug bindings log to console with `[DebugKO]` prefix:
 
 - `foreach: $data.targets` renders one icon per target. For residence targets use the **population-level icon** (`$data.populationLevel ? $data.populationLevel.icon : $data.icon`) — all residences share one building icon, so population icons distinguish tiers.
 - The `<thead>` is intentionally left unclosed before `<tbody data-bind="foreach: $root.filteredEffects">`; leave it as-is.
+## Factory config: boost sources container (`factory-config-section.html`)
+
+- One table row (`tr.boost-sources-row`, `td colspan="3"`) between the productivity row and the fertility row, inside `ifEditable` and an `if` on `boostSources.hasAny()`, so it is absent while aggregating and for a factory without items or active effects. It is a `collapsible` (`id: 'factory-config-boost-sources'`, `collapsed: true`, `data: $data` = the FactoryPresenter, `headerTemplate: 'factory-boost-sources-header'`); the header shows icon and number pairs for the active source count and the net boost, the net only while `isProductivityVisible()`.
+- Inside: one guidance sentence, then up to three plain blocks (`.boost-group-items`, `.boost-group-range`, `.boost-group-permanent`), each behind `if: ...Rows().length`. The tri-state legend exists in the items block only. Items and range rows use `tri-state-toggle` (range rows: `state: $data.toggle`, `hasBoost: false`, id `fc-<target>-<effect>-equipped`, same scheme as items); permanent rows have no input and no toggle, an `openEffectSource` button (`$parent.openEffectSource($data)`, `$parent` = the presenter inside the `foreach`) and `tr[data-effect-guid]`.
+- Row values come from the shared partial `factory-buff-values.html` (`template: { name: 'factory-buff-values', data: $data }`), which reads `activeBuff()`, `extraGoods`, `replacementArray`, `replacingWorkforce` and `target` from an item row or an `EffectBoostRow`. Base productivity additions carry the title `boostBaseAddition`, productivity upgrades the title `productivity`; every icon has a title.
+- The productivity value is a focusable `.prod-trigger` with a `.prod-tip` (`role="tooltip"`) in `ifEditable`; the plain value stays in `ifAggregated`. The tooltip is a CSS popover (visible on `:hover` and `:focus`, `visibility: hidden` before) built from `boostSources.breakdown()` with repeated inline expressions, not a `with:`: rows with value 0 are omitted, the fertility row appears below 100 %, `.prod-tip-total` equals the displayed value.
+- The supplier tab of a river embankment factory shows `img.river-embankment-icon` (`visible: $data.isRiverEmbankment`, title key `riverEmbankment`) between the region icon and the name. Static `src` attributes are hashed by the build, so tests find the icon by its class.
+- `consumer-config-dialog.html` is not mounted and keeps its own copy of the old items block.
+
+## Collapsible `headerTemplate`
+
+`<collapsible params="..., headerTemplate: 'template-name'">` renders the named template (data: the collapsible's `data` param) in the legend after the heading, inside `span.collapser-header`. The legend is the toggle target, so a click inside the header toggles the section. `summary` (always followed by " t/min") is unchanged and independent of it.
+
 ## tri-state-toggle component (item equip: Off / Base / Boosted)
 
 - Replaces `icon-checkbox` for equipped **factory items** in `factory-config-section.html` and `consumer-config-dialog.html` (the item rows under `foreach: $data.availableItems`, where each `$data` is a base `AppliedBuff`).

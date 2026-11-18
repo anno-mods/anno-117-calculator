@@ -30,6 +30,7 @@ export class AppliedBuff {
     public available: KnockoutComputed<boolean>;
     public visible: KnockoutComputed<boolean>;
     public scaling: KnockoutObservable<number>;
+    public coverage: KnockoutObservable<number> | KnockoutComputed<number>;
     public isBoostBuff: boolean;
     // For an item base equipment, resolves to the boost buff while the slot is Boosted, else the base buff.
     // Set by the owning Item after boost equipments are created; drives the displayed numbers.
@@ -45,7 +46,8 @@ export class AppliedBuff {
      * @param isBoostBuff - marks this buff as the boosted variant of an item slot (excluded from the item row list)
      */
     constructor(parent: Item|Effect|Module, buff: Buff, factory: Constructible, _assetsMap: AssetsMap, useParentScaling=true,
-                scalingOverride?: KnockoutObservable<number> | KnockoutComputed<number>, isBoostBuff=false) {
+                scalingOverride?: KnockoutObservable<number> | KnockoutComputed<number>, isBoostBuff=false,
+                coverage?: KnockoutObservable<number> | KnockoutComputed<number>) {
         // Validate required parameters
         if (!parent) {
             throw new Error('AppliedBuff parent is required');
@@ -118,16 +120,25 @@ export class AppliedBuff {
             return this.scaling() * this.buff.fertilityPercent;
         });
 
+        // Share of residences in range (0..1). It scales the values of residence buffs only and never the
+        // effect scaling, which stays 0/1 so gated needs keep their `scaling() === 1` test.
+        this.coverage = coverage ?? FULL_COVERAGE;
+
         this.populationBonus = ko.pureComputed(() => {
-            return this.scaling() * this.buff.population;
+            return this.scaling() * this.buff.population * this.coverage();
         });
 
         this.consumptionModifierInPercent = ko.pureComputed(() => {
-            return this.scaling() * this.buff.consumptionModifierInPercent;
+            return this.scaling() * this.buff.consumptionModifierInPercent * this.coverage();
         });
 
         this.goodConsumptionUpgrade = ko.pureComputed(() => {
-            return this.scaling() > 0 ? this.buff.goodConsumptionUpgrade : [];
+            if (this.scaling() <= 0)
+                return [];
+            const share = this.coverage();
+            if (share === 1)
+                return this.buff.goodConsumptionUpgrade; // original array: effects without coverage keep their identity
+            return this.buff.goodConsumptionUpgrade.map(e => ({ product: e.product, amountInPercent: e.amountInPercent * share }));
         });
 
         this.replacements = new Map();
@@ -167,7 +178,21 @@ export class AppliedBuff {
 
         this.target.addBuff(this);
     }
+
+    /**
+     * Value per residence that the buff adds to the attribute while the need of the given product is supplied
+     * (`needAttributes` entries with that attribute; Population adds residents), scaled like `populationBonus`.
+     */
+    needAttribute(productGuid: number, attributeId: string): number {
+        let sum = 0;
+        for (const entry of this.buff.needAttributes)
+            if (entry.productGuids.indexOf(productGuid) !== -1)
+                sum += entry.attributes[attributeId] ?? 0;
+        return sum * this.scaling() * this.coverage();
+    }
 }
+
+const FULL_COVERAGE = ko.observable(1);
 
 /**
  * Represents additional goods production from equipped items

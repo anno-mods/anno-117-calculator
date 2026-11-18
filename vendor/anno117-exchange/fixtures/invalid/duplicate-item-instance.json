@@ -1,0 +1,28 @@
+{
+  "format": "anno117-exchange",
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "x",
+    "version": "1.0.0"
+  },
+  "islands": [
+    {
+      "id": "a",
+      "itemStorage": [
+        {
+          "item": 51316,
+          "instance": 2001,
+          "slot": 1
+        }
+      ]
+    }
+  ],
+  "account": {
+    "items": [
+      {
+        "item": 51328,
+        "instance": 2001
+      }
+    ]
+  }
+}

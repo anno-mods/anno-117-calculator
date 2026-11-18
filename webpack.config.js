@@ -3,10 +3,13 @@ const CompressionPlugin = require('compression-webpack-plugin');
 
 module.exports = {
   mode: 'development',
-  entry: './src/main.ts',
+  entry: {
+    calculator: './src/main.ts',
+    statistics: './src/statistics.ts'
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'calculator.bundle.js',
+    filename: '[name].bundle.js',
     charset: true
   },
   module: {

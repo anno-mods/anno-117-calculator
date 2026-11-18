@@ -1,0 +1,30 @@
+{
+  "format": "anno117-exchange",
+  "formatVersion": "1.9",
+  "generator": {
+    "name": "future-tool"
+  },
+  "futureBlock": {
+    "anything": [
+      1,
+      2,
+      3
+    ]
+  },
+  "research": {
+    "researched": [
+      37870
+    ],
+    "counts": {
+      "37870": 2
+    },
+    "basis": "estimated-by-future-tool"
+  },
+  "islands": [
+    {
+      "id": "n1",
+      "futureIslandKey": "kept",
+      "session": 3245
+    }
+  ]
+}

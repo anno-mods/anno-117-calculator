@@ -1,0 +1,139 @@
+{
+  "format": "anno117-exchange",
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "conformance",
+    "version": "1.0.0"
+  },
+  "islands": [
+    {
+      "id": "a",
+      "name": "A",
+      "session": 3245,
+      "gameIsland": {
+        "sessionGuid": 3245,
+        "islandId": 1,
+        "areaIndex": 1,
+        "areaKey": 8257
+      }
+    },
+    {
+      "id": "b",
+      "name": "B",
+      "session": 3245,
+      "gameIsland": {
+        "sessionGuid": 3245,
+        "islandId": 2,
+        "areaIndex": 1,
+        "areaKey": 8321
+      }
+    },
+    {
+      "id": "c",
+      "name": "C",
+      "session": 3245,
+      "gameIsland": {
+        "sessionGuid": 3245,
+        "islandId": 3,
+        "areaIndex": 1,
+        "areaKey": 8385
+      }
+    }
+  ],
+  "trade": {
+    "routes": [
+      {
+        "id": "r1",
+        "stations": [
+          {
+            "slots": [
+              {
+                "product": 151680,
+                "mode": "load",
+                "slot": 0,
+                "amount": 10
+              }
+            ],
+            "island": "a"
+          },
+          {
+            "slots": [
+              {
+                "product": 151680,
+                "mode": "unload",
+                "slot": 0,
+                "amount": 10
+              }
+            ],
+            "island": "c"
+          }
+        ],
+        "ships": [
+          {
+            "type": 1001,
+            "slots": 4,
+            "count": 1
+          }
+        ]
+      },
+      {
+        "id": "r2",
+        "stations": [
+          {
+            "slots": [
+              {
+                "product": 151680,
+                "mode": "load",
+                "slot": 0,
+                "amount": 10
+              }
+            ],
+            "island": "b"
+          },
+          {
+            "slots": [
+              {
+                "product": 151680,
+                "mode": "unload",
+                "slot": 0,
+                "amount": 10
+              }
+            ],
+            "island": "c"
+          }
+        ],
+        "ships": [
+          {
+            "type": 1001,
+            "slots": 4,
+            "count": 2
+          }
+        ]
+      }
+    ],
+    "imports": [
+      {
+        "island": "c",
+        "product": 151680,
+        "basis": "planned",
+        "suppliers": [
+          {
+            "island": "a",
+            "share": 0.3333
+          },
+          {
+            "island": "b",
+            "share": 0.6667
+          }
+        ]
+      }
+    ]
+  },
+  "ext": {
+    "conformance": {
+      "case": "shared-supply",
+      "rule": "reference-derivation",
+      "note": "Weight = ship count (as the stand-in for visits per time) times unload slot amounts: 10 against 20."
+    }
+  }
+}

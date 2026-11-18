@@ -49,6 +49,7 @@ Save and share your calculator configurations:
 - Click the **Download** button in the navigation bar
 - **Export Configuration**: Download your current setup (islands, buildings, settings) as a JSON file
 - **Import Configuration**: Load a previously saved configuration
+- **Export Exchange File / Import Exchange File**: Share your islands, buildings, trade routes and settings with other Anno 117 tools in the tool-neutral exchange format. The import shows a report, replaces all stored data only after you confirm and keeps everything the calculator does not model so that it returns on export. See [docs/exchange-format.md](docs/exchange-format.md).
 
 ## View Modes
 

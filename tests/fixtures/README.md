@@ -66,7 +66,7 @@ Common localStorage key patterns used by the calculator:
 - `{populationGuid}[{needGuid}].checked` - Population need activation state
 - `{populationGuid}[{needGuid}].notes` - Notes for specific need
 - `island.effect.{effectGuid}.scaling` - Island-level effect scaling (0-1)
-- `global.effect.{effectGuid}.scaling` - Global effect scaling (0-1)
+- `{effectGuid}.scaling` - Global effect scaling (0-1), stored inside the `globalEffects` SubStorage
 
 ## Using Fixtures in Tests
 

@@ -21,6 +21,13 @@ Technical guidance for working with the Anno 117 Calculator codebase.
 - **views.ts** - Presenters (ResidencePresenter pattern)
 - **i18n.ts** - UI translations (12 languages required)
 
+## UI and UX (read before planning any interface change)
+
+Every plan or change that adds or alters a dialog, tile, table, tooltip, setting, icon, string or import/export flow must
+follow `docs/ui-ux-design.md` (principles, layout, colour and dark mode, language, accessibility, defaults, planning
+checklist). Template wiring is in `templates/AGENTS.md`; planning agents answer the checklist in section 9 of the guide in
+the plan text.
+
 ## Testing
 
 **Key Commands:**
@@ -57,6 +64,9 @@ Three invariants; everything else is in `src/AGENTS.md` -> "Aggregate mode (`src
 - **Branch inside existing computed properties; never swap the array a bootstrap `foreach` iterates.** `CategoryPresenter.productPresenters`, `ProductPresenter.factoryPresenters` and `window.view.template.populationGroups` must keep the same array reference forever - swapping forces Knockout to rebuild the whole tile grid (~2s). Arrays iterated inside modal dialogs are exempt; they re-render on open.
 - **Read-only aggregate rows are a data contract, not a template convention.** `AggregateBuildingsCalc` (`src/aggregate.ts`) is a `BuildingsCalc` of read-only cross-island sums (`readOnly === true`, setters are logged no-ops). Presenters return it from `buildings()`, and shared components branch on `buildings().readOnly`. Prefer this over a template-level condition.
 - **Gate genuinely-disappearing blocks with `<!-- ko ifEditable: true -->` / `<!-- ko ifAggregated: true -->`, never `visible:`** - `visible:` still evaluates a hidden control's `enable:`/`click:` bindings against read-only aggregate data, which throws because the aggregate objects deliberately implement no mutators.
+
+### Residence items and coverage
+Island-store keys: `residenceItem.<item>.state` (0/1/2), `villaCoverage`, `<level>[<effect>].coverage`, `<level>[<building>].publicCoverage`, `publicCoverage` (percent 0..100, default 100). Coverage multiplies buff values through `AppliedBuff.coverage` and never an effect `scaling`. Details: `src/AGENTS.md` -> "Residence items (villa items) and coverage"; exchange mapping: `docs/exchange-format.md`.
 
 ### Initialization Order (world.ts:518)
 **MUST follow this sequence:**
@@ -100,6 +110,14 @@ Three invariants; everything else is in `src/AGENTS.md` -> "Aggregate mode (`src
 - Island name used as localStorage key (e.g., "Latium", "All Islands")
 - Contains nested JSON with session, building counts, etc.
 - See tests/CLAUDE.md for complete structure
+
+### Live Statistics Page
+- **Separate Webpack Entry**: `statistics.html` loads `statistics.bundle.js` compiled from a second entry point.
+- **Island Selection**: Dropdown selector is populated by `feed.islands()`, sorted by resolved session index and `areaName` localeCompare. Sticky selection persists selected island across messages.
+- **Category Tabs Order**: Tabs follow the predefined order of category filters inside `window.params.productFilters`, with "All" always first.
+- **Product Row Sorting**: Rows (`filteredRows`) are sorted by category index and product index in `window.params.productFilters`, with unmapped products sorted last under "Other".
+- **Stacked Progress Bars**: Production (green) and consumption (white) bars in each row scale relative to `Math.max(perfectGeneration(), perfectConsumption())` to ensure direct visual comparability.
+- **Row Locators in Tests**: Locate the product icon using `row.locator('img').first()` since each row contains multiple `img` elements.
 
 ### ALL_ISLANDS Constant
 - Defined in src/util.ts:51 as `"All Islands"`

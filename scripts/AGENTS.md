@@ -35,9 +35,9 @@ const LANGUAGES = ['en', 'de', 'fr', 'es', 'it', 'pl', 'pt-BR', 'ru', 'zh-CN', '
 
 ## Release Publishing (publish.sh / publish.bat)
 
-Bumps version, builds, and publishes a release. `publish.bat` (Windows) wraps `publish.sh` (Git Bash). Usage: `scripts/publish.bat [tag]`.
+Bumps version, builds, and publishes a release. `publish.bat` (Windows) wraps `publish.sh` and calls Git for Windows' `C:\Program Files\Git\bin\bash.exe` explicitly (plain `bash` on PATH is WSL, which bypasses Git Credential Manager and prompts for username/password). Usage: `scripts/publish.bat [tag]`.
 
-**Flow**: bump version in package.json/util.ts → draft changelog from commits since the last "Merge branch 'release'" (edit `RELEASE_NOTES_DRAFT.md`) → build → bare version-bump commit on `main` → squash-merge `main` into `release` (one commit per release) → push `release` to `anno-mods` as both `release` and `release:main` → `.github/workflows/auto-release.yml` tags/creates the GitHub Release on push to `main` when the commit's first line matches `^Release \d+\.\d+` → merge `release` back into local `main` for bookkeeping only (never pushed).
+**Flow**: bump version in package.json/util.ts → draft changelog from commits since the last "Merge branch 'release'" (edit `RELEASE_NOTES_DRAFT.md`) → build → bare version-bump commit on `main` → squash-merge `main` into `release` (one commit per release) → push `release:main` to `anno-mods` (a single push; no `release` branch on the remote) → `.github/workflows/auto-release.yml` tags/creates the GitHub Release on push to `main` when the commit's first line matches `^Release \d+\.\d+` → merge `release` back into local `main` for bookkeeping only (never pushed).
 
 **Constraint**: `anno-mods/main` (the public repo, backs the releases page) must only ever receive the linear release-branch history, never local `main` directly - local `main`'s granular dev history includes NDA playtest data. Other remotes (`github`, `byWulf`, `hypergonial`) are dev/collaborator forks and are out of scope for this constraint unless told otherwise.
 
@@ -164,7 +164,15 @@ module.exports = { main };
 
 **Prebuild hooks** in package.json:
 - `prebuild`: Runs automatically before `build` command
-- Current prebuild: `npm run generate-sitemap`
+- Current prebuild: `npm run check-base-product-dlc-locks && npm run generate-sitemap`
+
+### check-base-product-dlc-locks.js
+
+**Purpose**: Build gate. Fails `npm run build` (exit 1) when `js/params.js` locks a base-game asset behind a DLC: any asset (product, need, item, effect, ...) that is ungated in `js/params-base.js` but carries `dlcUnlocks` now, or a product with a base-game factory that carries `dlcUnlocks`. `Product.available` and `Need.available` are "any listed DLC checked", so such an asset (and the consumption of a need) disappears for every player without the DLC. A need cannot be judged by its residences: DLC residences have no `dlcUnlocks` either, so only the comparison with `params-base.js` applies to needs.
+
+**Output**: grouped by asset type, one line per asset, `guid english_name dlc_it_locks`, e.g. `2138 Wine DLC03_Dawn_of_Delta(67904)`.
+
+**Fix**: in the asset extractor (see `../asset-extractor/docs/handoff-base-products-dlc-locked.md`), then regenerate `js/params.js`. The detection is in `scripts/lib/dlc-locked-products.js`, shared with `tests/computed/base-products-not-dlc-locked.spec.ts`.
 
 **Adding new prebuild steps**:
 ```json

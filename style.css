@@ -786,6 +786,18 @@ input[type=number]::-webkit-inner-spin-button {
     display: inline-block;
 }
 
+.dlc-list li .dlc-extras {
+    display: block;
+    margin: 4px 0 4px 32px;
+}
+
+.dlc-list li .dlc-extras .inline-list-centered {
+    display: flex;
+}
+
+.volcano-level-button.active {
+    font-weight: 600;
+}
 /* dark-mode styles */
 .bg-darker {
     background: #1a1a1a;
@@ -1120,4 +1132,345 @@ right connector from last child*/
 .bg-dark .tri-state-toggle .tri[data-state="2"] {
     background-color: #e0a800;
     border-color: #c69500;
+}
+
+/* Live statistics page (statistics.html) production/consumption bars. New classes only -
+   unrelated to .product-tile-amount/.product-tile-load, which size the main tile grid. */
+.stats-bar-track {
+    position: relative;
+    width: 100%;
+    height: 0.6rem;
+    background-color: rgba(0, 0, 0, 0.25);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.stats-bar-fill {
+    height: 100%;
+    border-radius: 3px 0 0 3px;
+}
+
+.stats-bar-fill-production {
+    background: green;
+}
+
+.stats-bar-fill-consumption {
+    background: white;
+}
+
+/* Villa items dialog (templates/villa-items-dialog.html): one sortable table of residence items. */
+.villa-table-scroll {
+    overflow-x: auto;
+}
+
+.villa-table {
+    min-width: 960px;
+}
+
+.villa-table th {
+    vertical-align: bottom;
+    text-align: center;
+    padding: 0.25rem 0.25rem;
+    white-space: nowrap;
+}
+
+.villa-table td {
+    vertical-align: middle;
+    padding: 0.4rem 0.4rem;
+    text-align: center;
+}
+
+.villa-table td.villa-item,
+.villa-table th:nth-child(2) {
+    text-align: left;
+}
+
+.villa-table tr.villa-off td:not(.villa-state):not(.villa-item),
+.villa-table tr.villa-off td.villa-item .villa-item-name {
+    opacity: 0.6;
+}
+
+.villa-sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.15rem 0.25rem;
+    color: inherit;
+    text-decoration: none;
+}
+
+.villa-sort:hover,
+.villa-sort:focus {
+    color: inherit;
+    text-decoration: none;
+    background: rgba(127, 127, 127, 0.14);
+}
+
+.villa-sort .villa-sort-indicator {
+    opacity: 0.35;
+}
+
+.villa-table th[aria-sort="ascending"] .villa-sort-indicator,
+.villa-table th[aria-sort="descending"] .villa-sort-indicator {
+    opacity: 1;
+    color: #007bff;
+}
+
+.villa-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    margin: 0 0.3rem 0 0;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.villa-chip img {
+    width: 18px;
+    height: 18px;
+}
+
+.villa-dash {
+    opacity: 0.5;
+}
+
+.villa-heroic {
+    opacity: 0.4;
+    color: inherit;
+}
+
+.villa-heroic.villa-heroic-lit {
+    opacity: 1;
+    color: #28a745;
+}
+
+.villa-empty {
+    padding: 0.75rem 0;
+}
+
+.need-column-icons th {
+    vertical-align: bottom;
+    padding: 0.25rem 0.1rem;
+    border-top: 0;
+}
+
+.need-attribute-cell,
+.need-weight-cell,
+.need-coverage-cell {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* Factory config: boost sources container (one collapsed container, up to three plain groups) */
+.boost-sources-row > td {
+    padding: 0;
+    border-top: 0;
+    background-color: transparent;
+}
+
+.collapser-header {
+    font-weight: normal;
+}
+
+.boost-head {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* .table-fixed centers every cell; the boost sources container reads left to right */
+.table-fixed tr.boost-sources-row td {
+    text-align: left;
+}
+
+/* The "Boost sources" legend sits at the left edge of the container, not centered by the table cell */
+.boost-sources-row fieldset,
+.boost-sources-row legend {
+    text-align: left;
+}
+
+.boost-sources-row legend {
+    float: none;
+    margin-left: 0;
+    margin-right: auto;
+}
+
+/* Game trade route icon and its indicator sit together in the middle of the tile */
+.game-route-indicator .inline-list-stretched {
+    justify-content: center;
+    gap: .35rem;
+    margin-right: 0 !important;
+}
+
+.boost-head-pair {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    margin-right: .75rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.boost-group {
+    margin-top: .75rem;
+}
+
+.boost-group-head {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding-bottom: .2rem;
+    border-bottom: 1px solid rgba(128, 128, 128, .4);
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+}
+
+.boost-group-legend {
+    display: flex;
+    gap: .75rem;
+    margin-left: auto;
+    font-weight: normal;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.boost-legend-entry {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+}
+
+/* Productivity value with the calculation as a tooltip (hover and focus) */
+.prod-trigger {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted currentColor;
+    cursor: help;
+    font-variant-numeric: tabular-nums;
+}
+
+.prod-trigger:focus {
+    outline: 2px solid #2a6fa8;
+    outline-offset: 3px;
+}
+
+.prod-tip {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 1060;
+    width: 210px;
+    max-width: calc(100vw - 48px);
+    padding: 8px 12px;
+    border-radius: 5px;
+    background: #1c2530;
+    color: #f3f6f9;
+    font-size: 13px;
+    line-height: 1.5;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .35);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .12s;
+    pointer-events: none;
+}
+
+.prod-trigger:hover .prod-tip,
+.prod-trigger:focus .prod-tip {
+    opacity: 1;
+    visibility: visible;
+}
+
+.prod-tip table {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+}
+
+.prod-tip td {
+    padding: 2px 0;
+    border: 0;
+}
+
+.prod-tip td:last-child {
+    text-align: right;
+}
+
+.prod-tip .prod-tip-sum td,
+.prod-tip .prod-tip-total td {
+    border-top: 1px solid rgba(128, 128, 128, .5);
+    padding-top: 4px;
+}
+
+.prod-tip .prod-tip-total td {
+    font-weight: 600;
+}
+
+.bg-dark .prod-tip {
+    background: #e6ebf0;
+    color: #1c2530;
+}
+
+/* the game icons are white; the light dark-mode tooltip needs them dark */
+.bg-dark .prod-tip img.icon-sm {
+    filter: invert(1);
+}
+
+.boost-group-permanent table td:first-child {
+    padding-left: 0;
+}
+
+.boost-group-permanent .inline-list-centered {
+    justify-content: flex-start;
+}
+
+/* Trade routes dialog: sticky header and filter bar, indicator dots */
+.trade-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background-color: inherit;
+    border-radius: inherit;
+}
+
+.trade-chip-tag {
+    font-size: 0.75rem;
+    margin: 0 0.15rem;
+}
+
+.trade-filter-select {
+    width: auto;
+    max-width: 14rem;
+    /* .form-control padding (0.5rem) overrides form-control-sm but its fixed height stays, clipping the text */
+    height: auto;
+    line-height: 1.5;
+}
+
+.trade-table th[aria-sort="ascending"] .villa-sort-indicator,
+.trade-table th[aria-sort="descending"] .villa-sort-indicator {
+    opacity: 1;
+    color: #007bff;
+}
+
+.route-ind-red {
+    color: #d9534f;
+}
+
+.route-ind-yellow {
+    color: #f0ad4e;
+}
+
+.trade-table .prod-trigger.trade-red,
+.trade-table .prod-trigger.trade-yellow,
+.product-tile .prod-trigger {
+    border-bottom: 0;
+}
+
+.trade-table .prod-tip {
+    right: 0;
+    left: auto;
+    text-align: left;
+}
+
+.trade-stops {
+    list-style: decimal;
 }

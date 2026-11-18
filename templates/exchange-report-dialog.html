@@ -1,0 +1,23 @@
+<div id="exchange-report-dialog" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true" data-bind="debug: 'Exchange Report Dialog'">
+    <div class="modal-dialog modal-lg" data-bind="with: $root.exchangeReport">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 data-bind="text: title">Exchange</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- ko foreach: sections -->
+                <div data-bind="attr: { id: id }">
+                    <h6 data-bind="text: $root.texts[textKey].name"></h6>
+                    <ul class="mb-3" data-bind="foreach: entries">
+                        <li data-bind="text: message"></li>
+                    </ul>
+                </div>
+                <!-- /ko -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="exchange-close-button" class="btn btn-secondary" data-dismiss="modal" data-bind="text: $root.texts.exchangeClose.name">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

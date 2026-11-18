@@ -1,4 +1,4 @@
-import { ACCURACY, BuildingsCalc, formatNumber, ko } from './util';
+import { ACCURACY, BuildingsCalc, DLC, NamedElement, formatNumber, ko } from './util';
 import { PopulationLevel, ResidenceBuilding } from './population';
 import { ResidenceEffectCoverage, ResidenceEffect, ResidenceNeed, NeedCategory, Need, PopulationLevelNeed } from './consumption';
 import { Product, Effect } from './production';
@@ -135,16 +135,8 @@ export class ViewMode {
             effect.scaling(1);
         }
 
-        //Vulcano effects
-        for (const session of (window.view.sessions as Session[])){
-            if (session.region.id != "Roman" && session.region.id != "Meta" )
-                continue;
-
-            for (const e of session.effects){
-                if (e.guid == 145099 || e.guid == 145095 || e.guid == 148043)
-                    e.scaling(5) // fertile soil and obsidian gathering / mining
-            }
-        }
+        // Volcano effects at level 5 (obsidian gathering / mining, fertile soil)
+        window.view.dlcSettings?.applyAll(5);
 
         //Nile Flood
         for (const session of (window.view.sessions as Session[])){
@@ -608,11 +600,74 @@ function sumPopulationLevelNeedAcrossRealIslands(populationLevelGuid: number, ne
     });
 }
 
+/** One building icon of the supply-building column of the needs table. */
+export interface SupplyBuilding {
+    guid: number;
+    name: KnockoutComputed<string>;
+    icon?: string | undefined;
+}
+
+/** One attribute cell of a need row: the total of the need over the residences of the level, signed except for Population. */
+export interface NeedAttributeCell {
+    attribute: NamedElement;
+    isPopulation: boolean;
+    /** Raw value of the need for this attribute per residence (residents per residence for Population); decides which columns exist. */
+    value: number;
+    /** Total over the residences: constructed buildings x (raw value + item bonus) x supply share, 0 while the need is off. */
+    total(): number;
+    text(): string;
+}
+
+/** Text of a total of an attribute: Population unsigned, other attributes signed and blank at 0. */
+function formatAttributeTotal(attribute: NamedElement, total: number): string {
+    const isPopulation = attribute.id === 'Population';
+    if (total === 0 && !isPopulation)
+        return '';
+    return formatNumber(total, !isPopulation);
+}
+
+/** The columns of the needs table that render for the visible needs of a level (R20). */
+export interface NeedColumns {
+    /** Attributes with a value other than 0 on at least one visible need, in the order of params.needAttributes. */
+    attributes: NamedElement[];
+    dlc: boolean;
+    /** Share of supply of public needs, shown above the t/min of the need; renders only when params.publicServices exists. */
+    coverage: boolean;
+}
+
+const publicServiceElements = new Map<number, NamedElement>();
+
+/** Public buildings (params.publicServices) that provide the need and exist in the region, as named icons. */
+function publicBuildingsProviding(needGuid: number, regionId: string | undefined): SupplyBuilding[] {
+    const result: SupplyBuilding[] = [];
+    for (const service of (window.params.publicServices || [])) {
+        if (service.providedNeeds.indexOf(needGuid) === -1)
+            continue;
+        if (regionId && regionId !== 'Meta' && service.regions.length && service.regions.indexOf(regionId) === -1)
+            continue;
+        let element = publicServiceElements.get(service.guid);
+        if (!element) {
+            element = new NamedElement(service);
+            publicServiceElements.set(service.guid, element);
+        }
+        result.push({ guid: service.guid, name: element.name, icon: element.icon });
+    }
+    return result;
+}
+
 class PopulationLevelNeedPresenter {
     public parent: NeedCategoryPresenter;
     public guid: number;
     public id: string;
     public residentsPerResidence: number;
+    public supplyWeight: number;
+    public dlcs: DLC[];
+    public isBuilding: boolean;
+    public supplyBuildings: KnockoutComputed<SupplyBuilding[]>;
+    /** Share of supply in percent of a public need; the largest share across the real islands while aggregating. */
+    public coverage: KnockoutComputed<number | undefined>;
+    public cells: KnockoutComputed<NeedAttributeCell[]>;
+    private need: Need;
     private instance: KnockoutObservable<PopulationLevelNeed | undefined>;
     public name: KnockoutObservable<string>;
     public visible: KnockoutComputed<boolean>;
@@ -665,20 +720,93 @@ class PopulationLevelNeedPresenter {
             }
         });
         this.isInactive =  ko.pureComputed(() => false);
-        this.residents = ko.pureComputed(() => {
-            if (this.parent.parent.isAggregateMode()) {
-                const populationLevelGuid = this.parent.parent.instance()?.guid;
-                if (populationLevelGuid == null)
-                    return 0;
-                return sumPopulationLevelNeedAcrossRealIslands(populationLevelGuid, this.guid, n => n.residents());
-            }
+        this.residents = ko.pureComputed(() => this.attributeTotal('Population'));
 
-            let inst = this.instance();
-            if(inst == null)
-                return 0;
+        this.need = need;
+        this.supplyWeight = need.supplyWeight;
+        this.dlcs = need.dlcs;
+        this.isBuilding = need.isBuilding;
 
-            return inst.residents();
+        // Goods needs: the factories that output the product and exist on the island; public needs: the public
+        // buildings that provide the need (params.publicServices, empty until the extractor delivers them).
+        this.supplyBuildings = ko.pureComputed(() => {
+            const island: Island | undefined = this.parent.parent.instance()?.island;
+            if (need.isBuilding)
+                return publicBuildingsProviding(need.guid, island?.region.id);
+
+            const product = island ? island.assetsMap.get(need.product.guid) as Product | undefined : undefined;
+            return (product ? product.factories : [])
+                .filter(f => f.available())
+                .map(f => ({ guid: f.guid as number, name: f.name, icon: f.icon }));
         });
+
+        this.coverage = ko.pureComputed(() => {
+            if (!need.isBuilding)
+                return undefined;
+            const level = this.parent.parent.instance();
+            if (!level)
+                return undefined;
+            if (this.parent.parent.isAggregateMode()) {
+                let best: number | undefined;
+                for (const island of (window.view.islands() as Island[])) {
+                    if (island.isAllIslands())
+                        continue;
+                    const share = findPopulationLevelOnIsland(island, level.guid)?.needsMap.get(this.guid)?.coverage();
+                    if (share !== undefined && (best === undefined || share > best))
+                        best = share;
+                }
+                return best;
+            }
+            return this.instance()?.coverage();
+        });
+
+        this.cells = ko.pureComputed(() => this.parent.parent.needColumns().attributes.map((attribute): NeedAttributeCell => {
+            const isPopulation = attribute.id === 'Population';
+            const value = isPopulation ? this.residentsPerResidence : (this.need.attributes.get(attribute) ?? 0);
+            const total = () => this.attributeTotal(attribute.id ?? '');
+            return {
+                attribute,
+                isPopulation,
+                value,
+                total,
+                // An unchecked need shows what it would add; the template dims the cell.
+                text: () => formatAttributeTotal(attribute, this.checked() ? total() : this.attributePotential(attribute.id ?? '')),
+            };
+        }));
+    }
+
+    /**
+     * Total of an attribute of this need over the residences of the level. While aggregating it sums the totals of the
+     * need across every real island that has the level, otherwise it reads the single repointed instance.
+     */
+    attributeTotal(attributeId: string): number {
+        if (this.parent.parent.isAggregateMode()) {
+            const populationLevelGuid = this.parent.parent.instance()?.guid;
+            if (populationLevelGuid == null)
+                return 0;
+            return sumPopulationLevelNeedAcrossRealIslands(populationLevelGuid, this.guid, n => n.attributeTotal(attributeId));
+        }
+
+        const inst = this.instance();
+        return inst == null ? 0 : inst.attributeTotal(attributeId);
+    }
+
+    /** Like attributeTotal, but as if the need were checked (what an unchecked need would add; display only). */
+    attributePotential(attributeId: string): number {
+        if (this.parent.parent.isAggregateMode()) {
+            const populationLevelGuid = this.parent.parent.instance()?.guid;
+            if (populationLevelGuid == null)
+                return 0;
+            return sumPopulationLevelNeedAcrossRealIslands(populationLevelGuid, this.guid, n => n.attributePotential(attributeId));
+        }
+
+        const inst = this.instance();
+        return inst == null ? 0 : inst.attributePotential(attributeId);
+    }
+
+    /** Raw value of this need for a need attribute (0 when the need has none). */
+    attributeValue(attribute: NamedElement): number {
+        return this.need.attributes.get(attribute) ?? 0;
     }
 
     update(need?: PopulationLevelNeed){
@@ -739,8 +867,9 @@ export class RangeEffect {
     public available: KnockoutComputed<boolean>;
     public visible: KnockoutComputed<boolean>;
     public totalPopulation: KnockoutComputed<number>;
+    private buildings: KnockoutComputed<BuildingsCalc | null>;
 
-    constructor(appliedBuff: AppliedBuff, isPatronEffect: boolean, buildings: KnockoutComputed<BuildingsCalc | null>) {
+    constructor(appliedBuff: AppliedBuff, isPatronEffect: boolean, buildings: KnockoutComputed<BuildingsCalc | null>, island?: Island) {
         this.appliedBuff = appliedBuff;
         this.isPatronEffect = isPatronEffect;
 
@@ -751,13 +880,40 @@ export class RangeEffect {
         });
 
         this.available = appliedBuff.available;
-        this.visible = appliedBuff.visible;
+        // A patron effect exists only while its patron is the island patron and a devotion milestone is reached.
+        this.visible = ko.pureComputed(() => appliedBuff.visible()
+            && (!isPatronEffect || !island || island.availablePatronEffects().indexOf(effect) !== -1));
 
         this.totalPopulation = ko.pureComputed(() => {
             const b = buildings();
             if (!b) return 0;
             return b.constructed() * this.appliedBuff.populationBonus();
         });
+        this.buildings = buildings;
+    }
+
+    /** Total of an attribute over the residences: Population is the resident bonus, others the buff's attribute value. */
+    attributeTotal(attributeId: string): number {
+        const b = this.buildings();
+        if (!b) return 0;
+        // The value the effect would add when switched on: an inactive effect shows its potential, dimmed by the template.
+        const value = attributeId === 'Population'
+            ? this.appliedBuff.buff.population
+            : (this.appliedBuff.buff.attributes[attributeId] ?? 0);
+        // Active: scaled like the calculation (a patron effect scales with its devotion milestone). Inactive: the
+        // potential of one unit, which the template dims.
+        const scaling = this.appliedBuff.scaling();
+        return b.constructed() * value * (scaling > 0 ? scaling : 1) * this.appliedBuff.coverage();
+    }
+
+    /** True while the effect contributes to the calculation. */
+    isActive(): boolean {
+        return this.appliedBuff.scaling() > 0;
+    }
+
+    /** Text of the attribute cell, same format as the needs table (blank at 0 except Population). */
+    attributeText(attribute: NamedElement): string {
+        return formatAttributeTotal(attribute, this.attributeTotal(attribute.id ?? ''));
     }
 }
 
@@ -792,6 +948,9 @@ export class ResidencePresenter{
     private populationLevelNeeds: PopulationLevelNeedPresenter[];
     public needCategories: NeedCategoryPresenter[];
     public visibleNeedCategories: KnockoutObservableArray<NeedCategoryPresenter>;
+    public needColumns: KnockoutComputed<NeedColumns>;
+    /** One total per rendered attribute column (empty text for 0). */
+    public needTotals: KnockoutComputed<string[]>;
     public effectCoverage: KnockoutObservableArray<ResidenceEffectCoverage>;
     public populationBuffs: KnockoutComputed<RangeEffect[]>;
     public populationBuffsId: string;
@@ -921,7 +1080,7 @@ export class ResidencePresenter{
                 if (seen.has(effect)) continue;
                 seen.add(effect);
                 const isPatronEffect = patronEffects.indexOf(effect) !== -1;
-                result.push(new RangeEffect(b, isPatronEffect, this.buildings));
+                result.push(new RangeEffect(b, isPatronEffect, this.buildings, residence.island));
             }
             return result;
         });
@@ -949,6 +1108,27 @@ export class ResidencePresenter{
 
         this.visibleNeedCategories = ko.pureComputed(() => this.needCategories.filter(n => n.visible()));
 
+        // Columns of the needs table: only what the calculator has data for. The columns are gated with `if:` on this
+        // computed; nothing here changes an array that a bootstrap `foreach` iterates.
+        this.needColumns = ko.pureComputed((): NeedColumns => {
+            const needs = this.visibleNeedCategories().flatMap(c => c.visiblePopulationLevelNeeds());
+            const hasPublicData = (window.params.publicServices || []).length > 0;
+            return {
+                attributes: (window.view.needAttributes as NamedElement[]).filter(a => needs.some(n => n.attributeValue(a) !== 0)),
+                dlc: needs.some(n => n.dlcs.length > 0),
+                coverage: hasPublicData && needs.some(n => n.coverage() !== undefined),
+            };
+        });
+
+        // Totals per attribute column: the sum of the cell totals of the visible needs. A need that is switched off
+        // contributes 0, so no filter on `checked` is needed.
+        this.needTotals = ko.pureComputed((): string[] => {
+            const needs = this.visibleNeedCategories().flatMap(c => c.visiblePopulationLevelNeeds());
+            return this.needColumns().attributes.map(attribute => {
+                const total = needs.reduce((sum, n) => sum + n.attributeTotal(attribute.id ?? ''), 0);
+                return total === 0 ? '' : formatAttributeTotal(attribute, total);
+            });
+        });
     }
 
     update(populationLevel: PopulationLevel){

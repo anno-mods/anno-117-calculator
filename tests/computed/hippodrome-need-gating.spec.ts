@@ -40,6 +40,20 @@ test.describe('Hippodrome horse-need gating (Equites)', () => {
         // 100 Equites * 0.00515 t/min = 0.515 t/min.
         expect(on).toBeGreaterThanOrEqual(0.5);
 
+        // Every attribute of the gated need is a total over the 100 residences while the effect is on.
+        const attributeSum = () => page.evaluate(({ level, need }) => {
+            const w = window as any;
+            const n = w.view.island().populationLevels.find((l: any) => l.guid === level).needsMap.get(need);
+            const cfg = w.params.needs.find((x: any) => x.guid === need);
+            return {
+                total: w.params.needAttributes.reduce((s: number, a: any) => s + n.attributeTotal(a.id), 0),
+                raw: w.params.needAttributes.reduce((s: number, a: any) => s + (cfg.needAttributes[a.id] ?? 0), 0),
+            };
+        }, { level: EQUITES_POPULATION_LEVEL_GUID, need: HORSE_NEED_GUID });
+        const withEffect = await attributeSum();
+        expect(withEffect.raw).not.toBe(0);
+        expect(withEffect.total).toBeCloseTo(100 * withEffect.raw, 6);
+
         // Uncheck the effect -> the gated need is no longer consumed.
         await page.evaluate((effectGuid) => {
             (window as any).view.island().assetsMap.get(effectGuid).scaling(0);
@@ -49,6 +63,7 @@ test.describe('Hippodrome horse-need gating (Equites)', () => {
             return (window as any).view.island().assetsMap.get(productGuid).totalDemand();
         }, HORSE_PRODUCT_GUID);
         expect(off).toBe(0);
+        expect((await attributeSum()).total).toBe(0);
     });
 
     test('the product tile production converges when the effect is toggled off (no stale demand/production)', async ({ page }) => {

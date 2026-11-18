@@ -84,6 +84,7 @@
                         <button class="nav-link" data-toggle="tab" type="button" role="tab" data-bind="attr: {'data-target': '#factories-tab-' + $data.guid(), 'aria-controls': 'factories-tab-' + $data.guid(), 'aria-selected': $data.isDefaultSupplier()}, css: {'active': $data.isDefaultSupplier()}" >
                             <span class="d-flex align-items-center">
                                 <span class="icon-sm icon-light mr-2" data-bind="visible: $data.island().region.id == 'Meta', component: {name: 'asset-icon', params: $data.region()}"></span>
+                                <img class="icon-sm mr-2 river-embankment-icon" src="../icons/icon_raw_resource_rivers_2d_0_1.webp" data-bind="visible: $data.isRiverEmbankment, attr: {title: $root.texts.riverEmbankment.name(), alt: $root.texts.riverEmbankment.name()}">
                                 <span class="mb-0" data-bind="text: $data.name()"></span>
                                 <span class="ml-3" data-bind="text: $data.outputAmountFormatted()"></span>
                             </span>
@@ -166,6 +167,30 @@
                                     </td>
                                     <td></td>
                                 </tr>
+                                <!-- ko ifEditable: true -->
+                                <!-- ko if: $data.instance().governorSupply() > 0 -->
+                                <tr class="governor-supply-row" data-bind="debug: 'Governor Supply'">
+                                    <td data-bind="text: $root.texts.governorSupply ? $root.texts.governorSupply.name : 'Governor supply'"></td>
+                                    <td>
+                                        <img class="icon-sm icon-light" src="../icons/icon_ship_loading.webp" />
+                                        <span data-bind="text: $root.texts.import ? $root.texts.import.name : 'Import'"></span>
+                                    </td>
+                                    <td></td>
+                                    <td>
+                                        <div class="input-group input-group-short spinner">
+                                            <input step="0.1" min="0" class="form-control" type="number" value="0" data-bind="value: $data.instance().governorSupply, attr: { id: 'governor-supply-input-' + $data.product.guid }" />
+                                            <div class="input-group-append">
+                                                <div data-bind="component: { name: 'number-input-increment', params: { obs: $data.instance().governorSupply, id: 'governor-supply-input-' + $data.product.guid }}"></div>
+                                                <span class="input-group-text">t/min</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="fa fa-info-circle" data-bind="attr: { title: $root.texts.governorSupplyHint ? $root.texts.governorSupplyHint.name : '' }"></span>
+                                    </td>
+                                </tr>
+                                <!-- /ko -->
+                                <!-- /ko -->
                                 <!-- ko foreach: $data.tradeList().routes -->
                                 <tr>
                                     <td>

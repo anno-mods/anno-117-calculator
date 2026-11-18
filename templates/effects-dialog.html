@@ -5,6 +5,12 @@
                 <h4>
                     <span data-bind="text: $root.texts.effects.name">Effect</span>
                     <external-link params="subpage: 'research'"></external-link>
+                    <!-- Villa items button disabled until the feature is finished (wrap in ifnot: $root.island().isAllIslands())
+                    <button type="button" class="btn btn-light btn-sm ml-2" data-dismiss="modal"
+                            data-bind="click: () => $root.villaItems.open(), attr: {title: $root.texts.villaItemsOpen.name(), 'aria-label': $root.texts.villaItemsOpen.name()}">
+                        <span class="fa fa-home" aria-hidden="true"></span>
+                    </button>
+                    -->
                 </h4>
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 

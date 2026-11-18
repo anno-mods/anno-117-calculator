@@ -1,0 +1,22 @@
+<!-- ko foreach: $data.cells -->
+<td class="need-attribute-cell" data-bind="attr: {title: $data.attribute.name()}, style: {opacity: $parent.checked() ? '' : '0.45'}">
+    <!-- ko if: $data.isPopulation && $data.value > 0 -->
+    <img class="icon-sm icon-light" src="../icons/icon_resource_population.png" />
+    <span class="ml-1" data-bind="text: $data.text()"></span>
+    <!-- /ko -->
+    <!-- ko ifnot: $data.isPopulation -->
+    <!-- ko if: $data.text() !== '' -->
+    <img class="icon-sm icon-light" data-bind="attr: {src: $data.attribute.icon ? $data.attribute.icon : null, alt: $data.attribute.name()}" />
+    <!-- /ko -->
+    <span class="ml-1" data-bind="text: $data.text()"></span>
+    <!-- /ko -->
+</td>
+<!-- /ko -->
+<td class="need-coverage-cell text-right">
+    <!-- ko if: $root.presenter.residence.needColumns().coverage && $data.coverage() !== undefined -->
+    <div class="need-coverage" data-bind="text: formatNumber($data.coverage()) + ' %'"></div>
+    <!-- /ko -->
+    <!-- ko if: $data.amount -->
+    <div class="need-amount" data-bind="text: formatNumber($data.amount()) + ' t/min'"></div>
+    <!-- /ko -->
+</td>

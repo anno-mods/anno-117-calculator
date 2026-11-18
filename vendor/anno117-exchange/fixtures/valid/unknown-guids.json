@@ -1,0 +1,84 @@
+{
+  "format": "anno117-exchange",
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "anno117-conformance",
+    "version": "1.0.0"
+  },
+  "settings": {
+    "dlcs": [
+      1,
+      7
+    ]
+  },
+  "effects": {
+    "global": {
+      "999003": 1
+    },
+    "bySession": {
+      "999001": {
+        "999003": 2
+      }
+    }
+  },
+  "research": {
+    "researched": [
+      999006,
+      37870
+    ],
+    "counts": {
+      "999006": 3
+    }
+  },
+  "islands": [
+    {
+      "id": "later-region",
+      "name": "Island of a later game version",
+      "session": 999001,
+      "buildings": {
+        "999002": {
+          "built": 3,
+          "planned": 1
+        }
+      },
+      "effects": {
+        "999003": 1
+      },
+      "fertilities": {
+        "999007": true
+      },
+      "products": {
+        "999004": {
+          "producer": 999005
+        }
+      },
+      "factories": {
+        "999008": {
+          "items": [
+            {
+              "item": 999009,
+              "boosted": true
+            }
+          ],
+          "effects": [
+            999010
+          ]
+        }
+      },
+      "disabledNeeds": {
+        "999011": [
+          999012
+        ]
+      }
+    },
+    {
+      "id": "known",
+      "session": 3245,
+      "buildings": {
+        "3174": {
+          "built": 2
+        }
+      }
+    }
+  ]
+}

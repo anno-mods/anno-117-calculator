@@ -1,0 +1,30 @@
+{
+  "format": "anno117-exchange",
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "calculator-test",
+    "version": "1.0.0"
+  },
+  "islands": [
+    {
+      "id": "cinis",
+      "name": "Cinis",
+      "session": 3245,
+      "buildings": {
+        "3089": {
+          "built": 4,
+          "fullyUtilize": false
+        }
+      }
+    }
+  ],
+  "ext": {
+    "conformance": {
+      "expect": {
+        "product": 2077,
+        "demandPerMinute": 0,
+        "note": "fullyUtilize false: demand follows the production chain, the sawmills drive nothing"
+      }
+    }
+  }
+}

@@ -1,0 +1,119 @@
+<div id="villa-items-dialog" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true" data-bind="debug: 'Villa Items Dialog'">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>
+                    <span data-bind="text: $root.texts.villaItems.name()">Villa items</span>
+                    <small class="text-muted ml-2" data-bind="text: $root.island().name()"></small>
+                </h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- The dialog is not offered on the All-Islands pseudo-island: its content does not exist there. -->
+                <!-- ko ifnot: $root.island().isAllIslands() -->
+                <div class="villa-coverage d-flex align-items-center mb-3" data-bind="debug: 'Villa Coverage', attr: {title: $root.texts.villaCoverageHint.name()}">
+                    <span class="fa fa-bullseye fa-lg mr-3" role="img" data-bind="attr: {title: $root.texts.villaCoverageHint.name(), 'aria-label': $root.texts.villaCoverage.name()}"></span>
+                    <input id="villa-coverage-input" type="range" class="custom-range flex-grow-1" min="0" max="100" step="5"
+                           data-bind="value: $root.island().villaCoverage, attr: {'aria-label': $root.texts.villaCoverage.name(), title: $root.texts.villaCoverageHint.name()}" />
+                    <output id="villa-coverage-output" class="ml-3 font-weight-bold" for="villa-coverage-input" data-bind="text: $root.island().villaCoverage() + ' %'"></output>
+                </div>
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <span class="fa fa-search" role="img" data-bind="attr: {title: $root.texts.villaItemsSearch.name(), 'aria-label': $root.texts.villaItemsSearch.name()}"></span>
+                        </span>
+                    </div>
+                    <input id="villa-items-search" type="search" class="form-control"
+                           data-bind="textInput: $root.villaItems.search, attr: {placeholder: $root.texts.villaItemsSearchPlaceholder.name(), 'aria-label': $root.texts.villaItemsSearch.name()}" />
+                </div>
+
+                <div class="villa-table-scroll">
+                    <table id="villa-items-table" class="table table-striped table-sm villa-table">
+                        <thead>
+                            <tr data-bind="foreach: $root.villaItems.columns">
+                                <th scope="col" data-bind="attr: {'aria-sort': $root.villaItems.ariaSort($data.key), 'data-sort-key': $data.key}">
+                                    <button type="button" class="btn btn-link btn-sm villa-sort" data-bind="click: () => $root.villaItems.sortBy($data.key), attr: {title: $root.villaItems.headerTitle($data), 'aria-label': $root.villaItems.headerTitle($data)}">
+                                        <!-- ko if: $data.icon -->
+                                        <img class="icon-sm icon-light" data-bind="attr: {src: $data.icon, alt: $data.title(), title: $data.title()}" />
+                                        <!-- /ko -->
+                                        <!-- ko if: $data.key === 'state' --><span class="fa fa-check-square-o villa-mark" aria-hidden="true"></span><!-- /ko -->
+                                        <!-- ko if: $data.key === 'name' --><span class="fa fa-diamond villa-mark" aria-hidden="true"></span><!-- /ko -->
+                                        <!-- ko if: $data.key === 'additional' --><span class="fa fa-plus-circle villa-mark" aria-hidden="true"></span><!-- /ko -->
+                                        <!-- ko if: $data.withText --><span class="villa-header-text" data-bind="text: $data.title()"></span><!-- /ko -->
+                                        <span class="villa-sort-indicator" role="img" data-bind="css: $root.villaItems.sortIconClass($data.key), attr: {title: $root.villaItems.sortTitle($data.key), 'aria-label': $root.villaItems.sortTitle($data.key)}"></span>
+                                    </button>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: $root.villaItems.rows">
+                            <tr data-bind="debug: 'Villa Item', css: {'villa-off': $data.state() === 0}, attr: {'data-item': $data.item.guid}">
+                                <td class="villa-state">
+                                    <tri-state-toggle params="state: $data.state, hasBoost: $data.hasBoost, id: $data.id + '-state'"></tri-state-toggle>
+                                </td>
+                                <td class="villa-item">
+                                    <span class="villa-item-name">
+                                        <img class="icon-sm" data-bind="attr: {src: $data.icon ? $data.icon : null, alt: $data.name(), title: $data.name() + ' - ' + $data.item.getSourceText()}" />
+                                        <span data-bind="text: $data.name()"></span>
+                                    </span>
+                                    <!-- ko ifEditable: true -->
+                                    <!-- ko if: $data.heroicEffect -->
+                                    <button type="button" class="btn btn-link btn-sm p-0 ml-1 villa-heroic" data-bind="click: () => $root.villaItems.openEffect($data), css: {'villa-heroic-lit': $data.heroicLit()}, attr: {title: $data.heroicTitle(), 'aria-label': $data.heroicTitle()}">
+                                        <span class="fa fa-globe" aria-hidden="true"></span>
+                                    </button>
+                                    <!-- /ko -->
+                                    <!-- /ko -->
+                                </td>
+                                <td class="villa-targets">
+                                    <!-- ko foreach: $data.levels -->
+                                    <img class="icon-sm mr-1" data-bind="attr: {src: $data.icon ? $data.icon : null, alt: $data.name(), title: $data.name()}" />
+                                    <!-- /ko -->
+                                </td>
+                                <!-- ko foreach: $root.villaItems.attributeCells($data) -->
+                                <td class="villa-attribute" data-bind="attr: {'data-attribute': $data.attribute.id}">
+                                    <!-- ko foreach: $data.chips -->
+                                    <span class="villa-chip" data-bind="attr: {title: $data.title}">
+                                        <!-- ko foreach: $data.icons -->
+                                        <img data-bind="attr: {src: $data.src ? $data.src : null, alt: $data.name, title: $data.name}" />
+                                        <!-- /ko -->
+                                        <span data-bind="text: $data.text"></span>
+                                    </span>
+                                    <!-- /ko -->
+                                    <!-- ko if: $data.chips.length === 0 -->
+                                    <span class="villa-dash" role="img" data-bind="attr: {title: $root.texts.villaNoValue.name(), 'aria-label': $root.texts.villaNoValue.name()}">&ndash;</span>
+                                    <!-- /ko -->
+                                </td>
+                                <!-- /ko -->
+                                <td class="villa-consumption">
+                                    <!-- ko if: $data.data().consumption !== undefined -->
+                                    <span class="villa-chip" data-bind="text: formatNumber($data.data().consumption, true) + ' %'"></span>
+                                    <!-- /ko -->
+                                    <!-- ko if: $data.data().consumption === undefined -->
+                                    <span class="villa-dash" role="img" data-bind="attr: {title: $root.texts.villaNoValue.name(), 'aria-label': $root.texts.villaNoValue.name()}">&ndash;</span>
+                                    <!-- /ko -->
+                                </td>
+                                <td class="villa-additional">
+                                    <!-- ko foreach: $data.data().additional -->
+                                    <span class="villa-chip" data-bind="attr: {title: $data.title}">
+                                        <!-- ko foreach: $data.icons -->
+                                        <img data-bind="attr: {src: $data.src ? $data.src : null, alt: $data.name, title: $data.name}" />
+                                        <!-- /ko -->
+                                        <span data-bind="text: $data.text"></span>
+                                    </span>
+                                    <!-- /ko -->
+                                    <!-- ko if: $data.data().additional.length === 0 -->
+                                    <span class="villa-dash" role="img" data-bind="attr: {title: $root.texts.villaNoValue.name(), 'aria-label': $root.texts.villaNoValue.name()}">&ndash;</span>
+                                    <!-- /ko -->
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- ko if: $root.villaItems.rows().length === 0 -->
+                <p class="text-muted villa-empty" data-bind="text: $root.texts.villaNoMatch.name()"></p>
+                <!-- /ko -->
+                <!-- /ko -->
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,3642 @@
+{
+ "imports": [
+  {
+   "island": "a10177",
+   "product": 2153,
+   "suppliers": [
+    {
+     "island": "a9603",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a10177",
+   "product": 2154,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a10177",
+   "product": 2155,
+   "suppliers": [
+    {
+     "island": "a8515",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a10177",
+   "product": 2156,
+   "suppliers": [
+    {
+     "island": "a9795",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a10177",
+   "product": 2161,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a10177",
+   "product": 2162,
+   "suppliers": [
+    {
+     "island": "a9603",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a10177",
+   "product": 2163,
+   "suppliers": [
+    {
+     "island": "a9603",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a10177",
+   "product": 31706,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a10177",
+   "product": 31768,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a10177",
+   "product": 151680,
+   "suppliers": [
+    {
+     "island": "a41796",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a10177",
+   "product": 151691,
+   "suppliers": [
+    {
+     "island": "a41796",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a10177",
+   "product": 151694,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a10177",
+   "product": 151698,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a10177",
+   "product": 151703,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8451",
+   "product": 2069,
+   "suppliers": [
+    {
+     "island": "a9795",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8451",
+   "product": 2100,
+   "suppliers": [
+    {
+     "island": "a8899",
+     "amount": 0.9249
+    },
+    {
+     "island": "a9667",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8451",
+   "product": 2101,
+   "suppliers": [
+    {
+     "island": "a8899",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8451",
+   "product": 2105,
+   "suppliers": [
+    {
+     "island": "a9603",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8451",
+   "product": 2138,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8451",
+   "product": 2153,
+   "suppliers": [
+    {
+     "island": "a9603",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8451",
+   "product": 2154,
+   "suppliers": [
+    {
+     "island": "a9795",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8451",
+   "product": 2156,
+   "suppliers": [
+    {
+     "island": "a9795",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8451",
+   "product": 8405,
+   "suppliers": [
+    {
+     "island": "a8515",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8451",
+   "product": 31702,
+   "suppliers": [
+    {
+     "island": "a8899",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8451",
+   "product": 151690,
+   "suppliers": [
+    {
+     "island": "a41796",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8451",
+   "product": 151694,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8451",
+   "product": 151699,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8515",
+   "product": 2138,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "amount": 0.5591
+    },
+    {
+     "island": "a10177",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8515",
+   "product": 2141,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8515",
+   "product": 2145,
+   "suppliers": [
+    {
+     "island": "a10177",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8515",
+   "product": 2154,
+   "suppliers": [
+    {
+     "island": "a9795",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8515",
+   "product": 2158,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8515",
+   "product": 2162,
+   "suppliers": [
+    {
+     "island": "a9603",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8515",
+   "product": 31700,
+   "suppliers": [
+    {
+     "island": "a8899",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8515",
+   "product": 31706,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8515",
+   "product": 31708,
+   "suppliers": [
+    {
+     "island": "a9603",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8515",
+   "product": 55954,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8515",
+   "product": 151692,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8515",
+   "product": 151694,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8515",
+   "product": 151697,
+   "suppliers": [
+    {
+     "island": "a41796",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8515",
+   "product": 151699,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8899",
+   "product": 2102,
+   "suppliers": [
+    {
+     "island": "a8515",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8899",
+   "product": 2153,
+   "suppliers": [
+    {
+     "island": "a8515",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8899",
+   "product": 2154,
+   "suppliers": [
+    {
+     "island": "a9795",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8899",
+   "product": 2156,
+   "suppliers": [
+    {
+     "island": "a9795",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8899",
+   "product": 2158,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8899",
+   "product": 2159,
+   "suppliers": [
+    {
+     "island": "a8515",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8899",
+   "product": 31706,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8899",
+   "product": 55954,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8899",
+   "product": 151694,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8899",
+   "product": 151699,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 2108,
+   "suppliers": [
+    {
+     "island": "a8515",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 2129,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 2138,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "amount": 0.9335
+    },
+    {
+     "island": "a10177",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 2141,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 2143,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 2145,
+   "suppliers": [
+    {
+     "island": "a10177",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 2154,
+   "suppliers": [
+    {
+     "island": "a9795",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 2156,
+   "suppliers": [
+    {
+     "island": "a9795",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 2158,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 8405,
+   "suppliers": [
+    {
+     "island": "a8515",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 31700,
+   "suppliers": [
+    {
+     "island": "a8899",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 31706,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 55954,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 145220,
+   "suppliers": [
+    {
+     "island": "a10177",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 151690,
+   "suppliers": [
+    {
+     "island": "a41796",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 151692,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 151694,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 151697,
+   "suppliers": [
+    {
+     "island": "a41796",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 151699,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9795",
+   "product": 2108,
+   "suppliers": [
+    {
+     "island": "a8515",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9795",
+   "product": 2153,
+   "suppliers": [
+    {
+     "island": "a9603",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9795",
+   "product": 2158,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9795",
+   "product": 2159,
+   "suppliers": [
+    {
+     "island": "a8515",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9795",
+   "product": 8405,
+   "suppliers": [
+    {
+     "island": "a8515",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9795",
+   "product": 31700,
+   "suppliers": [
+    {
+     "island": "a8899",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9795",
+   "product": 31706,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9795",
+   "product": 55954,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9795",
+   "product": 151694,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a9795",
+   "product": 151699,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 2071,
+   "suppliers": [
+    {
+     "island": "a41796",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 2121,
+   "suppliers": [
+    {
+     "island": "a10177",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 2136,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 2137,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 2138,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 2144,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 2147,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 2151,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 2153,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 2154,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 2155,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 2156,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 2161,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 145220,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 151689,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 151690,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 151697,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 151698,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8452",
+   "product": 151714,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8644",
+   "product": 2136,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8644",
+   "product": 2137,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8644",
+   "product": 2144,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8644",
+   "product": 2147,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8644",
+   "product": 2151,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8644",
+   "product": 2153,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8644",
+   "product": 2154,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8644",
+   "product": 2155,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8644",
+   "product": 2161,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8644",
+   "product": 2162,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8644",
+   "product": 55954,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8644",
+   "product": 145220,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8644",
+   "product": 151689,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8644",
+   "product": 151690,
+   "suppliers": [
+    {
+     "island": "a41796",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8644",
+   "product": 151693,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8644",
+   "product": 151697,
+   "suppliers": [
+    {
+     "island": "a41796",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8644",
+   "product": 151698,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 2143,
+   "suppliers": [
+    {
+     "island": "a8452",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 2144,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 2147,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 2151,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 2153,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 2154,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 2155,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 2156,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 2161,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 2162,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 31695,
+   "suppliers": [
+    {
+     "island": "a8452",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 55954,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 145220,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 151689,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 151690,
+   "suppliers": [
+    {
+     "island": "a41796",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 151694,
+   "suppliers": [
+    {
+     "island": "a8452",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 151695,
+   "suppliers": [
+    {
+     "island": "a8452",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 151696,
+   "suppliers": [
+    {
+     "island": "a8452",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 151697,
+   "suppliers": [
+    {
+     "island": "a41796",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 151698,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 151699,
+   "suppliers": [
+    {
+     "island": "a8452",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 151701,
+   "suppliers": [
+    {
+     "island": "a8452",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a8708",
+   "product": 151703,
+   "suppliers": [
+    {
+     "island": "a8452",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 2121,
+   "suppliers": [
+    {
+     "island": "a10177",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 2124,
+   "suppliers": [
+    {
+     "island": "a10177",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 2137,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 2138,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 2143,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 2147,
+   "suppliers": [
+    {
+     "island": "a10177",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 2151,
+   "suppliers": [
+    {
+     "island": "a10177",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 2155,
+   "suppliers": [
+    {
+     "island": "a8515",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 2156,
+   "suppliers": [
+    {
+     "island": "a9795",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 2161,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 2162,
+   "suppliers": [
+    {
+     "island": "a9603",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 55954,
+   "suppliers": [
+    {
+     "island": "a8451",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 145220,
+   "suppliers": [
+    {
+     "island": "a10177",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 151680,
+   "suppliers": [
+    {
+     "island": "a41796",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 151690,
+   "suppliers": [
+    {
+     "island": "a41796",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 151694,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 151695,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 151696,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 151697,
+   "suppliers": [
+    {
+     "island": "a41796",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 151699,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 151701,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a25668",
+   "product": 151703,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 2137,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 2138,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 2143,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 2144,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 2147,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 2151,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 2153,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 2154,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 2155,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 2156,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 2161,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 2162,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 2178,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 2179,
+   "suppliers": [
+    {
+     "island": "a10177",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 55954,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 145220,
+   "suppliers": [
+    {
+     "island": "a10177",
+     "amount": 0.0378
+    },
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 151689,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 151690,
+   "suppliers": [
+    {
+     "island": "a41796",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 151694,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 151695,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 151696,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 151697,
+   "suppliers": [
+    {
+     "island": "a41796",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 151698,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 151699,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 151701,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 151703,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 2137,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 2138,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 2143,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 2144,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 2147,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 2151,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 2153,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 2154,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 2155,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 2156,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 2161,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 2162,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 55954,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 145220,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 151689,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 151693,
+   "suppliers": [
+    {
+     "island": "a8452",
+     "amount": 0.507
+    },
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 151694,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 151695,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "amount": 0.3068
+    },
+    {
+     "island": "a8452",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 151696,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 151698,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 151701,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 151703,
+   "suppliers": [
+    {
+     "island": "a8708",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 151704,
+   "suppliers": [
+    {
+     "island": "a26308",
+     "default": true
+    }
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 151705,
+   "suppliers": [
+    {
+     "island": "a25668",
+     "default": true
+    }
+   ]
+  }
+ ],
+ "source": "Marcia 73.with-storage-and-trade-history.sparse.exchange.json, routes 48, 93, 51, 66 only (no save content)",
+ "islands": [
+  "a10177",
+  "a25668",
+  "a26308",
+  "a41796",
+  "a8451",
+  "a8452",
+  "a8515",
+  "a8644",
+  "a8708",
+  "a8899",
+  "a9603",
+  "a9795"
+ ],
+ "routes": [
+  {
+   "id": 48,
+   "name": "Statuettes Nil - Syc",
+   "manual": false,
+   "stations": [
+    {
+     "slots": [
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 1,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 2,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 3,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 4,
+       "amount": 50.0
+      }
+     ],
+     "island": "a25668"
+    },
+    {
+     "slots": [
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 1,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 2,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 3,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 4,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 1,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 2,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 3,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 4,
+       "amount": 50.0
+      }
+     ],
+     "island": "a41796"
+    },
+    {
+     "slots": [
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 1,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 2,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 3,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 4,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 1,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 2,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 3,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 4,
+       "amount": 50.0
+      }
+     ],
+     "island": "a8452"
+    },
+    {
+     "slots": [
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 1,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 2,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 3,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 4,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 1,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 2,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 3,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 4,
+       "amount": 50.0
+      }
+     ],
+     "island": "a8708"
+    },
+    {
+     "slots": [
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 1,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 2,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 3,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 4,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 1,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 2,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 3,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 4,
+       "amount": 50.0
+      }
+     ],
+     "island": "a8644"
+    },
+    {
+     "slots": [
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 1,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 2,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 3,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 4,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 1,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 2,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 3,
+       "amount": 50.0
+      },
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 4,
+       "amount": 50.0
+      }
+     ],
+     "island": "a26308"
+    }
+   ],
+   "ships": [
+    {
+     "type": 178644,
+     "slots": 5,
+     "modules": [],
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": 51,
+   "name": "Roast Beef Cud - Uxo",
+   "manual": false,
+   "stations": [
+    {
+     "slots": [
+      {
+       "product": 31768,
+       "mode": "load",
+       "slot": 0,
+       "amount": 5.0
+      },
+      {
+       "product": 31768,
+       "mode": "unload",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 31707,
+       "mode": "load",
+       "slot": 1,
+       "amount": 50.0
+      },
+      {
+       "product": 31707,
+       "mode": "unload",
+       "slot": 1,
+       "amount": 50.0
+      },
+      {
+       "product": 2161,
+       "mode": "load",
+       "slot": 2,
+       "amount": 10.0
+      },
+      {
+       "product": 2161,
+       "mode": "unload",
+       "slot": 2,
+       "amount": 50.0
+      }
+     ],
+     "island": "a8451"
+    },
+    {
+     "slots": [
+      {
+       "product": 31704,
+       "mode": "load",
+       "slot": 3,
+       "amount": 50.0
+      }
+     ]
+    },
+    {
+     "slots": [
+      {
+       "product": 31768,
+       "mode": "unload",
+       "slot": 0,
+       "amount": 5.0
+      },
+      {
+       "product": 31768,
+       "mode": "load",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 31707,
+       "mode": "unload",
+       "slot": 1,
+       "amount": 50.0
+      },
+      {
+       "product": 31707,
+       "mode": "load",
+       "slot": 1,
+       "amount": 50.0
+      },
+      {
+       "product": 2161,
+       "mode": "unload",
+       "slot": 2,
+       "amount": 50.0
+      },
+      {
+       "product": 2161,
+       "mode": "load",
+       "slot": 2,
+       "amount": 50.0
+      },
+      {
+       "product": 31704,
+       "mode": "unload",
+       "slot": 3,
+       "amount": 50.0
+      }
+     ],
+     "island": "a9603"
+    }
+   ],
+   "ships": [
+    {
+     "type": 37223,
+     "slots": 4,
+     "modules": [],
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": 66,
+   "name": "Coal Arg - Can",
+   "manual": false,
+   "stations": [
+    {
+     "slots": [
+      {
+       "product": 2085,
+       "mode": "load",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 2085,
+       "mode": "load",
+       "slot": 1,
+       "amount": 50.0
+      }
+     ],
+     "island": "a8899"
+    },
+    {
+     "slots": [
+      {
+       "product": 2085,
+       "mode": "unload",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 2085,
+       "mode": "unload",
+       "slot": 1,
+       "amount": 50.0
+      }
+     ],
+     "island": "a9795"
+    },
+    {
+     "slots": [
+      {
+       "product": 2085,
+       "mode": "load",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 2085,
+       "mode": "load",
+       "slot": 1,
+       "amount": 50.0
+      }
+     ],
+     "island": "a8515"
+    },
+    {
+     "slots": [
+      {
+       "product": 2085,
+       "mode": "unload",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 2085,
+       "mode": "unload",
+       "slot": 1,
+       "amount": 50.0
+      }
+     ],
+     "island": "a9795"
+    }
+   ],
+   "ships": [
+    {
+     "type": 39571,
+     "slots": 2,
+     "modules": [],
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": 93,
+   "name": "Statuettes Cin - Syc",
+   "manual": false,
+   "stations": [
+    {
+     "slots": [
+      {
+       "product": 145220,
+       "mode": "load",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 2179,
+       "mode": "load",
+       "slot": 1,
+       "amount": 50.0
+      },
+      {
+       "product": 2179,
+       "mode": "load",
+       "slot": 2,
+       "amount": 50.0
+      },
+      {
+       "product": 2179,
+       "mode": "load",
+       "slot": 3,
+       "amount": 50.0
+      },
+      {
+       "product": 2179,
+       "mode": "load",
+       "slot": 4,
+       "amount": 50.0
+      },
+      {
+       "product": 2179,
+       "mode": "load",
+       "slot": 5,
+       "amount": 50.0
+      }
+     ],
+     "island": "a10177"
+    },
+    {
+     "slots": [
+      {
+       "product": 145220,
+       "mode": "unload",
+       "slot": 0,
+       "amount": 50.0
+      },
+      {
+       "product": 2179,
+       "mode": "unload",
+       "slot": 1,
+       "amount": 50.0
+      },
+      {
+       "product": 2179,
+       "mode": "unload",
+       "slot": 2,
+       "amount": 50.0
+      },
+      {
+       "product": 2179,
+       "mode": "unload",
+       "slot": 3,
+       "amount": 50.0
+      },
+      {
+       "product": 2179,
+       "mode": "unload",
+       "slot": 4,
+       "amount": 50.0
+      },
+      {
+       "product": 2179,
+       "mode": "unload",
+       "slot": 5,
+       "amount": 50.0
+      }
+     ],
+     "island": "a26308"
+    }
+   ],
+   "ships": [
+    {
+     "type": 37224,
+     "slots": 6,
+     "modules": [],
+     "count": 1
+    }
+   ]
+  }
+ ],
+ "visits": [
+  {
+   "route": 48,
+   "island": "a8452",
+   "trader": 41,
+   "time": 506176000.0,
+   "clock": "game",
+   "shipType": 178644,
+   "goods": {
+    "145220": 20.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a8515",
+   "trader": 41,
+   "time": 506202400.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": -46.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a9603",
+   "trader": 41,
+   "time": 506244600.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": 10.0,
+    "31707": 5.0,
+    "31768": 5.0
+   }
+  },
+  {
+   "route": 48,
+   "island": "a8708",
+   "trader": 41,
+   "time": 506459400.0,
+   "clock": "game",
+   "shipType": 178644,
+   "goods": {
+    "145220": 2.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a8451",
+   "trader": 41,
+   "time": 506477400.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": -10.0,
+    "31707": -5.0,
+    "31768": -5.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a9795",
+   "trader": 41,
+   "time": 506662700.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": 97.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a8899",
+   "trader": 41,
+   "time": 506916400.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": -97.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a9603",
+   "trader": 41,
+   "time": 506996000.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": 10.0,
+    "31707": 5.0,
+    "31768": 5.0
+   }
+  },
+  {
+   "route": 93,
+   "island": "a10177",
+   "trader": 41,
+   "time": 507175600.0,
+   "clock": "game",
+   "shipType": 37224,
+   "goods": {
+    "145220": -50.0
+   }
+  },
+  {
+   "route": 48,
+   "island": "a26308",
+   "trader": 41,
+   "time": 507208100.0,
+   "clock": "game",
+   "shipType": 178644,
+   "goods": {
+    "145220": -47.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a9795",
+   "trader": 41,
+   "time": 507278300.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": 83.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a8451",
+   "trader": 41,
+   "time": 507314900.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": -10.0,
+    "31707": -5.0,
+    "31768": -5.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a8515",
+   "trader": 41,
+   "time": 507657600.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": -83.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a9603",
+   "trader": 41,
+   "time": 507780600.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": 10.0,
+    "31707": 5.0,
+    "31768": 5.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a9795",
+   "trader": 41,
+   "time": 508055200.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": 39.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a8451",
+   "trader": 41,
+   "time": 508063200.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": -10.0,
+    "31707": -5.0,
+    "31768": -5.0
+   }
+  },
+  {
+   "route": 48,
+   "island": "a41796",
+   "trader": 41,
+   "time": 508154300.0,
+   "clock": "game",
+   "shipType": 178644,
+   "goods": {
+    "145220": 24.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a8899",
+   "trader": 41,
+   "time": 508349500.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": -39.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a9603",
+   "trader": 41,
+   "time": 508516600.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": 10.0,
+    "31707": 5.0,
+    "31768": 5.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a9795",
+   "trader": 41,
+   "time": 508603300.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": 37.0
+   }
+  },
+  {
+   "route": 93,
+   "island": "a26308",
+   "trader": 41,
+   "time": 508837200.0,
+   "clock": "game",
+   "shipType": 37224,
+   "goods": {
+    "145220": 50.0
+   }
+  },
+  {
+   "route": 48,
+   "island": "a8452",
+   "trader": 41,
+   "time": 508875800.0,
+   "clock": "game",
+   "shipType": 178644,
+   "goods": {
+    "145220": 20.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a8451",
+   "trader": 41,
+   "time": 508917900.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": -10.0,
+    "31707": -5.0,
+    "31768": -5.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a8515",
+   "trader": 41,
+   "time": 508975700.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": -37.0
+   }
+  },
+  {
+   "route": 48,
+   "island": "a8708",
+   "trader": 41,
+   "time": 509080100.0,
+   "clock": "game",
+   "shipType": 178644,
+   "goods": {
+    "145220": 2.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a9603",
+   "trader": 41,
+   "time": 509252500.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": 10.0,
+    "31707": 5.0,
+    "31768": 5.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a9795",
+   "trader": 41,
+   "time": 509285000.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": 35.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a8451",
+   "trader": 41,
+   "time": 509596400.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": -10.0,
+    "31707": -5.0,
+    "31768": -5.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a8899",
+   "trader": 41,
+   "time": 509600300.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": -35.0
+   }
+  },
+  {
+   "route": 48,
+   "island": "a26308",
+   "trader": 41,
+   "time": 509795600.0,
+   "clock": "game",
+   "shipType": 178644,
+   "goods": {
+    "145220": -44.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a9795",
+   "trader": 41,
+   "time": 509854200.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": 25.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a9603",
+   "trader": 41,
+   "time": 509997700.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": 10.0,
+    "31707": 5.0,
+    "31768": 5.0
+   }
+  },
+  {
+   "route": 93,
+   "island": "a10177",
+   "trader": 41,
+   "time": 510182200.0,
+   "clock": "game",
+   "shipType": 37224,
+   "goods": {
+    "145220": -50.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a8515",
+   "trader": 41,
+   "time": 510227000.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": -25.0
+   }
+  },
+  {
+   "route": 48,
+   "island": "a25668",
+   "trader": 41,
+   "time": 510260100.0,
+   "clock": "game",
+   "shipType": 178644,
+   "goods": {
+    "145220": -2.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a8451",
+   "trader": 41,
+   "time": 510371200.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": -10.0,
+    "31707": -5.0,
+    "31768": -5.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a9795",
+   "trader": 41,
+   "time": 510556300.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": 86.0
+   }
+  },
+  {
+   "route": 48,
+   "island": "a41796",
+   "trader": 41,
+   "time": 510564300.0,
+   "clock": "game",
+   "shipType": 178644,
+   "goods": {
+    "145220": 23.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a9603",
+   "trader": 41,
+   "time": 510697400.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": 10.0,
+    "31707": 5.0,
+    "31768": 5.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a8899",
+   "trader": 41,
+   "time": 510827700.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": -86.0
+   }
+  },
+  {
+   "route": 48,
+   "island": "a8452",
+   "trader": 41,
+   "time": 511066700.0,
+   "clock": "game",
+   "shipType": 178644,
+   "goods": {
+    "145220": 18.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a9795",
+   "trader": 41,
+   "time": 511073500.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": 80.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a8451",
+   "trader": 41,
+   "time": 511078000.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": -10.0,
+    "31707": -5.0,
+    "31768": -5.0
+   }
+  },
+  {
+   "route": 48,
+   "island": "a8708",
+   "trader": 41,
+   "time": 511301300.0,
+   "clock": "game",
+   "shipType": 178644,
+   "goods": {
+    "145220": 2.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a8515",
+   "trader": 41,
+   "time": 511460800.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": -80.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a9603",
+   "trader": 41,
+   "time": 511472300.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": 10.0,
+    "31707": 5.0,
+    "31768": 5.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a8451",
+   "trader": 41,
+   "time": 511788900.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": -10.0,
+    "31707": -5.0,
+    "31768": -5.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a9795",
+   "trader": 41,
+   "time": 511821200.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": 62.0
+   }
+  },
+  {
+   "route": 93,
+   "island": "a26308",
+   "trader": 41,
+   "time": 512022300.0,
+   "clock": "game",
+   "shipType": 37224,
+   "goods": {
+    "145220": 50.0
+   }
+  },
+  {
+   "route": 48,
+   "island": "a26308",
+   "trader": 41,
+   "time": 512067500.0,
+   "clock": "game",
+   "shipType": 178644,
+   "goods": {
+    "145220": 5.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a8899",
+   "trader": 41,
+   "time": 512145600.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": -62.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a9603",
+   "trader": 41,
+   "time": 512201300.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": 10.0,
+    "31707": 5.0,
+    "31768": 5.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a9795",
+   "trader": 41,
+   "time": 512420300.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": 42.0
+   }
+  },
+  {
+   "route": 48,
+   "island": "a25668",
+   "trader": 41,
+   "time": 512512500.0,
+   "clock": "game",
+   "shipType": 178644,
+   "goods": {
+    "145220": -48.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a8451",
+   "trader": 41,
+   "time": 512565600.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": -10.0,
+    "31707": -5.0,
+    "31768": -5.0
+   }
+  },
+  {
+   "route": 66,
+   "island": "a8515",
+   "trader": 41,
+   "time": 512810300.0,
+   "clock": "game",
+   "shipType": 39571,
+   "goods": {
+    "2085": -42.0
+   }
+  },
+  {
+   "route": 51,
+   "island": "a9603",
+   "trader": 41,
+   "time": 512942400.0,
+   "clock": "game",
+   "shipType": 37223,
+   "goods": {
+    "2161": 10.0,
+    "31707": 5.0,
+    "31768": 5.0
+   }
+  },
+  {
+   "route": 48,
+   "island": "a41796",
+   "trader": 41,
+   "time": 513019500.0,
+   "clock": "game",
+   "shipType": 178644,
+   "goods": {
+    "145220": 23.0
+   }
+  }
+ ],
+ "history": [
+  {
+   "island": "a8515",
+   "product": 2085,
+   "kind": "storage",
+   "clock": "game",
+   "unit": "t",
+   "start": 506484400,
+   "step": 600100,
+   "values": [
+    316.0,
+    344.0,
+    276.0,
+    294.0,
+    310.0,
+    293.0,
+    313.0,
+    304.0,
+    329.0,
+    259.0,
+    287.0,
+    269.0
+   ]
+  },
+  {
+   "island": "a41796",
+   "product": 145220,
+   "kind": "storage",
+   "clock": "game",
+   "unit": "t",
+   "start": 506484400,
+   "step": 600100,
+   "values": [
+    89.0,
+    84.0,
+    78.0,
+    97.0,
+    91.0,
+    85.0,
+    80.0,
+    97.0,
+    92.0,
+    86.0,
+    80.0,
+    98.0
+   ]
+  },
+  {
+   "island": "a8899",
+   "product": 2085,
+   "kind": "storage",
+   "clock": "game",
+   "unit": "t",
+   "start": 506484400,
+   "step": 600100,
+   "values": [
+    450.0,
+    382.0,
+    428.0,
+    449.0,
+    448.0,
+    450.0,
+    450.0,
+    450.0,
+    410.0,
+    416.0,
+    383.0,
+    412.0
+   ]
+  },
+  {
+   "island": "a9795",
+   "product": 2085,
+   "kind": "storage",
+   "clock": "game",
+   "unit": "t",
+   "start": 506484400,
+   "step": 600100,
+   "values": [
+    469.0,
+    482.0,
+    522.0,
+    525.0,
+    534.0,
+    537.0,
+    520.0,
+    521.0,
+    522.0,
+    545.0,
+    546.0,
+    549.0
+   ]
+  },
+  {
+   "island": "a9603",
+   "product": 31704,
+   "kind": "storage",
+   "clock": "game",
+   "unit": "t",
+   "start": 506484400,
+   "step": 600100,
+   "values": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "island": "a26308",
+   "product": 145220,
+   "kind": "storage",
+   "clock": "game",
+   "unit": "t",
+   "start": 506484400,
+   "step": 600100,
+   "values": [
+    148.0,
+    100.0,
+    98.0,
+    97.0,
+    146.0,
+    144.0,
+    99.0,
+    98.0,
+    96.0,
+    95.0,
+    149.0,
+    147.0
+   ]
+  }
+ ],
+ "minimum": {}
+}

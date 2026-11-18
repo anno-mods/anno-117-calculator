@@ -1,0 +1,54 @@
+<!-- Buff values of one row of the boost sources groups. $data is an item row (AppliedBuff) or an EffectBoostRow:
+     both expose activeBuff(), target, extraGoods, replacementArray and replacingWorkforce. -->
+<div class="buff-list">
+    <!-- base productivity: adds to the base of 100 % -->
+    <div data-bind="if: $data.activeBuff().baseProductivityUpgrade != 0, attr: {title: $root.texts.boostBaseAddition.name()}">
+        <span data-bind="text: formatNumber($data.activeBuff().baseProductivityUpgrade, true) + ' %'"></span>
+        <img class="icon-sm" src="../icons/icon_2d_productivity_0.webp" alt="">
+    </div>
+    <!-- productivity: adds to the sum of productivity upgrades -->
+    <div data-bind="if: $data.activeBuff().productivityUpgrade != 0, attr: {title: $root.texts.productivity.name()}">
+        <span data-bind="text: formatNumber($data.activeBuff().productivityUpgrade, true) + ' %'"></span>
+        <img class="icon-sm" src="../icons/icon_2d_productivity_0.webp" alt="">
+    </div>
+    <!-- fuel upgrade-->
+    <div data-bind="debug: 'Fuel duration', if: $data.activeBuff().fuelDurationPercent != 0, attr: {title: $root.texts.fuelEfficiency.name()}">
+        <span data-bind="text: formatNumber($data.activeBuff().fuelDurationPercent, true) + ' % s /'"></span>
+        <img class="icon-sm" src="../icons/icon_3d_charcoal_goods_0.webp" alt="">
+    </div>
+    <!-- extra goods -->
+    <span data-bind="if: $data.extraGoods">
+        <span class="inline-list-centered">
+            <img class="icon-sm icon-light mr-2" src="../icons/icon_extra_goods.webp" data-bind="attr: {title: $root.texts.extraGoods.name()}" />
+            <!-- ko foreach: $data.extraGoods -->
+            <span style="flex: 100 1 auto;"></span>
+            <span style="flex: auto;" data-bind="visible: $data.product.available()">
+                <img class="icon-sm" data-bind="attr: { src: $data.product.icon ? $data.product.icon  : null, alt: $data.product.name, title: $data.product.name() }" />
+            </span>
+            <span style="flex: 100 1 auto;"></span>
+            <!-- /ko -->
+        </span>
+    </span>
+    <!-- input replacements -->
+    <div data-bind="if: $data.replacementArray">
+        <div data-bind="foreach: $data.replacementArray">
+            <replacement params="{old: $data.old, new: $data.new}"></replacement>
+        </div>
+    </div>
+    <!-- workforce maintenance -->
+    <div data-bind="if: $data.activeBuff().workforceMaintenanceFactorUpgrade != 0">
+        <span class="inline-list-centered">
+            <span data-bind="text: formatNumber($data.activeBuff().workforceMaintenanceFactorUpgrade, true) + ' %'"></span>
+            <img class="icon-sm icon-light" data-bind="attr: { src: $data.target.workforceDemand.workforce().icon ? $data.target.workforceDemand.workforce().icon  : null, alt: $data.target.workforceDemand.workforce().name, title: $data.target.workforceDemand.workforce().name() }" />
+        </span>
+    </div>
+    <!-- workforce replacement -->
+    <div data-bind="if: $data.replacingWorkforce && $data.target.workforceDemand.defaultWorkforce.guid !== $data.replacingWorkforce">
+        <replacement params="{old: $data.target.workforceDemand.defaultWorkforce, new: $data.replacingWorkforce}"></replacement>
+    </div>
+    <!-- fertility buff -->
+    <div data-bind="if: $data.activeBuff().addedFertility" class="inline-list-centered">
+        <span data-bind="text: formatNumber($data.activeBuff().fertilityPercent, true) + ' %'"></span>
+        <img class="icon-sm ml-1" data-bind="attr: { src: $data.activeBuff().addedFertility.icon ? $data.activeBuff().addedFertility.icon : null, alt: $data.activeBuff().addedFertility.name, title: $data.activeBuff().addedFertility.name }">
+    </div>
+</div>

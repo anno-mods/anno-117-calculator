@@ -23,6 +23,56 @@
                         </td>
                     </tr>
                     <tr>
+                        <td data-bind="text: $root.texts.downloadExchange.name"></td>
+                        <td>
+                            <div class="btn-group float-right">
+                                <label class="btn btn-secondary" id="import-exchange-button" role="button" href="#" for="exchange-selector" data-bind="attr: { title: $root.texts.importExchange.name }">
+                                    <input id="exchange-selector" type="file" accept=".json,application/json" style="display: none;">
+                                    <span class="fa fa-upload"> </span>
+                                </label>
+                                <label data-bind="click: () => exportExchange(), attr: { title: $root.texts.exportExchange.name }" id="export-exchange-button" role="button" href="#" class="btn btn-secondary">
+                                    <span class="fa fa-download"> </span>
+                                </label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr id="exchange-planner-row">
+                        <td colspan="2" class="border-top-0 pt-0 small text-muted">
+                            <span data-bind="text: $root.texts.exchangeFromPlanner.name"></span>
+                            <a href="https://github.com/Taludas/Anno-117-Planner/releases/latest" target="_blank" rel="noopener noreferrer">https://github.com/Taludas/Anno-117-Planner/releases/latest</a>
+                        </td>
+                    </tr>
+                    <tr id="import-scope-row">
+                        <td colspan="2" class="border-top-0 pt-0">
+                            <div id="import-scope-block" class="scope" role="group" data-bind="attr: { 'aria-label': $root.texts.importExchange.name }">
+                                <div class="d-flex align-items-center">
+                                    <label class="mb-0 mr-2"><input type="checkbox" id="import-scope-islands" data-bind="checked: $root.importScopes.islands.checked" /> <span data-bind="text: $root.texts.importScopeIslands.name"></span></label>
+                                    <button type="button" id="import-keep-islands" class="btn btn-sm btn-outline-secondary ml-auto" data-bind="enable: $root.importScopes.islands.checked, css: { active: $root.importScopes.keepIslands.checked }, click: () => $root.importScopes.keepIslands.checked(!$root.importScopes.keepIslands.checked()), attr: { title: $root.texts.importKeepIslands.name, 'aria-label': $root.texts.importKeepIslands.name, 'aria-pressed': $root.importScopes.keepIslands.checked() ? 'true' : 'false' }"><span class="fa fa-thumb-tack"></span></button>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <label class="mb-0 mr-2"><input type="checkbox" id="import-scope-residences" data-bind="checked: $root.importScopes.residences.checked" /> <span data-bind="text: $root.texts.importScopeResidences.name"></span></label>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <label class="mb-0 mr-2"><input type="checkbox" id="import-scope-production" data-bind="checked: $root.importScopes.production.checked" /> <span data-bind="text: $root.texts.importScopeProduction.name"></span></label>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <label class="mb-0 mr-2"><input type="checkbox" id="import-scope-trade" data-bind="checked: $root.importScopes.trade.checked" /> <span data-bind="text: $root.texts.importScopeTrade.name"></span></label>
+                                    <span class="ml-auto">
+                                        <button type="button" id="import-keep-routes" class="btn btn-sm btn-outline-secondary" data-bind="enable: $root.importScopes.trade.checked, css: { active: $root.importScopes.keepRoutes.checked }, click: () => $root.importScopes.keepRoutes.checked(!$root.importScopes.keepRoutes.checked()), attr: { title: $root.texts.importKeepRoutes.name, 'aria-label': $root.texts.importKeepRoutes.name, 'aria-pressed': $root.importScopes.keepRoutes.checked() ? 'true' : 'false' }"><span class="fa fa-thumb-tack"></span></button>
+                                        <button type="button" id="import-recalc-routes" class="btn btn-sm btn-outline-secondary" data-bind="enable: $root.importScopes.trade.checked, css: { active: $root.importScopes.recalcRoutes.checked }, click: () => $root.importScopes.recalcRoutes.checked(!$root.importScopes.recalcRoutes.checked()), attr: { title: $root.texts.importRecalcRoutes.name, 'aria-label': $root.texts.importRecalcRoutes.name, 'aria-pressed': $root.importScopes.recalcRoutes.checked() ? 'true' : 'false' }"><span class="fa fa-refresh"></span></button>
+                                    </span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <label class="mb-0 mr-2"><input type="checkbox" id="import-scope-modifiers" data-bind="checked: $root.importScopes.modifiers.checked" /> <span data-bind="text: $root.texts.importScopeModifiers.name"></span></label>
+                                </div>
+                                <p id="import-scope-sentence" class="small text-muted mt-2 mb-0" aria-live="polite" data-bind="text: $root.importScopes.sentence"></p>
+                                <!-- ko if: $root.importScopes.undoAvailable -->
+                                <button type="button" id="import-undo-button" class="btn btn-sm btn-warning mt-2" data-bind="text: $root.texts.importUndo.name, attr: { title: $root.texts.importUndo.name }, click: $root.importScopes.undo"></button>
+                                <!-- /ko -->
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
                         <td data-bind="text: $root.texts.downloadCalculator.name" style="white-space:pre-wrap"></td>
                         <td>
                             <a id="download-calculator-button" role="button" href="https://github.com/anno-mods/anno-117-calculator/releases/latest" class="btn btn-secondary float-right">
@@ -31,6 +81,12 @@
                         </td>
                     </tr>
                 </table>
+                <!-- ko if: $root.exchangeReport.invalid -->
+                <div id="exchange-invalid-message" class="alert alert-danger">
+                    <span data-bind="text: $root.texts.exchangeInvalid.name"></span>
+                    <small class="d-block" data-bind="text: $root.exchangeReport.invalid"></small>
+                </div>
+                <!-- /ko -->
             </div>
         </div>
     </div>

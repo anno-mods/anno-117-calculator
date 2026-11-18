@@ -4,8 +4,8 @@ import { BindingErrorDetector } from '../helpers/binding-detector';
 
 /**
  * DOM-level checks for the Chariot and Crew (174824) per-building toggle: it must render as a row in
- * the Bakery's "Items Equipped" table (first real exercise of tri-state-toggle / factory-config-section
- * with a non-Item, Effect parent - see plan Risks & Dependencies), must not appear in the global Effects
+ * the Range effects group of the Bakery's Boost sources container (tri-state-toggle with an Effect parent),
+ * must not appear in the global Effects
  * dialog any more, and clicking it must apply/remove the +20% productivity on that factory only.
  */
 const LATIUM_SESSION = 3245;

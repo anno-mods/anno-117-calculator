@@ -1,4 +1,4 @@
-﻿<div class="factory-config-section mb-4" data-bind="debug: 'Factory Config Section', with: $data">
+<div class="factory-config-section mb-4" data-bind="debug: 'Factory Config Section', with: $data">
     <table class="table table-striped table-fixed">
         <tbody>
             <tr>
@@ -48,7 +48,89 @@
                     <span data-bind="text: $root.texts.productivity.name"></span>
                 </td>
                 <td>
+                    <!-- ko ifEditable: true -->
+                    <!-- productivity with the calculation as a tooltip on hover and focus -->
+                    <div class="prod-trigger" tabindex="0"
+                         data-bind="attr: {'aria-label': $root.texts.productivityBreakdown.name(), 'aria-describedby': 'prod-tip-' + $data.guid()}">
+                        <span class="prod-value" data-bind="text: formatNumber(100 * $data.boost()) + '%'"></span>
+                        <div class="prod-tip" role="tooltip" data-bind="attr: {id: 'prod-tip-' + $data.guid()}">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td><img class="icon-sm" src="../icons/icon_2d_productivity_0.webp" alt="" data-bind="attr: {title: $root.texts.productivity.name()}"></td>
+                                        <td>100 %</td>
+                                    </tr>
+                                    <!-- ko if: $data.instance().boostSources.breakdown().baseAdditions != 0 -->
+                                    <tr class="prod-tip-base">
+                                        <td><img class="icon-sm" src="../icons/icon_2d_productivity_0.webp" alt="" data-bind="attr: {title: $root.texts.boostBaseAddition.name()}"></td>
+                                        <td data-bind="text: formatNumber($data.instance().boostSources.breakdown().baseAdditions, true) + ' %'"></td>
+                                    </tr>
+                                    <tr class="prod-tip-base-sum">
+                                        <td><span>=</span></td>
+                                        <td data-bind="text: formatNumber(100 + $data.instance().boostSources.breakdown().baseAdditions) + ' %'"></td>
+                                    </tr>
+                                    <!-- /ko -->
+                                    <!-- ko if: $data.instance().boostSources.breakdown().items != 0 -->
+                                    <tr class="prod-tip-items">
+                                        <td><img class="icon-sm" src="../icons/icon_2d_item_meta_0.webp" alt="" data-bind="attr: {title: $root.texts.itemsEquipped.name()}"></td>
+                                        <td data-bind="text: formatNumber($data.instance().boostSources.breakdown().items, true) + ' %'"></td>
+                                    </tr>
+                                    <!-- /ko -->
+                                    <!-- ko if: $data.instance().boostSources.breakdown().rangeEffects != 0 -->
+                                    <tr class="prod-tip-range">
+                                        <td><img class="icon-sm" src="../icons/icon_2d_item_scope_radius_0.webp" alt="" data-bind="attr: {title: $root.texts.rangeEffects.name()}"></td>
+                                        <td data-bind="text: formatNumber($data.instance().boostSources.breakdown().rangeEffects, true) + ' %'"></td>
+                                    </tr>
+                                    <!-- /ko -->
+                                    <!-- ko if: $data.instance().boostSources.breakdown().permanentEffects != 0 -->
+                                    <tr class="prod-tip-permanent">
+                                        <td><img class="icon-sm" src="../icons/icon_2d_scope_global_objects_0.webp" alt="" data-bind="attr: {title: $root.texts.permanentEffects.name()}"></td>
+                                        <td data-bind="text: formatNumber($data.instance().boostSources.breakdown().permanentEffects, true) + ' %'"></td>
+                                    </tr>
+                                    <!-- /ko -->
+                                    <!-- ko if: $data.instance().boostSources.breakdown().timeLimitedEffects != 0 -->
+                                    <tr class="prod-tip-timelimited">
+                                        <td><span class="fa fa-clock-o" data-bind="attr: {title: $root.texts.boostTimeLimitedEffects.name()}"></span></td>
+                                        <td data-bind="text: formatNumber($data.instance().boostSources.breakdown().timeLimitedEffects, true) + ' %'"></td>
+                                    </tr>
+                                    <!-- /ko -->
+                                    <!-- ko if: $data.instance().boostSources.breakdown().modules != 0 -->
+                                    <tr class="prod-tip-modules">
+                                        <td><span class="fa fa-puzzle-piece" data-bind="attr: {title: $data.instance().modules.map(m => m.name()).join(', ')}"></span></td>
+                                        <td data-bind="text: formatNumber($data.instance().boostSources.breakdown().modules, true) + ' %'"></td>
+                                    </tr>
+                                    <!-- /ko -->
+                                    <!-- ko if: $data.instance().boostSources.breakdown().aqueduct != 0 -->
+                                    <tr class="prod-tip-aqueduct">
+                                        <td><span class="fa fa-tint" data-bind="attr: {title: $data.instance().aqueductBuff.buff.name()}"></span></td>
+                                        <td data-bind="text: formatNumber($data.instance().boostSources.breakdown().aqueduct, true) + ' %'"></td>
+                                    </tr>
+                                    <!-- /ko -->
+                                    <tr class="prod-tip-sum">
+                                        <td><span data-bind="attr: {title: $root.texts.boostSumOfUpgrades.name()}">&Sigma;</span></td>
+                                        <td data-bind="text: formatNumber(100 + $data.instance().boostSources.breakdown().baseAdditions) + ' % &times; ' + formatNumber(100 + $data.instance().boostSources.breakdown().upgrades) + ' % = ' + formatNumber($data.instance().boostSources.breakdown().sum) + ' %'"></td>
+                                    </tr>
+                                    <!-- ko if: $data.instance().boostSources.breakdown().fertilityFactor < 1 - ACCURACY -->
+                                    <tr class="prod-tip-fertility">
+                                        <td><img class="icon-sm" src="../icons/icon_2d_fertility_0.webp" alt="" data-bind="attr: {title: $root.texts.fertility.name()}"></td>
+                                        <td data-bind="text: '&times; ' + formatNumber(100 * $data.instance().boostSources.breakdown().fertilityFactor) + ' %'"></td>
+                                    </tr>
+                                    <!-- /ko -->
+                                    <tr class="prod-tip-total">
+                                        <td><img class="icon-sm" src="../icons/icon_2d_productivity_0.webp" alt="" data-bind="attr: {title: $root.texts.productivity.name()}"></td>
+                                        <td data-bind="text: formatNumber(100 * $data.instance().boostSources.breakdown().total) + ' %'"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- /ko -->
+                    <!-- ko ifAggregated: true -->
                     <div data-bind="text: formatNumber(100 * $data.boost()) + '%', attr: {title: $root.texts.productivity.name()}"></div>
+                    <!-- /ko -->
+                    <!-- ko if: $data.syncedAverageProductivity() !== null -->
+                    <span class="text-muted" data-bind="text: '(' + formatNumber($data.syncedAverageProductivity()) + '%)', attr: {title: $root.texts.gameConnectorSyncedProductivity.name()}"></span>
+                    <!-- /ko -->
                 </td>
                 <td>
                     <!-- ko ifEditable: true -->
@@ -71,6 +153,130 @@
                     <!-- /ko -->
                 </td>
             </tr>
+            <!-- /ko -->
+            <!-- ko ifEditable: true -->
+            <!-- boost sources: one collapsed container with up to three groups -->
+            <!-- ko if: $data.instance().boostSources.hasAny() -->
+            <tr class="boost-sources-row">
+                <td colspan="3">
+                    <collapsible params="id: 'factory-config-boost-sources', heading: $root.texts.boostSources.name, collapsed: true, data: $data, headerTemplate: 'factory-boost-sources-header'">
+                        <p class="boost-sources-guidance text-muted small mb-2">
+                            <span class="fa fa-info-circle mr-1" aria-hidden="true"></span>
+                            <span data-bind="text: $root.texts.boostSourcesGuidance.name"></span>
+                        </p>
+
+                        <!-- equipped items: tri-state Off / Base / Boosted -->
+                        <!-- ko if: $data.instance().boostSources.itemRows().length -->
+                        <div class="boost-group boost-group-items">
+                            <div class="boost-group-head">
+                                <img class="icon-sm icon-light" src="../icons/icon_2d_item_meta_0.webp" alt="">
+                                <span data-bind="text: $root.texts.itemsEquipped.name"></span>
+                                <external-link params="subpage: 'items'"></external-link>
+                                <!-- tri-state legend: Off / Base / Boosted -->
+                                <span class="boost-group-legend text-muted small">
+                                    <span class="boost-legend-entry">
+                                        <span class="tri-state-toggle" style="cursor: default;"><span class="tri" data-state="0"></span></span>
+                                        <span data-bind="text: $root.texts.boostOff.name"></span>
+                                    </span>
+                                    <span class="boost-legend-entry">
+                                        <span class="tri-state-toggle" style="cursor: default;"><span class="tri" data-state="1"></span></span>
+                                        <span data-bind="text: $root.texts.boostBase.name"></span>
+                                    </span>
+                                    <span class="boost-legend-entry">
+                                        <span class="tri-state-toggle" style="cursor: default;"><span class="tri" data-state="2"></span></span>
+                                        <span data-bind="text: $root.texts.boostBoosted.name"></span>
+                                    </span>
+                                </span>
+                            </div>
+                            <table class="table table-striped">
+                                <tbody data-bind="foreach: $data.instance().boostSources.itemRows">
+                                    <tr data-bind="debug: 'Available Item'">
+                                        <td>
+                                            <div class="inline-list">
+                                                <tri-state-toggle params="asset: $data.parent,
+                                                                          state: $data.parent.slotStates.get($data.target),
+                                                                          hasBoost: $data.parent.boostEquipments.length > 0,
+                                                                          id: 'fc-' + $data.target.guid + '-' + $data.parent.guid + '-equipped'"></tri-state-toggle>
+                                                <span class="ml-1" data-bind="text: $data.parent.name"></span>
+                                            </div>
+                                        </td>
+                                        <td data-bind="template: { name: 'factory-buff-values', data: $data }"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /ko -->
+
+                        <!-- range effects: Off / On per building type -->
+                        <!-- ko if: $data.instance().boostSources.rangeRows().length -->
+                        <div class="boost-group boost-group-range">
+                            <div class="boost-group-head">
+                                <img class="icon-sm icon-light" src="../icons/icon_2d_item_scope_radius_0.webp" alt="">
+                                <span data-bind="text: $root.texts.rangeEffects.name"></span>
+                            </div>
+                            <table class="table table-striped">
+                                <tbody data-bind="foreach: $data.instance().boostSources.rangeRows">
+                                    <tr data-bind="attr: {'data-effect-guid': $data.guid}">
+                                        <td>
+                                            <div class="inline-list">
+                                                <tri-state-toggle params="asset: $data.effect,
+                                                                          state: $data.toggle,
+                                                                          hasBoost: false,
+                                                                          id: 'fc-' + $data.target.guid + '-' + $data.guid + '-equipped'"></tri-state-toggle>
+                                                <span class="ml-1" data-bind="text: $data.name"></span>
+                                                <span class="fa fa-home ml-2 text-muted" data-bind="attr: {title: $root.texts.rangeEffectNeedsBuilding.name(), 'aria-label': $root.texts.rangeEffectNeedsBuilding.name()}"></span>
+                                            </div>
+                                        </td>
+                                        <td data-bind="template: { name: 'factory-buff-values', data: $data }"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /ko -->
+
+                        <!-- permanent effects: read-only, set in the dialog that owns the effect -->
+                        <!-- ko if: $data.instance().boostSources.permanentRows().length -->
+                        <div class="boost-group boost-group-permanent">
+                            <div class="boost-group-head">
+                                <img class="icon-sm icon-light" src="../icons/icon_2d_scope_global_objects_0.webp" alt="">
+                                <span data-bind="text: $root.texts.permanentEffects.name"></span>
+                            </div>
+                            <table class="table table-striped">
+                                <tbody data-bind="foreach: $data.instance().boostSources.permanentRows">
+                                    <tr data-bind="attr: {'data-effect-guid': $data.guid}">
+                                        <td>
+                                            <div class="inline-list-centered">
+                                                <!-- ko if: $data.owner === 'patron' -->
+                                                <img class="icon-sm icon-light mr-1" src="../icons/icon_2d_religion_belief_0.webp" alt="" data-bind="attr: {title: $data.sourceText()}">
+                                                <!-- /ko -->
+                                                <!-- ko if: $data.owner !== 'patron' -->
+                                                <img class="icon-sm icon-light mr-1" src="../icons/icon_2d_reward_buff_0.webp" alt="" data-bind="attr: {title: $data.sourceText()}">
+                                                <!-- /ko -->
+                                                <span data-bind="text: $data.name"></span>
+                                                <!-- ko if: $data.stack() > 1 -->
+                                                <span class="badge badge-secondary ml-1" data-bind="text: '&times;' + $data.stack()"></span>
+                                                <!-- /ko -->
+                                                <span class="boost-source-line text-muted small ml-2" data-bind="text: $data.sourceLine()"></span>
+                                                <!-- ko ifnot: $data.permanentOnly -->
+                                                <button type="button" class="btn btn-link btn-sm p-0 ml-2 boost-source-link"
+                                                        data-bind="click: () => $parent.openEffectSource($data),
+                                                                   attr: {title: $data.owner === 'patron' ? $root.texts.openPatronDialog.name() : $root.texts.openEffectsDialog.name(),
+                                                                          'aria-label': $data.owner === 'patron' ? $root.texts.openPatronDialog.name() : $root.texts.openEffectsDialog.name()}">
+                                                    <span class="fa fa-external-link" aria-hidden="true"></span>
+                                                </button>
+                                                <!-- /ko -->
+                                            </div>
+                                        </td>
+                                        <td data-bind="template: { name: 'factory-buff-values', data: $data }"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /ko -->
+                    </collapsible>
+                </td>
+            </tr>
+            <!-- /ko -->
             <!-- /ko -->
             <!-- ko if: $data.instance().neededFertility -->
             <tr>
@@ -112,99 +318,6 @@
             </tr>
         </tbody>
     </table>
-
-    <!-- ko ifEditable: true -->
-    <div data-bind="if: $data.instance().availableItems().length">
-        <collapsible params="id: 'factory-config-equipped-items', heading: $root.texts.itemsEquipped.name, externalLink: 'items', collapsed: true, data: $data.instance()">
-            <!-- tri-state legend: Off / Base / Boosted -->
-            <div class="text-muted small mb-2" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
-                <span style="display: inline-flex; align-items: center; gap: .35rem;">
-                    <span class="tri-state-toggle" style="cursor: default;"><span class="tri" data-state="0"></span></span>
-                    <span data-bind="text: $root.texts.boostOff.name"></span>
-                </span>
-                <span style="display: inline-flex; align-items: center; gap: .35rem;">
-                    <span class="tri-state-toggle" style="cursor: default;"><span class="tri" data-state="1"></span></span>
-                    <span data-bind="text: $root.texts.boostBase.name"></span>
-                </span>
-                <span style="display: inline-flex; align-items: center; gap: .35rem;">
-                    <span class="tri-state-toggle" style="cursor: default;"><span class="tri" data-state="2"></span></span>
-                    <span data-bind="text: $root.texts.boostBoosted.name"></span>
-                </span>
-            </div>
-            <table class="table table-striped">
-                <tbody data-bind="foreach: $data.availableItems">
-                    <tr data-bind="debug: 'Available Item'">
-                        <td>
-                            <div class="inline-list">
-                                <!-- ko ifEditable: true -->
-                                <tri-state-toggle params="asset: $data.parent,
-                                                          state: $data.parent.slotStates.get($data.target),
-                                                          hasBoost: $data.parent.boostEquipments.length > 0,
-                                                          id: 'fc-' + $data.target.guid + '-' + $data.parent.guid + '-equipped'"></tri-state-toggle>
-                                <!-- /ko -->
-                                <span class="ml-1" data-bind="text: $data.parent.name, attr: {for: 'fc-' + $data.target.guid + '-' + $data.parent.guid + '-equipped'}"></span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="buff-list">
-                                <!-- base productivity -->
-                                <div data-bind="if: $data.activeBuff().baseProductivityUpgrade != 0, attr:{title: $root.texts.productivity.name()}">
-                                    <span data-bind="text: formatNumber($data.activeBuff().baseProductivityUpgrade, true) + ' %'"></span>
-                                    <img class="icon-sm" src="../icons/icon_2d_productivity_0.webp"></span>
-                                </div>
-                                <!-- productivity -->
-                                <div data-bind="if: $data.activeBuff().productivityUpgrade != 0, attr:{title: $root.texts.productivity.name()}">
-                                    <span data-bind="text: formatNumber($data.activeBuff().productivityUpgrade, true) + ' %'"></span>
-                                    <img class="icon-sm" src="../icons/icon_2d_productivity_0.webp"></span>
-                                </div>
-                                <!-- fuel upgrade-->
-                                <div data-bind="debug: 'Fuel duration',if: $data.activeBuff().fuelDurationPercent != 0, attr:{title: $root.texts.fuelEfficiency.name()}">
-                                    <span data-bind="text: formatNumber($data.activeBuff().fuelDurationPercent, true) + ' % s /'"></span>
-                                    <img class="icon-sm" src="../icons/icon_3d_charcoal_goods_0.webp"></span>
-                                </div>
-                                <!-- extra goods -->
-                                <span data-bind="if: $data.extraGoods">
-                                    <span class="inline-list-centered">
-                                        <img class="icon-sm icon-light mr-2" src="../icons/icon_extra_goods.webp" />
-                                        <!-- ko foreach: $data.extraGoods -->
-                                        <span style="flex: 100 1 auto;"></span>
-                                        <span style="flex: auto;" data-bind="visible: $data.product.available()">
-                                            <img class="icon-sm" data-bind="attr: { src: $data.product.icon ? $data.product.icon  : null, alt: $data.product.name }" />
-                                        </span>
-                                        <span style="flex: 100 1 auto;"></span>
-                                        <!-- /ko -->
-                                    </span>
-                                </span>
-                                <!-- input replacements -->
-                                <div data-bind="if: $data.replacementArray">
-                                    <div data-bind="foreach: $data.replacementArray">
-                                        <replacement params="{old: $data.old, new: $data.new}"></replacement>
-                                    </div>
-                                </div>
-                                <!-- workforce maintenance -->
-                                <div data-bind="if: $data.activeBuff().workforceMaintenanceFactorUpgrade != 0">
-                                    <span class="inline-list-centered">
-                                        <span data-bind="text: formatNumber($data.activeBuff().workforceMaintenanceFactorUpgrade, true) + ' %'"></span>
-                                        <img class="icon-sm icon-light" data-bind="attr: { src: $data.target.workforceDemand.workforce().icon ? $data.target.workforceDemand.workforce().icon  : null, alt: $data.target.workforceDemand.workforce().name }" />
-                                    </span>
-                                </div>
-                                <!-- workforce replacement -->
-                                <div data-bind="if: $data.replacingWorkforce && $parent.workforceDemand.defaultWorkforce.guid !== $data.replacingWorkforce">
-                                    <replacement params="{old: $parent.workforceDemand.defaultWorkforce, new: $data.replacingWorkforce}"></replacement>
-                                </div>
-                                <!-- fertility buff -->
-                                <div data-bind="if: $data.activeBuff().addedFertility" class="inline-list-centered">
-                                    <span data-bind="text: formatNumber($data.activeBuff().fertilityPercent, true) + ' %'"></span>
-                                    <img class="icon-sm ml-1" data-bind="attr: { src: $data.activeBuff().addedFertility.icon ? $data.activeBuff().addedFertility.icon : null, alt: $data.activeBuff().addedFertility.name, title: $data.activeBuff().addedFertility.name }">
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </collapsible>
-    </div>
-    <!-- /ko -->
 
     <div data-bind="if: $data.instance().isFactory && $data.instance().extraGoodProductionList && $data.instance().extraGoodProductionList.amount() > ACCURACY">
         <collapsible params="id: 'factory-config-extraGoods', heading: $root.texts.extraGoods.name, collapsed: false, data: $data.instance()">

@@ -10,6 +10,7 @@ import {
 import { Island, Region } from './world';
 import { FactoryConfig, ModuleConfig } from './types.config';
 import { ExtraGoodSupplier, Supplier } from './suppliers';
+import { computeProductivity, FactoryBoostSources } from './factory-boost-sources';
 
 
 /**
@@ -40,6 +41,7 @@ export class Consumer extends NamedElement{
     public items: AppliedBuff[];                            // Applied item effects
     public buffs: KnockoutObservableArray<AppliedBuff>;     // All applied effects (items + other sources)
     public aqueductBuff?: AqueductBuff;                     // Special aqueduct productivity buff
+    private boostSourcesModel?: FactoryBoostSources;        // created by the boostSources getter
     public modules: Module[];                               // Attached modules (for factories)
 
     // === INPUT DEMAND SYSTEM ===
@@ -215,15 +217,11 @@ export class Consumer extends NamedElement{
                 productivityUpgradeSum += this.aqueductBuff.productivityUpgrade();
             }
 
-            // Calculate boost: (100 + baseProductivitySum) * (100 + productivityUpgradeSum) / 10000
-            // This is equivalent to: (base / 100) * (1 + productivityUpgradeSum / 100)
-            const baseValue = 100 + baseProductivitySum;
-            const multiplier = 100 + productivityUpgradeSum;
-            const totalBoost = (baseValue * multiplier) / 10000; // do division in the end to avoid rounding issues
+            // boost: (100 + baseProductivitySum) * (100 + productivityUpgradeSum) / 10000 * fertility,
+            // see computeProductivity (shared with the breakdown of the factory boost sources)
+            const fertilityFactor = this instanceof Factory ? this.fertilityFactor() : 1.0;
 
-            const fertilityFactor = (this as any).fertilityFactor ? (this as any).fertilityFactor() : 1.0;
-
-            this.boost(Math.max(ACCURACY, totalBoost * fertilityFactor));
+            this.boost(computeProductivity(baseProductivitySum, productivityUpgradeSum, fertilityFactor));
         });
 
         this.inputDemandsSubscription = ko.computed(() => {
@@ -288,13 +286,16 @@ export class Consumer extends NamedElement{
             if (!product) {
                 throw new Error(`Fuel product with GUID ${window.view.constants.fuelProduct} not found in assetsMap`);
             }
-            let cycleTime = window.view.constants.fuelProductionTime as number;
+            let fuelTime = window.view.constants.fuelProductionTime as number;
 
+            // One unit of fuel lasts the burn time whatever the cycle time or productivity
+            // (in-game: 3 min burn cycle for 90 s and 120 s buildings, also at 1000 % productivity).
+            // The factor is t/min per working building, so it must not depend on cycleTime or boost.
             const fuelFactor = ko.pureComputed(() => {
                 const percentBuff = this.buffs().reduce((a:number, b: AppliedBuff)=> a+b.fuelDurationPercent() , 0);
                 const factor = percentBuff / 100 + 1;
 
-                return this.cycleTime / (factor * cycleTime) / this.boost();
+                return 60 / (factor * fuelTime);
             });
             this.inputDemandFuel = new Demand(product, this, assetsMap, fuelFactor);
             this.buildings.utilized.subscribe(buildings => this.inputDemandFuel!.updateAmount(buildings));
@@ -363,6 +364,16 @@ export class Consumer extends NamedElement{
         return this.icon || '';
     }
 
+
+    /**
+     * What drives the productivity of this consumer, grouped for the factory config view (equipped items, range
+     * effects, permanent effects) with the header numbers and the productivity breakdown. Created on first access.
+     */
+    get boostSources(): FactoryBoostSources {
+        if (!this.boostSourcesModel)
+            this.boostSourcesModel = new FactoryBoostSources(this, () => this instanceof Factory ? this.fertilityFactor() : 1.0);
+        return this.boostSourcesModel;
+    }
 
     addBuff(appliedBuff: AppliedBuff){
         this.buffs.push(appliedBuff)
@@ -526,6 +537,7 @@ export class Factory extends Consumer implements Supplier {
     // === FACTORY IDENTIFICATION ===
     public isFactory: boolean;                              // Always true for Factory instances
     public neededFertility?: Fertility;                     // Fertility/deposit required to operate
+    public isRiverEmbankment: boolean;                      // Built on a river embankment (params flag isRiverEmbankment)
 
     // === PRODUCTION OUTPUTS ===
     public outputs: Product[];                              // Products this factory produces
@@ -549,6 +561,13 @@ export class Factory extends Consumer implements Supplier {
     public fertilityFactor: KnockoutComputed<number>;
 
     /**
+     * Game Connector (KTD5): the pipe's live `AverageProductivity` for this factory's product,
+     * shown bracketed next to the calculator's own computed productivity. Transient, live game
+     * state - never persisted, reset to `null` on disconnect (src/game-connector.ts).
+     */
+    public syncedAverageProductivity: KnockoutObservable<number | null>;
+
+    /**
      * Creates a new Factory instance
      * @param config - Configuration object for the factory
      * @param assetsMap - Map of all available assets
@@ -560,6 +579,8 @@ export class Factory extends Consumer implements Supplier {
         
         // Explicit assignments
         this.isFactory = true;
+        this.isRiverEmbankment = config.isRiverEmbankment === true;
+        this.syncedAverageProductivity = ko.observable(null);
 
         if (config.neededFertility) {
             const fertility = assetsMap.get(config.neededFertility);

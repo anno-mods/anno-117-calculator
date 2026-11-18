@@ -1,5 +1,5 @@
 import { ACCURACY, formatNumber, formatPercentage, versionCalculator, Option, ko, dummyObservable, NeedConsumptionSetting, NamedElement, debugBindingContext, logAssetInfo, inspectElement, getAssetType } from './util';
-import { languageCodes, texts as locaTexts, options } from './i18n';
+import { detectBrowserLanguage, texts as locaTexts, options } from './i18n';
 import { registerComponents } from './components';
 
 // Import params from the js directory - this is a legacy import that needs to be loaded
@@ -10,12 +10,23 @@ if (typeof require !== 'undefined') {
 import { AssetsMap, LiteralsMap } from './types';
 import { DarkMode, ResidencePresenter } from './views';
 import { CategoryPresenter } from './presenters';
+import { isPermanentOnlyEffect } from './permanent-only-effects';
 import { PopulationGroupPresenter } from './population-presenters';
 import { PublicServicePresenter, PublicRecipeBuildingPresenter, RecipeListPresenter } from './public-building-presenters';
 import { ConstantsConfig, NeedConsumptionConfig, TextConfig } from './types.config';
 import { Storage as SubStorage, Island, Region, Session } from './world';
 import { Effect, ProductCategory, Fertility, AreaBuff } from './production';
 import { isAggregating, compareAggregateDemands } from './aggregate';
+import { VillaItemsViewModel } from './villa-items';
+import { TradeRoutesViewModel } from './trade-routes-dialog';
+import { recomputeShares } from './trade-allocation';
+import { DlcSettings } from './dlc-settings';
+import './exchange';
+import { ExchangeReportDialog } from './exchange/report-dialog';
+import { ImportScopesViewModel } from './exchange/import-scopes-ui';
+import type { ReportEntry } from './exchange/types';
+import { JUST_IMPORTED_KEY, JUST_IMPORTED_RECALC } from './exchange/writer';
+import { saveSnapshot, hasSnapshot, clearSnapshot } from './exchange/undo';
 
 
 declare const $: any;
@@ -29,6 +40,7 @@ window.formatNumber = formatNumber;
 window.formatPercentage = formatPercentage;
 window.factoryReset = factoryReset;
 window.exportConfig = exportConfig;
+window.exportExchange = exportExchange;
 
 // Knockout itself, for console debugging (ko.dataFor/contextFor on a live element) and so binding
 // tests can assert which binding handlers are registered. The app never reads it back off window.
@@ -64,6 +76,7 @@ window.view = {
         const search = window.view.effectsFilter.search().trim().toLowerCase();
         const source = window.view.effectsFilter.source();
         return island().availableEffects().filter((e: Effect) => {
+            if (isPermanentOnlyEffect(e.guid)) return false;
             if (source !== 'all' && e.source !== source) return false;
             if (search && !e.name().toLowerCase().includes(search)) return false;
             if (e.buffs.length > 0 && e.buffs.every((b) => b.hasNoDisplayableEffect())) return false;
@@ -86,6 +99,9 @@ window.view = {
     regions: [] as Region[],
     sessions: [] as Session[],
     needAttributes: [] as NamedElement[],
+    // Created in the bootstrap, once the need attributes exist.
+    villaItems: null as VillaItemsViewModel | null,
+    tradeRoutes: null as TradeRoutesViewModel | null,
     assetsMap: new Map() as AssetsMap,
     literalsMap: new Map() as LiteralsMap,
     productsToTraders: new Map(),
@@ -106,6 +122,11 @@ window.view = {
     },
     viewMode: null,
     islandManager: null,
+    exchangeReport: new ExchangeReportDialog(() => window.view.texts),
+    // Created in the bootstrap, once the sessions exist.
+    dlcSettings: null as DlcSettings | null,
+    // Created in the bootstrap, once the settings storage exists.
+    importScopes: null as ImportScopesViewModel | null,
     // Debug settings for Knockout binding debugging
     debug: {
         enabled: ko.observable(false),
@@ -148,11 +169,9 @@ window.view.debug.logBindings.subscribe((value: boolean) => {
 });
 
 // Set default language based on browser locale
-for (const code in languageCodes) {
-    if (navigator.language.startsWith(code)) {
-        window.view.settings.language(languageCodes[code]);
-        break;
-    }
+const detectedLanguage = detectBrowserLanguage();
+if (detectedLanguage) {
+    window.view.settings.language(detectedLanguage);
 }
 
 /**
@@ -317,6 +336,120 @@ function installImportConfigListener(): void {
 
 
 /**
+ * Opens #exchange-report-dialog. The download dialog is closed first so two modals never stack.
+ */
+function showExchangeReportDialog(): void {
+    const download = $('#download-dialog');
+    const open = () => $('#exchange-report-dialog').modal('show');
+    if (download.hasClass('show')) {
+        download.one('hidden.bs.modal', () => setTimeout(open, 0));
+        download.modal('hide');
+    } else {
+        open();
+    }
+}
+
+/**
+ * Exports the exchange file (tool-neutral format) and shows the read-only report when the export dropped or
+ * approximated something.
+ */
+function exportExchange(): void {
+    const result = window.exchange.exportDocument();
+    const blob = new Blob([JSON.stringify(result.document, null, 2)], { type: "application/json" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style.display = "none";
+    a.href = url;
+    a.download = "Anno117CalculatorExchange.json";
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    ($ as any).notify({ message: window.view.texts.exchangeExported.name() }, { type: 'success', placement: { align: 'center' } });
+
+    const report: ReportEntry[] = result.report;
+    if (report.length > 0) {
+        window.view.exchangeReport.showExport(report);
+        showExchangeReportDialog();
+    }
+}
+
+/**
+ * After the reload that follows an exchange import: opens the Download dialog, which then offers Undo. The flag is
+ * consumed. Runs at the end of bootstrapping.
+ */
+function openDownloadDialogAfterImport(): void {
+    let recalculated = false;
+    try {
+        const flag = window.sessionStorage.getItem(JUST_IMPORTED_KEY);
+        if (!flag)
+            return;
+        recalculated = flag === JUST_IMPORTED_RECALC;
+        window.sessionStorage.removeItem(JUST_IMPORTED_KEY);
+    } catch (e) {
+        return;
+    }
+    // One-shot allocation of the imported multi-source routes (src/trade-allocation.ts). After a route recalculation the
+    // floors are calculated from scratch; otherwise groups with hand-set floors stay.
+    try {
+        ko.tasks.runEarly();
+        recomputeShares(window.view.tradeManager.routes(), { untouchedOnly: !recalculated });
+    } catch (e) {
+        console.warn('trade allocation after import failed', e);
+    }
+    $('#download-dialog').modal('show');
+}
+
+/**
+ * Installs the change listener of #exchange-selector: reads the file and imports it at once with the ticked scopes.
+ * No confirmation and no report: a snapshot of all stored data is kept for Undo, then the import replaces the ticked
+ * scopes and the page reloads. Only a file that cannot be read at all shows a message.
+ */
+function installImportExchangeListener(): void {
+    $('#exchange-selector').on('change', (event: JQuery.ChangeEvent) => {
+        event.preventDefault();
+        const input = event.target as HTMLInputElement;
+        if (!input.files || !input.files[0])
+            return;
+
+        const file = input.files[0];
+        const fileReader = new FileReader();
+        const dialog: ExchangeReportDialog = window.view.exchangeReport;
+        dialog.invalid(null);
+
+        fileReader.onload = function (ev: ProgressEvent<FileReader>) {
+            input.value = '';
+            const text = (ev.target as FileReader).result as string;
+            SubStorage.flushPending();
+            const plan = window.exchange.planScopedImport(text, window.view.importScopes.selection());
+            if ('error' in plan) {
+                dialog.invalid(plan.error);
+                return;
+            }
+            // A failed snapshot does not stop the import; saveSnapshot then leaves no record and Undo is not offered.
+            SubStorage.flushPending();
+            saveSnapshot(window.exchange.undo.snapshot());
+            const selection = window.view.importScopes.selection();
+            const result = window.exchange.applyImport(plan, { recalcRoutes: selection.trade && selection.recalcRoutes });
+            if (!result.ok) {
+                console.error('Exchange import failed:', result.error);
+                clearSnapshot();
+                window.view.importScopes.undoAvailable(hasSnapshot());
+            }
+        };
+
+        fileReader.onerror = function (err: ProgressEvent<FileReader>) {
+            input.value = '';
+            console.error(err);
+            dialog.invalid(String(fileReader.error));
+        };
+
+        fileReader.readAsText(file);
+    });
+}
+
+/**
  * Sets up Knockout numeric input validation and extender
  */
 function setupNumericExtender(): void {
@@ -416,6 +549,10 @@ function init(_isFirstRun: boolean, configVersion: string | null): void {
         }
     }
 
+    window.view.importScopes = new ImportScopesViewModel(() => window.view.texts);
+    if (settingsStorage)
+        window.view.importScopes.persist(settingsStorage);
+
     window.view.settings.languages = params.languages;
 
     for (let attr of (params.needConsumptions as NeedConsumptionConfig[])) {
@@ -514,6 +651,7 @@ function init(_isFirstRun: boolean, configVersion: string | null): void {
         window.view.assetsMap.set(s.guid, s);
         window.view.sessions.push(s);
     }
+    window.view.dlcSettings = new DlcSettings(window.view.sessions, sessionStorage);
 
     window.view.needAttributes = [];
     // Set up attributes: Population, Money, Happiness, Health, FireSafety, Belief, Knowledge, Prestige
@@ -549,6 +687,7 @@ function init(_isFirstRun: boolean, configVersion: string | null): void {
 
     // Set up trade manager
     window.view.tradeManager = new (require('./trade').TradeManager)();
+    window.view.tradeRoutes = new TradeRoutesViewModel();
 
     // Set up presenters and templates
     const allIslands = window.view.islandManager.allIslands as Island;
@@ -589,7 +728,8 @@ function init(_isFirstRun: boolean, configVersion: string | null): void {
         recipeLists: recipeListPresenters
     };
     window.view.presenter.residence = new ResidencePresenter(allIslands.needCategories, allIslands.populationLevels[0]);
-    
+    window.view.villaItems = new VillaItemsViewModel(window.view.needAttributes);
+
 
     // Set up view mode for first run
     if (_isFirstRun)
@@ -605,6 +745,27 @@ function init(_isFirstRun: boolean, configVersion: string | null): void {
     (window as any).PublicConsumerBuilding = require('./factories').PublicConsumerBuilding;
     (window as any).RecipeList = require('./consumption').RecipeList;
     (window as any).Product = require('./production').Product;
+
+    // Game Connector (U7): instantiated after every island (including persistBuildings()) is
+    // fully constructed - same relative position the statistics page's own independent feed uses.
+    // Never auto-connects (KTD1-equivalent) - only the navbar control (U5) calls connect().
+    const { GameConnector } = require('./game-connector');
+    window.view.gameConnector = new GameConnector();
+    // The pipe server is a loopback service, so the control only makes sense when the page is
+    // opened from a file or served from the local machine.
+    window.view.gameConnectorAvailable = ['file:'].includes(window.location.protocol)
+        || ['localhost', '127.0.0.1', '[::1]', '::1'].includes(window.location.hostname);
+    window.view.gameConnectorDismissedDuplicateNamesKey = ko.observable('');
+    window.view.gameConnectorStateLabel = ko.pureComputed(() => {
+        switch (window.view.gameConnector.state()) {
+            case 'connecting': return window.view.texts.gameConnectorConnecting.name();
+            case 'connected': return window.view.texts.gameConnectorConnected.name();
+            case 'reconnecting': return window.view.texts.gameConnectorReconnecting.name();
+            case 'offline': return window.view.texts.gameConnectorOffline.name();
+            default: return window.view.texts.gameConnectorDisconnected.name();
+        }
+    });
+    (window as any).GameConnector = GameConnector;
 
     // Apply Knockout bindings
     ko.applyBindings(window.view, $(document.body)[0]);
@@ -728,4 +889,6 @@ $(document).ready(function () {
     
     // Install import config listener (must occur after template binding)
     installImportConfigListener();
-}); 
+    installImportExchangeListener();
+    openDownloadDialogAfterImport();
+});

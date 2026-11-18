@@ -1,4 +1,4 @@
-import { NamedElement, EPSILON, ko, dummyObservableArray, dummyComputed, getForcedDefaultSupplier } from './util';
+import { NamedElement, EPSILON, ko, createFloatInput, dummyObservableArray, dummyComputed, getForcedDefaultSupplier } from './util';
 import {  AssetsMap } from './types';
 import { ProductConfig, BuildingBuffConfig, PatronsConfig, EffectConfig, ItemConfig, ProductFilterConfig, FertilityConfig, AreaBuffConfig } from './types.config';
 import { Workforce } from './population';
@@ -40,6 +40,7 @@ export class Product extends NamedElement {
 
     // === SUPPLIER MANAGEMENT ===
     public passiveTradeSupplier!: PassiveTradeSupplier; // Passive trade supplier
+    public governorSupply!: KnockoutObservable<number>; // t/min a governor delivers to the island (exchange import), summed into production
     public tradeList!: TradeList; // TradeList - manages trade routes for this product (initialized in initSuppliers)
     public availableSuppliers: KnockoutComputed<Supplier[]>; // All available suppliers (factories + extra goods)
     public defaultSupplier: KnockoutObservable<Supplier | null>; // User-selected default supplier
@@ -164,6 +165,9 @@ export class Product extends NamedElement {
         // Create passive trade supplier
         this.passiveTradeSupplier = new PassiveTradeSupplier(this, island);
 
+        // Governor supply (t/min) delivered to this island; not a route and never the default supplier
+        this.governorSupply = createFloatInput(0, 0);
+
         // Create extra good suppliers if there are extra good production entries
         if (this.extraGoodProductionList && this.extraGoodProductionList.entries.length > 0) {
             // Group entries by factory
@@ -258,6 +262,7 @@ export class Product extends NamedElement {
             }
             
             sum += this.passiveTradeSupplier.currentProduction();
+            sum += this.governorSupply();
 
             return sum;
         });
@@ -270,6 +275,7 @@ export class Product extends NamedElement {
                 if (!supplier.isDefaultSupplier())
                     sum += supplier.currentProduction();
             }
+            sum += this.governorSupply();
 
             return sum;
         });
@@ -543,6 +549,11 @@ export class Buff extends NamedElement {
     public population: number;
     public additionalNeeds: Product[]; // products of the needs a mythical item adds (resolved for display)
     public providedNeedUpgrade: number[];
+    // Attributes a supplied need contributes (products by GUID), e.g. +2 Population while the Bread need is supplied.
+    public needAttributes: { productGuids: number[]; attributes: Record<string, number> }[];
+    // Attributes of the buff itself (Population, Happiness, ...) and the area effect it adds; raw data for display.
+    public attributes: Record<string, number>;
+    public functionalEffect: number;
     public consumptionModifierInPercent: number;
     public goodConsumptionUpgrade: {
         product: Product;
@@ -586,6 +597,12 @@ export class Buff extends NamedElement {
             })
             .filter((p): p is Product => p !== undefined);
         this.providedNeedUpgrade = config.providedNeedUpgrade || [];
+        this.needAttributes = (config.needAttributes || []).map(entry => ({
+            productGuids: (entry.products || []).filter((p): p is number => typeof p === 'number'),
+            attributes: (entry.attributes || {}) as Record<string, number>,
+        }));
+        this.attributes = (config.attributes || {}) as Record<string, number>;
+        this.functionalEffect = config.functionalEffect || 0;
         this.consumptionModifierInPercent = config.consumptionModifierInPercent ?? 0;
         this.goodConsumptionUpgrade = (config.goodConsumptionUpgrade || [])
             .map((entry) => {
@@ -718,7 +735,8 @@ export class AreaBuff extends Buff {
             workforceMaintenanceFactorUpgrade: 0,
             fertilityPercent: config.fertilityPercent,
             addedFertility: config.addedFertility,
-            population: 0
+            population: 0,
+            functionalEffect: 0
         };
         super(buffConfig, assetsMap);
         this.scaling = ko.observable(0);
@@ -828,7 +846,7 @@ export class Patron extends NamedElement {
  * (Happiness, Money, Belief, etc.). Used to decide whether a 'building'-sourced Effect qualifies for a
  * per-target toggle in each target's "Items Equipped" list instead of the global Effects dialog.
  */
-function isProductionRelevantBuff(buff: Buff): boolean {
+export function isProductionRelevantBuff(buff: Buff): boolean {
     return buff.productivityUpgrade !== 0
         || buff.workforceModifierInPercent !== 0
         || buff.additionalOutputs.length > 0
@@ -1044,9 +1062,26 @@ export class Effect extends NamedElement {
             return buff as Buff;
         });
 
+        // An area effect of a building reaches only a share of each level's residences; the island holds that share
+        // per (level, effect) and it scales the buff values, never the effect's own 0/1 scaling.
+        const shares = new Map<number, KnockoutComputed<number>>();
+        const shareOf = (target: any): KnockoutComputed<number> | undefined => {
+            if (this.source !== 'building' || !target.populationLevel || !target.island)
+                return undefined;
+            const level: number = target.populationLevel.guid;
+            const known = shares.get(level);
+            if (known)
+                return known;
+            const percent = target.island.areaEffectCoverage(level, this.guid);
+            const share: KnockoutComputed<number> = ko.pureComputed(() => percent() / 100);
+            shares.set(level, share);
+            return share;
+        };
+
         for (const target of targets) {
+            const coverage = shareOf(target);
             for (const buff of buffs)
-                new AppliedBuff(this, buff, target, assetsMap);
+                new AppliedBuff(this, buff, target, assetsMap, true, undefined, false, coverage);
         }
     }
 }
@@ -1071,14 +1106,20 @@ export class Item extends NamedElement {
     public availableEquipments: KnockoutObservableArray<AppliedBuff>;
     public checked: KnockoutComputed<boolean>;
     public visible: KnockoutComputed<boolean>;
+    // GUID of the island-wide effect the item switches on (ItemConfig.heroicEffect); 0 when it has none
+    public heroicEffectGuid: number;
+    private assetsMap: AssetsMap;
 
     /**
      * Creates a new Item instance
      * @param config - Configuration object for the item
      * @param assetsMap - Map of all available assets
      * @param region - The region this item belongs to
+     * @param options - residence items (villa items): one island-level `sharedState` for every target slot, the
+     *                  share of residences in range as `coverage` (0..1) for the radius buffs, and `residencesOnly`
+     *                  to bind residence targets and ignore factory targets
      */
-    constructor(config: ItemConfig, _assetsMap: AssetsMap, _region: Region) {
+    constructor(config: ItemConfig, _assetsMap: AssetsMap, _region: Region, options: ItemOptions = {}) {
         // Validate required parameters
         if (!config.name) {
             throw new Error('Item name is required');
@@ -1097,19 +1138,28 @@ export class Item extends NamedElement {
         this.guid = config.guid;
         this.additionalOutputs = new Map<Product, number>();
 
+        this.assetsMap = _assetsMap;
+        this.heroicEffectGuid = config.heroicEffect || 0;
         this.factories = (config.targets || []).map((f: number) => _assetsMap.get(f)).filter((f: any) => isConstructible(f)); // ignore not considered buildings, e.g. warehouse
+        if (options.residencesOnly)
+            this.factories = this.factories.filter(isResidenceTarget);
 
         // One tri-state observable per (item, factory) slot. Registered with the item's DLC so an
         // applied item locks its DLC (see AGENTS.md / task_tristate_boost_toggle.md DLC invariant).
+        // A residence item shares one state across all its slots.
         this.slotStates = new Map<Constructible, KnockoutObservable<number>>();
+        if (options.sharedState && this.factories.length)
+            this.lockDLCIfSet(options.sharedState);
         for (const f of this.factories){
-            const state = ko.observable(0);
+            const state = options.sharedState ?? ko.observable(0);
             this.slotStates.set(f, state);
-            this.lockDLCIfSet(state); // no-op unless the item has exactly one dlcUnlocks
+            if (!options.sharedState)
+                this.lockDLCIfSet(state); // no-op unless the item has exactly one dlcUnlocks
         }
 
         this.equipments = [];
-        for (const b of config.buffs){
+        const hasBoostBuffs = (config.boostBuffs || []).length > 0;
+        for (const b of (config.buffs || [])){
             const buff = _assetsMap.get(b);
             if (!buff) {
                 throw new Error(`Buff with GUID ${b} not found in assetsMap for item ${this.name()} ${this.guid}`);
@@ -1121,9 +1171,10 @@ export class Item extends NamedElement {
                 // scaling(1) equips at Base, scaling(0) turns the slot Off (matches the old equip toggle).
                 this.equipments.push(new AppliedBuff(this, buff, f, _assetsMap, false,
                     ko.pureComputed({
-                        read: () => state() === 1 ? 1 : 0,
+                        // an item without a boosted variant treats a stray state 2 as Base
+                        read: () => (state() === 1 || (state() === 2 && !hasBoostBuffs)) ? 1 : 0,
                         write: (v: number) => state(v ? 1 : 0),
-                    })));
+                    }), false, options.coverage));
             }
 
         }
@@ -1139,7 +1190,7 @@ export class Item extends NamedElement {
                 const state = this.slotStates.get(f)!;
                 // boost buff is active only in state 2 (Boosted)
                 this.boostEquipments.push(new AppliedBuff(this, buff, f, _assetsMap, false,
-                    ko.pureComputed(() => state() === 2 ? 1 : 0), true));
+                    ko.pureComputed(() => state() === 2 ? 1 : 0), true, options.coverage));
             }
         }
 
@@ -1191,8 +1242,72 @@ export class Item extends NamedElement {
             return false;
         });
     }
+
+    /**
+     * Localized source label of an item, the counterpart of Effect.getSourceText for the effect an item activates:
+     * the label of the item's island-wide effect when it has one, otherwise the label of the heroic specialist
+     * class, which every villa item belongs to (params.js translation, not i18n.ts).
+     */
+    getSourceText(): string {
+        const effect = this.heroicEffectOf();
+        if (effect)
+            return effect.getSourceText();
+
+        const texts = (window as any).view?.texts;
+        return texts && texts['heroicSpecialist'] ? texts['heroicSpecialist'].name() : '';
+    }
+
+    /**
+     * The island effect named by `heroicEffect`, or undefined when the item has none or the GUID has no
+     * Effect in the assets map. Resolved at the call, because effects enter the map after items are configured.
+     */
+    heroicEffectOf(): Effect | undefined {
+        if (!this.heroicEffectGuid)
+            return undefined;
+        const effect = this.assetsMap.get(this.heroicEffectGuid);
+        return effect instanceof Effect ? effect : undefined;
+    }
+
+    /**
+     * One-way link from the item state to its island-wide effect (R4): an activation (state Base or Boosted)
+     * sets the effect to 1, Off never writes. Subscribes to the state observables, so it must run after the
+     * island loaded its persisted values: loading a stored state does not write, and an effect switched
+     * off in the Effects dialog stays off on reload while the item stays equipped.
+     */
+    linkHeroicEffect(): void {
+        if (!this.heroicEffectGuid)
+            return;
+        const seen = new Set<KnockoutObservable<number>>();
+        for (const state of this.slotStates.values()) {
+            if (seen.has(state))
+                continue;
+            seen.add(state);
+            state.subscribe((value: number) => {
+                if (!writesHeroicEffect(value))
+                    return;
+                const effect = this.heroicEffectOf();
+                if (effect && effect.scaling() < 1)
+                    effect.scaling(1);
+            });
+        }
+    }
 }
 
+export interface ItemOptions {
+    sharedState?: KnockoutObservable<number>;
+    coverage?: KnockoutObservable<number> | KnockoutComputed<number>;
+    residencesOnly?: boolean;
+}
+
+/** Residences are the constructibles that carry a population level (duck-typed, residences are not imported here). */
+function isResidenceTarget(target: Constructible): boolean {
+    return 'populationLevel' in target;
+}
+
+/** An item in state Base (1) or Boosted (2) switches its island-wide effect on; Off writes nothing. */
+export function writesHeroicEffect(state: number): boolean {
+    return state >= 1;
+}
 
 /**
  * Represents an item equipped to a specific factory

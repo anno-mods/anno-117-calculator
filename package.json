@@ -1,7 +1,7 @@
 {
   "name": "anno-117-calculator",
   "displayName": "Anno 117 Calculator",
-  "version": "4.0",
+  "version": "5.0",
   "description": "A calculator to compute the consumption of goods in the computer game Anno 117.",
   "scripts": {
     "test": "playwright test",
@@ -16,7 +16,7 @@
     "test:init-errors": "playwright test tests/e2e/initialization-errors.spec.ts --reporter=list",
     "test:dom-inspect": "playwright test tests/e2e/dom-inspection.spec.ts --reporter=list",
     "test:report": "playwright show-report",
-    "prebuild": "npm run generate-sitemap",
+    "prebuild": "npm run check-base-product-dlc-locks && npm run generate-sitemap",
     "build": "webpack",
     "build:ts": "tsc",
     "dev": "webpack serve",
@@ -28,6 +28,7 @@
     "migration-helper": "node scripts/migration-helper.js",
     "generate-types": "node scripts/generate-config-types.js",
     "generate-sitemap": "node scripts/generate-sitemap.js",
+    "check-base-product-dlc-locks": "node scripts/check-base-product-dlc-locks.js",
     "check-translations": "node scripts/check-translations.js",
     "check-translations:batch": "node scripts/check-translations.js --batch",
     "publish": "bash scripts/publish.sh"
@@ -47,6 +48,7 @@
     "@types/jquery": "^3.5.29",
     "@types/knockout": "^3.4.72",
     "@types/node": "^20.10.5",
+    "ajv": "^8.20.0",
     "http-server": "^14.1.1",
     "javascript-lp-solver": "^1.0.3",
     "ts-loader": "^9.5.1",

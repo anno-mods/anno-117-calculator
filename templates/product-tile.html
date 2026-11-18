@@ -55,6 +55,17 @@
                 </div>
             </div>
         </div>
+
+        <!-- Imported product: game trade route icon with the indicators of its routes (locally produced products keep the factory count above) -->
+        <!-- ko if: !$data.factoryPresenterIfDefaultSupplier() && $data.gameRouteIndicators().visible -->
+        <div class="product-tile-count game-route-indicator">
+            <div class="inline-list-stretched mr-2">
+                <img class="icon-sm icon-light" src="../icons/icon_trade_routes_0.webp" data-bind="attr: {title: $root.texts.tradeGameRouteIcon.name(), alt: $root.texts.tradeGameRouteIcon.name()}" />
+                <span class="fa fa-circle route-ind-red" role="img" data-bind="visible: $data.gameRouteIndicators().red, attr: {title: $root.texts.tradeOverCapacity.name(), 'aria-label': $root.texts.tradeOverCapacity.name()}"></span>
+                <span class="fa fa-circle route-ind-yellow" role="img" data-bind="visible: $data.gameRouteIndicators().yellow, attr: {title: $root.texts.tradeSupplyAtRisk.name(), 'aria-label': $root.texts.tradeSupplyAtRisk.name()}"></span>
+            </div>
+        </div>
+        <!-- /ko -->
         </div>
 
         <!-- Total Production -->

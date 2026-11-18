@@ -55,6 +55,7 @@ export interface RegionConfig {
   iconPath: string;
   locaText?: LocaTextConfig;
   id: string;
+  dlcUnlocks?: number[];
 }
 
 // Fertility configuration interface
@@ -98,6 +99,7 @@ export interface NeedConfig {
   guid: number;
   name: string;
   iconPath: string;
+  locaText?: LocaTextConfig;
   needProduct: number;
   needCategory: string;
   supplyWeight: number;
@@ -113,7 +115,6 @@ export interface NeedConfig {
     Prestige: number;
     [key: string]: number; // Allow string indexing
   };
-  locaText?: LocaTextConfig;
   dlcUnlocks?: number[];
 }
 
@@ -124,6 +125,8 @@ export interface PopulationGroupConfig {
   locaText: LocaTextConfig;
   populationLevels: number[];
   region: string;
+  iconPath?: string;
+  dlcUnlocks?: number[];
 }
 
 // ResidenceBuilding configuration interface
@@ -211,6 +214,7 @@ export interface FactoryConfig {
   dlcUnlocks?: number[];
   aqueductProductivityBuff?: number;
   additionalModule?: number;
+  isRiverEmbankment?: boolean;
 }
 
 // Module configuration interface
@@ -256,6 +260,15 @@ export interface BuildingBuffConfig {
     product: number;
     amountInPercent: number;
   }[];
+  needAttributes?: {
+    products: any[];
+    attributes: Record<string, any>;
+  }[];
+  functionalEffect: number;
+  attributes?: {
+    Population: number;
+    Health: number;
+  };
   providedNeedUpgrade?: number[];
   additionalNeedsDemand?: number[];
   additionalOutputs?: {
@@ -265,11 +278,11 @@ export interface BuildingBuffConfig {
     amount: number;
   }[];
   additionalWorkforces?: number[];
+  dlcUnlocks?: number[];
   replaceInputs?: {
     newInput: number;
     oldInput: number;
   }[];
-  dlcUnlocks?: number[];
 }
 
 // AreaBuff configuration interface
@@ -295,7 +308,29 @@ export interface EffectConfig {
   effectDuration: number;
   effectScope: string;
   source: string;
+  sourceTypes?: string[];
+  sourceGuids?: number[];
   boostBuffs?: number[];
+  dlcUnlocks?: number[];
+}
+
+// PublicServiceBuilding configuration interface
+export interface PublicServiceBuildingConfig {
+  guid: number;
+  name: string;
+  iconPath: string;
+  locaText: LocaTextConfig;
+  providedNeeds: number[];
+  populationLevel: number;
+  radius?: {
+    value: number;
+    type: string;
+  };
+  attributeEffects?: {
+    effect: number;
+    scope: string;
+  }[];
+  regions: string[];
   dlcUnlocks?: number[];
 }
 
@@ -330,14 +365,30 @@ export interface ItemConfig {
   guid: number;
   name: string;
   iconPath: string;
-  locaText?: LocaTextConfig;
-  buffs: number[];
-  targets?: number[];
+  locaText: LocaTextConfig;
+  buffs?: number[];
+  targets: number[];
   effectScope: string;
   excludeEffectSourceGUID: boolean;
   rarity: string;
+  allocation: string;
   dlcUnlocks?: number[];
   boostBuffs?: number[];
+  boostHint?: {
+    english: string;
+    german: string;
+    spanish: string;
+    french: string;
+    italian: string;
+    japanese: string;
+    korean: string;
+    polish: string;
+    brazilian: string;
+    russian: string;
+    simplified_chinese: string;
+    traditional_chinese: string;
+  };
+  heroicEffect?: number;
 }
 
 // Icon configuration interface
@@ -376,6 +427,7 @@ export interface ParamsConfig {
   buildingBuffs: BuildingBuffConfig[];
   areaBuffs: AreaBuffConfig[];
   effects: EffectConfig[];
+  publicServices: PublicServiceBuildingConfig[];
   techs: TechConfig[];
   patrons: PatronsConfig[];
   items: ItemConfig[];

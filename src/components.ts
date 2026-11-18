@@ -586,6 +586,8 @@ ko.components.register('additional-output', {
  * @param params.checkbox - Optional checkbox for selecting all items
  * @param params.summary - Optional summary value to display
  * @param params.colorSummary - Whether to color the summary based on value
+ * @param params.headerTemplate - Optional name of a registered template rendered in the legend after the heading
+ *                                (with `data` as its data), for header content the `summary` cannot show
  */
 ko.components.register('collapsible', {
     viewModel: function (params: any) {
@@ -598,6 +600,7 @@ ko.components.register('collapsible', {
         this.externalLink = params.externalLink;
         this.hasCheckbox = false;
         this.hasExternalLink = this.externalLink != null;
+        this.headerTemplate = params.headerTemplate;
 
         if (params.checkbox) {
             this.hasCheckbox = true;
@@ -672,7 +675,10 @@ ko.components.register('collapsible', {
                         <external-link params="subpage: externalLink"></external-link>
                     <!-- /ko -->
                 </span>
-                <!-- /ko -->   
+                <!-- /ko -->
+                <!-- ko if: headerTemplate -->
+                    <span class="collapser-header" data-bind="template: { name: headerTemplate, data: data }"></span>
+                <!-- /ko -->
             </legend>
             <div class="collapse" data-bind="attr: {'id' : collapser.id}, class: cssClass">
                 <!-- ko template: { nodes: $componentTemplateNodes, data: data } --><!-- /ko -->
