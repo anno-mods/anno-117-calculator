@@ -1,4 +1,5 @@
-FROM nginx:stable-alpine
+# Pinned on purpose instead of stable-alpine, so updates are explicit; bump manually
+FROM nginx:1.30.7-alpine
 
 WORKDIR /usr/share/nginx/html
 
